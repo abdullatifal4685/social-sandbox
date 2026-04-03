@@ -4,6 +4,7 @@ const USER_NAME_KEY = "sandbox.userName";
 const SCENARIO_OVERRIDES_KEY = "sandbox.scenarioOverrides.v1";
 const HIDDEN_SCENARIO_IDS_KEY = "sandbox.hiddenScenarioIds.v1";
 const REFLECTION_HISTORY_KEY = "sandbox.reflectionHistory.v1";
+const IMPROVEMENT_TRACK_KEY = "sandbox.improvementTrack.v1";
 const PEER_ROOM_PREFIX = "sandbox.peer.room.";
 const PEER_USER_ID_KEY = "sandbox.peer.userId";
 const PEER_REQUESTS_KEY = "sandbox.peer.requests.v1";
@@ -329,6 +330,19 @@ function loadReflectionHistory() {
   }
 }
 
+function loadImprovementTrack() {
+  try {
+    const raw = localStorage.getItem(IMPROVEMENT_TRACK_KEY);
+    if (!raw) {
+      return [];
+    }
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 function loadPeerRequests() {
   try {
     const raw = localStorage.getItem(PEER_REQUESTS_KEY);
@@ -401,6 +415,7 @@ const state = {
   coachNote: "Type a message and I’ll give you a quick note here.",
   coachNoteHistory: [],
   reflectionHistory: loadReflectionHistory(),
+  improvementTrack: loadImprovementTrack(),
   inMomentPrompt: null,
   inMomentPromptAtTurn: 0,
   inMomentSubmitting: false,
@@ -492,6 +507,11 @@ function persistHiddenScenarioIds() {
 function persistReflectionHistory() {
   const trimmed = state.reflectionHistory.slice(-60);
   localStorage.setItem(REFLECTION_HISTORY_KEY, JSON.stringify(trimmed));
+}
+
+function persistImprovementTrack() {
+  const trimmed = state.improvementTrack.slice(-80);
+  localStorage.setItem(IMPROVEMENT_TRACK_KEY, JSON.stringify(trimmed));
 }
 
 const scenarioList = document.getElementById("scenarioList");
@@ -2481,6 +2501,107 @@ function buildReflectionTrendHtml() {
   `;
 }
 
+function getWeaknessLabel(score) {
+  if (score <= 0) {
+    return "Needs attention";
+  }
+  if (score === 1) {
+    return "Could improve";
+  }
+  return "Strong";
+}
+
+function buildStageFallbackDrill(stage) {
+  const guide = STAGE_GUIDE[stage] || STAGE_GUIDE.Listen;
+  const starterA = guide.starters?.[0] || "Use one clear sentence starter.";
+  const starterB = guide.starters?.[1] || "Follow with one open question.";
+  return [
+    `${stage} drill (2 minutes):`,
+    `1) Say this line once: ${starterA}`,
+    `2) Improve it once using your own words.`,
+    `3) Add this follow-up line: ${starterB}`,
+    "4) Finish with one next-step request.",
+  ].join("\n");
+}
+
+async function generateStageDrill(stage, weakStages) {
+  const promptText = [
+    "You are an expert conversation coach.",
+    `Create one short targeted drill for stage: ${stage}.`,
+    `Weak stages context: ${weakStages.join(", ") || "None"}`,
+    "Output format:",
+    "- Drill title",
+    "- 3 steps maximum",
+    "- 2 sentence starters",
+    "- 1 measurable success check",
+    "Keep it concise and practical for immediate repetition.",
+  ].join("\n");
+
+  try {
+    if (state.settings.mode === "proxy") {
+      return await callProxyAPI({
+        model: state.settings.model,
+        messages: [{ role: "user", content: promptText }],
+      });
+    }
+
+    if (!state.settings.apiKey) {
+      return buildStageFallbackDrill(stage);
+    }
+
+    return await callOpenAI([{ role: "user", content: promptText }]);
+  } catch {
+    return buildStageFallbackDrill(stage);
+  }
+}
+
+function upsertImprovementTrack({ stage, mode, status }) {
+  const now = Date.now();
+  const existing = state.improvementTrack.find((item) => item.stage === stage && item.mode === mode);
+  if (existing) {
+    existing.status = status;
+    existing.lastUpdated = now;
+    existing.attempts = (existing.attempts || 0) + (status === "started" ? 1 : 0);
+    existing.completions = (existing.completions || 0) + (status === "completed" ? 1 : 0);
+  } else {
+    state.improvementTrack.push({
+      id: `improve-${now}-${Math.random().toString(36).slice(2, 6)}`,
+      stage,
+      mode,
+      status,
+      attempts: status === "started" ? 1 : 0,
+      completions: status === "completed" ? 1 : 0,
+      createdAt: now,
+      lastUpdated: now,
+    });
+  }
+  persistImprovementTrack();
+}
+
+function buildImprovementTrackerHtml() {
+  if (!state.improvementTrack.length) {
+    return "<p class=\"muted\">No improvement actions yet. Pick one weakness and start a follow-up exercise.</p>";
+  }
+
+  const latest = state.improvementTrack
+    .slice()
+    .sort((a, b) => (b.lastUpdated || 0) - (a.lastUpdated || 0))
+    .slice(0, 6);
+
+  return `
+    <ul class="improvement-list">
+      ${latest
+        .map((item) => `
+          <li>
+            <strong>${escapeHtml(item.stage)}</strong> via ${escapeHtml(item.mode.toUpperCase())}
+            <span class="muted">Status: ${escapeHtml(item.status)} | Attempts: ${item.attempts || 0} | Completed: ${item.completions || 0}</span>
+          </li>
+        `)
+        .join("")}
+    </ul>
+  `;
+}
+
 function maybeQueueInMomentReflection() {
   const userTurnCount = getUserTurnCount();
   if (userTurnCount < 3 || state.inMomentPrompt) {
@@ -2512,6 +2633,8 @@ function generateFeedback() {
   const weak = scores.filter((item) => item.score === 0).map((item) => item.stage);
   const medium = scores.filter((item) => item.score === 1).map((item) => item.stage);
   const strong = scores.filter((item) => item.score === 2).map((item) => item.stage);
+  const targetStages = weak.length ? weak : (medium.length ? medium : [scores[0]?.stage || "Listen"]);
+  const scoreMap = Object.fromEntries(scores.map((item) => [item.stage, item.score]));
 
   const metacognitivePrompts = buildAdaptivePrompts(scores);
   state.activeReflectionPrompts = metacognitivePrompts;
@@ -2534,6 +2657,29 @@ function generateFeedback() {
         <li>${weak.length ? `Prioritize ${weak.join(", ")} with one sentence template each.` : "Increase precision by using one data point in each key response."}</li>
         <li>Reduce filler language and end with a concrete next-step request.</li>
       </ul>
+    </article>
+    <article class="analytics-card">
+      <h4>Follow-up Improvement Plan</h4>
+      <p class="muted">Choose one weakness to work on now. Practice with AI, with a peer, or with a quick drill, then track completion.</p>
+      <div class="improvement-cards">
+        ${targetStages
+          .map((stage) => {
+            const slug = stage.toLowerCase();
+            return `
+              <section class="improvement-card">
+                <h5>${escapeHtml(stage)} <span class="improvement-stage-tag">${getWeaknessLabel(scoreMap[stage] ?? 0)}</span></h5>
+                <div class="improvement-actions">
+                  <button class="ghost" type="button" data-improve-action="ai-now" data-stage="${escapeHtml(stage)}">Practice with AI</button>
+                  <button class="ghost" type="button" data-improve-action="peer-now" data-stage="${escapeHtml(stage)}">Practice with Peer</button>
+                  <button class="ghost" type="button" data-improve-action="drill" data-stage="${escapeHtml(stage)}">Generate AI Drill</button>
+                  <button class="ghost" type="button" data-improve-action="mark-done" data-stage="${escapeHtml(stage)}">Mark Improved</button>
+                </div>
+                <div id="improve-drill-${slug}" class="improvement-drill muted">No drill generated yet.</div>
+              </section>
+            `;
+          })
+          .join("")}
+      </div>
     </article>
     <article class="analytics-card reflection-form-card">
       <h4>Adaptive Reflection</h4>
@@ -2573,6 +2719,10 @@ function generateFeedback() {
 
       <h4>Reflection Trend</h4>
       <div id="reflectionTrend" class="reflection-trend">${buildReflectionTrendHtml()}</div>
+    </article>
+    <article class="analytics-card">
+      <h4>Improvement Tracker</h4>
+      <div id="improvementTracker">${buildImprovementTrackerHtml()}</div>
     </article>
   `;
 
@@ -2739,6 +2889,60 @@ if (submitInMomentReflectionBtn) {
 }
 
 finalFeedbackContent.addEventListener("click", async (event) => {
+  const actionButton = event.target.closest("[data-improve-action]");
+  if (actionButton) {
+    const stage = actionButton.getAttribute("data-stage") || "Listen";
+    const action = actionButton.getAttribute("data-improve-action");
+    const weakStages = state.latestStageScores.filter((item) => item.score < 2).map((item) => item.stage);
+
+    if (action === "ai-now") {
+      upsertImprovementTrack({ stage, mode: "ai", status: "started" });
+      state.stageIndex = Math.max(0, ILETS.indexOf(stage));
+      state.rightTab = "coach";
+      openSessionIntro();
+      goToPage("practice");
+      render();
+      renderHeader();
+      promptInput.focus();
+      return;
+    }
+
+    if (action === "peer-now") {
+      upsertImprovementTrack({ stage, mode: "peer", status: "started" });
+      state.peer.activeView = "community";
+      goToPage("peerPracticum");
+      return;
+    }
+
+    if (action === "mark-done") {
+      upsertImprovementTrack({ stage, mode: "self", status: "completed" });
+      const trackerNode = finalFeedbackContent.querySelector("#improvementTracker");
+      if (trackerNode) {
+        trackerNode.innerHTML = buildImprovementTrackerHtml();
+      }
+      return;
+    }
+
+    if (action === "drill") {
+      actionButton.disabled = true;
+      actionButton.textContent = "Generating...";
+      const targetNode = finalFeedbackContent.querySelector(`#improve-drill-${stage.toLowerCase()}`);
+      const drill = await generateStageDrill(stage, weakStages);
+      if (targetNode) {
+        targetNode.innerHTML = escapeHtml(drill).replaceAll("\n", "<br />");
+        targetNode.classList.remove("muted");
+      }
+      upsertImprovementTrack({ stage, mode: "drill", status: "started" });
+      const trackerNode = finalFeedbackContent.querySelector("#improvementTracker");
+      if (trackerNode) {
+        trackerNode.innerHTML = buildImprovementTrackerHtml();
+      }
+      actionButton.disabled = false;
+      actionButton.textContent = "Generate AI Drill";
+      return;
+    }
+  }
+
   const submitButton = event.target.closest("#submitReflectionBtn");
   if (!submitButton || state.finalReflectionSubmitting) {
     return;
