@@ -617,7 +617,6 @@ const peerVoiceModeBtn = document.getElementById("peerVoiceModeBtn");
 const peerVoiceStatusText = document.getElementById("peerVoiceStatusText");
 const peerReflectionMeta = document.getElementById("peerReflectionMeta");
 const peerReflectionSummary = document.getElementById("peerReflectionSummary");
-const peerBackToCommunityBtn = document.getElementById("peerBackToCommunityBtn");
 const peerChatMessages = document.getElementById("peerChatMessages");
 const peerChatForm = document.getElementById("peerChatForm");
 const peerChatInput = document.getElementById("peerChatInput");
@@ -3204,12 +3203,6 @@ if (peerTabCommunity || peerTabSession || peerTabReflection) {
       }
       setPeerView(view);
     });
-  });
-}
-
-if (peerBackToCommunityBtn) {
-  peerBackToCommunityBtn.addEventListener("click", () => {
-    setPeerView("community");
   });
 }
 
