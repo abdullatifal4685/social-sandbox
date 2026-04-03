@@ -228,18 +228,19 @@ h2 {
 }
 
 .path-icon-wrap {
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
+  width: 52px;
+  height: 52px;
+  border-radius: 18px;
   display: grid;
   place-items: center;
-  background: linear-gradient(180deg, rgba(29, 95, 229, 0.12), rgba(255, 255, 255, 0.95));
-  border: 1px solid rgba(29, 95, 229, 0.16);
+  background: linear-gradient(180deg, #ffffff, #eef4ff);
+  border: 1px solid rgba(20, 97, 255, 0.14);
+  box-shadow: 0 10px 26px rgba(20, 97, 255, 0.08);
 }
 
 .path-icon-wrap-accent {
-  background: linear-gradient(180deg, rgba(14, 163, 122, 0.14), rgba(255, 255, 255, 0.95));
-  border-color: rgba(14, 163, 122, 0.18);
+  background: linear-gradient(180deg, #ffffff, #eef4ff);
+  border-color: rgba(20, 97, 255, 0.14);
 }
 
 .path-btn strong,
