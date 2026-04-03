@@ -770,6 +770,11 @@ textarea {
   margin: 0 0 0.5rem;
 }
 
+.dashboard-help {
+  margin: 0.45rem 0 0;
+  line-height: 1.55;
+}
+
 .dashboard-list {
   margin: 0;
   padding-left: 1rem;

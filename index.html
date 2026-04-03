@@ -106,8 +106,9 @@
 
   <section id="pageDashboard" class="flow-page is-hidden">
     <div class="flow-card">
-      <h2>Learning Dashboard</h2>
-      <p id="dashboardIdentity" class="muted">Detailed view of your strengths, weak stages, and improvement progress.</p>
+      <h2>Practice Dashboard</h2>
+      <p id="dashboardIdentity" class="muted">This is your before-practice view: check what to focus on before you start.</p>
+      <p class="dashboard-help muted">Use Dashboard to preview your current weak stage, recent reflection scores, and progress. Use Analytics after practice to review results from the session you just completed.</p>
 
       <div class="choice-snapshot-grid dashboard-overview-grid">
         <article class="choice-snapshot-card">
@@ -210,16 +211,14 @@
     <div class="flow-card">
       <h2>Practice Feedback Summary</h2>
       <p id="finalIdentity" class="muted">Session reflection.</p>
-      <div class="dashboard-tabs">
-        <button id="finalTabCoaching" class="dashboard-tab active" type="button">Coaching</button>
-        <button id="finalTabAnalytics" class="dashboard-tab" type="button">Analytics</button>
-      </div>
+      <p class="dashboard-help muted">This summary keeps coaching and session results together so there is only one place to review what happened after practice.</p>
 
       <section id="finalCoachingSection" class="dashboard-section active">
         <div id="finalFeedbackContent" class="feedback-panel"></div>
       </section>
 
-      <section id="finalAnalyticsSection" class="dashboard-section">
+      <section id="finalAnalyticsSection" class="dashboard-section active">
+        <p class="dashboard-help muted">Session results and progress tracking appear here in the same view.</p>
         <div id="analyticsSummary" class="analytics-grid"></div>
       </section>
 
@@ -236,6 +235,7 @@
         <div>
           <h2>Peer Practicum</h2>
           <p class="muted">Practice difficult conversations with real peers, then exchange advice and feedback after each session.</p>
+          <p class="dashboard-help muted">Analytics is the after-practice view. It shows what happened in the session, what your patterns look like, and how your improvement tracker is moving.</p>
         </div>
       </div>
 
@@ -692,6 +692,6 @@ Agree on next step" required></textarea>
     </form>
   </dialog>
 
-  <script src="./app.js?v=20260417" defer></script>
+  <script src="./app.js?v=20260418" defer></script>
 </body>
 </html>
