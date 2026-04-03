@@ -23,7 +23,7 @@
         <p class="muted landing-subtitle">A guided simulator for difficult conversations at work, school, and leadership settings.</p>
         <p class="muted landing-note">Learn the concept first, then practice with AI coaching and reflection.</p>
         <div class="flow-actions landing-actions">
-          <button id="goToChoiceBtn" type="button">Start Learning Journey</button>
+          <button id="goToChoiceBtn" type="button" onclick="document.getElementById('pageLanding')?.classList.add('is-hidden');document.getElementById('pageChoice')?.classList.remove('is-hidden');window.scrollTo(0,0);">Start Learning Journey</button>
         </div>
       </div>
     </div>
@@ -618,6 +618,6 @@ Agree on next step" required></textarea>
     </form>
   </dialog>
 
-  <script src="./app.js?v=20260405" defer></script>
+  <script src="./app.js?v=20260406" defer></script>
 </body>
 </html>
