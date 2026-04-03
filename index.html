@@ -154,12 +154,24 @@
 
   <section id="pagePeerPracticum" class="flow-page is-hidden">
     <div class="flow-card peer-card">
-      <h2>Layer 3: Peer Practicum</h2>
-      <p class="muted">Practice difficult conversations with real peers, then exchange advice and feedback after each session.</p>
+      <div class="peer-page-head">
+        <div>
+          <h2>Peer Practicum</h2>
+          <p class="muted">Practice difficult conversations with real peers, then exchange advice and feedback after each session.</p>
+        </div>
+        <button id="peerBackToChoiceBtn" class="ghost" type="button">Back</button>
+      </div>
 
       <div class="peer-identity">
         <p class="flow-label">Practicing as</p>
-        <p id="peerIdentityName" class="name-summary">Learner</p>
+        <div class="peer-identity-row">
+          <p id="peerIdentityName" class="name-summary">Learner</p>
+          <button id="peerEditNameBtn" class="ghost name-edit-btn" type="button" aria-expanded="false">Edit</button>
+        </div>
+        <div id="peerUserNameEditor" class="name-editor is-hidden">
+          <label class="flow-label" for="peerUserNameInput">Edit your name</label>
+          <input id="peerUserNameInput" type="text" maxlength="40" placeholder="for example: Aulia" />
+        </div>
       </div>
 
       <div class="peer-view-tabs" role="tablist" aria-label="Peer practicum sections">
@@ -171,7 +183,6 @@
       <div id="peerCommunityView" class="peer-community-view">
         <div class="peer-room-head">
           <h3>Community Practice Directory</h3>
-          <button id="peerBackToChoiceBtn" class="ghost" type="button">Back</button>
         </div>
         <div id="peerUserDirectory" class="peer-user-directory"></div>
 

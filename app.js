@@ -419,6 +419,7 @@ const state = {
     requests: loadPeerRequests(),
     activeSession: null,
     activeView: "community",
+    nameEditorOpen: false,
     lastSessionSummary: null,
     sessionChecklist: {
       Introduce: false,
@@ -597,6 +598,9 @@ const tipsLead = document.getElementById("tipsLead");
 const tipsList = document.getElementById("tipsList");
 
 const peerIdentityName = document.getElementById("peerIdentityName");
+const peerEditNameBtn = document.getElementById("peerEditNameBtn");
+const peerUserNameEditor = document.getElementById("peerUserNameEditor");
+const peerUserNameInput = document.getElementById("peerUserNameInput");
 const peerTabCommunity = document.getElementById("peerTabCommunity");
 const peerTabSession = document.getElementById("peerTabSession");
 const peerTabReflection = document.getElementById("peerTabReflection");
@@ -1473,6 +1477,16 @@ function renderPeerPracticum() {
   }
 
   peerIdentityName.textContent = getLearnerName();
+  if (peerUserNameInput && document.activeElement !== peerUserNameInput) {
+    peerUserNameInput.value = state.userName;
+  }
+  if (peerUserNameEditor) {
+    peerUserNameEditor.classList.toggle("is-hidden", !state.peer.nameEditorOpen);
+  }
+  if (peerEditNameBtn) {
+    peerEditNameBtn.textContent = state.peer.nameEditorOpen ? "Done" : "Edit";
+    peerEditNameBtn.setAttribute("aria-expanded", state.peer.nameEditorOpen ? "true" : "false");
+  }
   renderPeerDirectory();
   renderPeerRequests();
   renderPeerSession();
@@ -3026,7 +3040,44 @@ if (backToBriefingBtn) {
 
 if (peerBackToChoiceBtn) {
   peerBackToChoiceBtn.addEventListener("click", () => {
+    state.peer.nameEditorOpen = false;
     goToPage("choice");
+  });
+}
+
+if (peerEditNameBtn && peerUserNameEditor && peerUserNameInput) {
+  peerEditNameBtn.addEventListener("click", () => {
+    state.peer.nameEditorOpen = !state.peer.nameEditorOpen;
+    if (!state.peer.nameEditorOpen) {
+      saveUserName(peerUserNameInput.value);
+      renderUserNameSummary();
+      renderHeader();
+    }
+    renderPeerPracticum();
+    if (state.peer.nameEditorOpen) {
+      peerUserNameInput.focus();
+      peerUserNameInput.select();
+    }
+  });
+
+  peerUserNameInput.addEventListener("input", () => {
+    saveUserName(peerUserNameInput.value);
+    renderUserNameSummary();
+    renderHeader();
+    if (peerIdentityName) {
+      peerIdentityName.textContent = getLearnerName();
+    }
+  });
+
+  peerUserNameInput.addEventListener("blur", () => {
+    if (!state.peer.nameEditorOpen) {
+      return;
+    }
+    saveUserName(peerUserNameInput.value);
+    state.peer.nameEditorOpen = false;
+    renderUserNameSummary();
+    renderHeader();
+    renderPeerPracticum();
   });
 }
 

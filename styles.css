@@ -788,6 +788,17 @@ textarea {
   margin: 0 auto;
 }
 
+.peer-page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.8rem;
+}
+
+.peer-page-head > div > p {
+  margin-bottom: 0;
+}
+
 .peer-view-tabs {
   margin-top: 1rem;
   display: grid;
@@ -866,6 +877,18 @@ textarea {
   border: 1px solid rgba(20, 97, 255, 0.12);
   border-radius: 12px;
   background: linear-gradient(180deg, #ffffff, #f5f9ff);
+}
+
+.peer-identity-row {
+  margin-top: 0.3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.peer-identity .name-editor {
+  margin-top: 0.65rem;
 }
 
 .peer-room-head {
@@ -2286,6 +2309,15 @@ body.hide-left.hide-right .layout {
 
   .peer-room-head {
     flex-direction: column;
+  }
+
+  .peer-page-head {
+    flex-direction: column;
+  }
+
+  .peer-identity-row {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .peer-card {
