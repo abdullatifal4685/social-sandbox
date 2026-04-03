@@ -278,6 +278,7 @@
             <textarea id="peerSharedNotes" rows="5" placeholder="Capture takeaways and strategy adjustments together..."></textarea>
             <div class="peer-notes-actions">
               <button id="peerSaveSharedNotesBtn" class="ghost" type="button">Save Notes</button>
+              <button id="peerEditSharedNotesBtn" class="ghost" type="button">Edit</button>
               <p id="peerSharedNotesStatus" class="muted peer-notes-status">Not saved yet.</p>
             </div>
           </section>
@@ -287,7 +288,11 @@
             <p class="muted">After ending the conversation, exchange one strength and one growth suggestion.</p>
             <label class="flow-label" for="peerFeedbackInput">Feedback to your peer</label>
             <textarea id="peerFeedbackInput" rows="4" placeholder="What worked well? What could improve next time?"></textarea>
-            <button id="peerSubmitFeedbackBtn" class="ghost" type="button">Send Feedback</button>
+            <div class="peer-notes-actions">
+              <button id="peerSubmitFeedbackBtn" class="ghost" type="button">Send Feedback</button>
+              <button id="peerEditFeedbackBtn" class="ghost" type="button">Edit</button>
+              <p id="peerFeedbackStatus" class="muted peer-notes-status">Not sent yet.</p>
+            </div>
             <ul id="peerFeedbackList" class="coach-note-list"></ul>
           </section>
         </div>
@@ -613,6 +618,6 @@ Agree on next step" required></textarea>
     </form>
   </dialog>
 
-  <script src="./app.js?v=20260403" defer></script>
+  <script src="./app.js?v=20260404" defer></script>
 </body>
 </html>

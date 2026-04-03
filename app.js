@@ -622,9 +622,12 @@ const peerChatForm = document.getElementById("peerChatForm");
 const peerChatInput = document.getElementById("peerChatInput");
 const peerSharedNotes = document.getElementById("peerSharedNotes");
 const peerSaveSharedNotesBtn = document.getElementById("peerSaveSharedNotesBtn");
+const peerEditSharedNotesBtn = document.getElementById("peerEditSharedNotesBtn");
 const peerSharedNotesStatus = document.getElementById("peerSharedNotesStatus");
 const peerFeedbackInput = document.getElementById("peerFeedbackInput");
 const peerSubmitFeedbackBtn = document.getElementById("peerSubmitFeedbackBtn");
+const peerEditFeedbackBtn = document.getElementById("peerEditFeedbackBtn");
+const peerFeedbackStatus = document.getElementById("peerFeedbackStatus");
 const peerFeedbackList = document.getElementById("peerFeedbackList");
 
 const chatMessages = document.getElementById("chatMessages");
@@ -653,6 +656,9 @@ state.voice = {
   pendingFinal: "",
 };
 
+    sharedNotesSaved: false,
+    feedbackDraft: "",
+    feedbackSent: false,
 state.peer.voice = {
   supported: Boolean(SpeechRecognitionAPI),
   mode: false,
@@ -1386,10 +1392,56 @@ function renderPeerSession() {
     peerSharedNotes.value = state.peer.sharedNotes;
   }
 
+  if (peerSharedNotes) {
+    peerSharedNotes.readOnly = state.peer.sharedNotesSaved;
+    peerSharedNotes.classList.toggle("peer-field-saved", state.peer.sharedNotesSaved);
+  }
+
+  if (peerSaveSharedNotesBtn) {
+    peerSaveSharedNotesBtn.disabled = state.peer.sharedNotesSaved;
+    peerSaveSharedNotesBtn.textContent = state.peer.sharedNotesSaved ? "Saved" : "Save Notes";
+  }
+
+  if (peerEditSharedNotesBtn) {
+    peerEditSharedNotesBtn.disabled = !state.peer.sharedNotesSaved;
+  }
+
   if (peerSharedNotesStatus) {
-    peerSharedNotesStatus.textContent = state.peer.sharedNotes
-      ? "Saved. Next: add Mutual Feedback below."
-      : "Not saved yet.";
+    if (state.peer.sharedNotesSaved && state.peer.sharedNotes) {
+      peerSharedNotesStatus.textContent = "Saved. Click Edit to update notes.";
+    } else if (state.peer.sharedNotes) {
+      peerSharedNotesStatus.textContent = "Unsaved changes.";
+    } else {
+      peerSharedNotesStatus.textContent = "Not saved yet.";
+    }
+  }
+
+  if (document.activeElement !== peerFeedbackInput) {
+    peerFeedbackInput.value = state.peer.feedbackDraft || "";
+  }
+
+  if (peerFeedbackInput) {
+    peerFeedbackInput.readOnly = state.peer.feedbackSent;
+    peerFeedbackInput.classList.toggle("peer-field-saved", state.peer.feedbackSent);
+  }
+
+  if (peerSubmitFeedbackBtn) {
+    peerSubmitFeedbackBtn.disabled = state.peer.feedbackSent;
+    peerSubmitFeedbackBtn.textContent = state.peer.feedbackSent ? "Sent" : "Send Feedback";
+  }
+
+  if (peerEditFeedbackBtn) {
+    peerEditFeedbackBtn.disabled = !state.peer.feedbackSent;
+  }
+
+  if (peerFeedbackStatus) {
+    if (state.peer.feedbackSent && state.peer.feedbackDraft) {
+      peerFeedbackStatus.textContent = "Sent. Click Edit to revise feedback.";
+    } else if (state.peer.feedbackDraft) {
+      peerFeedbackStatus.textContent = "Draft not sent yet.";
+    } else {
+      peerFeedbackStatus.textContent = "Not sent yet.";
+    }
   }
 
   if (peerReflectionMeta) {
@@ -1440,6 +1492,9 @@ function startPeerSession(requestId) {
     Solve: false,
   };
   state.peer.sharedNotes = "";
+  state.peer.sharedNotesSaved = false;
+  state.peer.feedbackDraft = "";
+  state.peer.feedbackSent = false;
   state.peer.feedbackNotes = [];
   state.peer.activeView = "session";
   state.peer.lastSessionSummary = null;
@@ -3123,6 +3178,7 @@ if (peerVoiceModeBtn) {
 
 if (peerSharedNotes) {
   peerSharedNotes.addEventListener("input", () => {
+    state.peer.sharedNotesSaved = false;
     if (peerSharedNotesStatus) {
       peerSharedNotesStatus.textContent = "Unsaved changes.";
     }
@@ -3130,22 +3186,37 @@ if (peerSharedNotes) {
 
   peerSharedNotes.addEventListener("change", () => {
     state.peer.sharedNotes = peerSharedNotes.value.trim();
+    state.peer.sharedNotesSaved = Boolean(state.peer.sharedNotes);
     if (peerSharedNotesStatus) {
-      peerSharedNotesStatus.textContent = state.peer.sharedNotes
-        ? "Saved. Next: add Mutual Feedback below."
+      peerSharedNotesStatus.textContent = state.peer.sharedNotesSaved
+        ? "Saved. Click Edit to update notes."
         : "Not saved yet.";
     }
+    renderPeerSession();
   });
 }
 
 if (peerSaveSharedNotesBtn) {
   peerSaveSharedNotesBtn.addEventListener("click", () => {
     state.peer.sharedNotes = peerSharedNotes?.value.trim() || "";
+    state.peer.sharedNotesSaved = Boolean(state.peer.sharedNotes);
     if (peerSharedNotesStatus) {
-      peerSharedNotesStatus.textContent = state.peer.sharedNotes
-        ? "Saved. Next: add Mutual Feedback below."
+      peerSharedNotesStatus.textContent = state.peer.sharedNotesSaved
+        ? "Saved. Click Edit to update notes."
         : "Not saved yet.";
     }
+    renderPeerSession();
+  });
+}
+
+if (peerEditSharedNotesBtn) {
+  peerEditSharedNotesBtn.addEventListener("click", () => {
+    state.peer.sharedNotesSaved = false;
+    if (peerSharedNotesStatus) {
+      peerSharedNotesStatus.textContent = "Editing enabled. Save when finished.";
+    }
+    renderPeerSession();
+    peerSharedNotes?.focus();
   });
 }
 
@@ -3158,13 +3229,12 @@ document.querySelectorAll("[data-peer-stage]").forEach((checkbox) => {
 
 if (peerSubmitFeedbackBtn) {
   peerSubmitFeedbackBtn.addEventListener("click", () => {
-    if (!state.peer.activeSession) {
-      return;
-    }
     const text = peerFeedbackInput.value.trim();
     if (!text) {
       return;
     }
+    state.peer.feedbackDraft = text;
+    state.peer.feedbackSent = true;
     state.peer.feedbackNotes.push({
       id: `feedback-${Date.now()}`,
       author: getLearnerName(),
@@ -3172,8 +3242,18 @@ if (peerSubmitFeedbackBtn) {
       timestamp: Date.now(),
     });
     state.peer.feedbackNotes = state.peer.feedbackNotes.slice(-20);
-    peerFeedbackInput.value = "";
     renderPeerSession();
+  });
+}
+
+if (peerEditFeedbackBtn) {
+  peerEditFeedbackBtn.addEventListener("click", () => {
+    state.peer.feedbackSent = false;
+    if (peerFeedbackStatus) {
+      peerFeedbackStatus.textContent = "Editing enabled. Send when ready.";
+    }
+    renderPeerSession();
+    peerFeedbackInput?.focus();
   });
 }
 
