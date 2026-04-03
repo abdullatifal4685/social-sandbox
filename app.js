@@ -1881,6 +1881,10 @@ function computeAnalytics() {
 }
 
 function renderFinalTab(tab) {
+  if (!finalTabCoaching || !finalTabAnalytics || !finalCoachingSection || !finalAnalyticsSection) {
+    return;
+  }
+
   const coachingActive = tab === "coaching";
   finalTabCoaching.classList.toggle("active", coachingActive);
   finalTabAnalytics.classList.toggle("active", !coachingActive);
@@ -3109,8 +3113,7 @@ function generateFeedback() {
   feedbackPanel.innerHTML = html;
   finalFeedbackContent.innerHTML = html;
   setReflectionDraftLock(false);
-  finalIdentity.textContent = `${getLearnerName()}, here is your latest feedback summary.`;
-  renderFinalTab("coaching");
+  finalIdentity.textContent = `${getLearnerName()}, here is your latest dashboard.`;
 }
 
 async function handleSend(event) {
