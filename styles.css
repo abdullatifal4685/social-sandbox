@@ -141,9 +141,8 @@ h2 {
 }
 
 .choice-visual {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.9rem;
   margin-bottom: 1rem;
 }
@@ -151,27 +150,21 @@ h2 {
 .choice-orb {
   width: 52px;
   height: 52px;
-  border-radius: 18px;
+  border-radius: 14px;
   display: grid;
   place-items: center;
-  background: linear-gradient(180deg, #ffffff, #eef4ff);
-  border: 1px solid rgba(20, 97, 255, 0.14);
+  background: linear-gradient(180deg, rgba(29, 95, 229, 0.12), rgba(255, 255, 255, 0.95));
+  border: 1px solid rgba(29, 95, 229, 0.16);
   box-shadow: 0 10px 26px rgba(20, 97, 255, 0.08);
 }
 
-.choice-orb-learn {
-  transform: translateY(6px);
-}
-
-.choice-orb-core {
-  width: 62px;
-  height: 62px;
-  background: linear-gradient(180deg, rgba(29, 95, 229, 0.16), rgba(255, 255, 255, 0.96));
-  border-color: rgba(29, 95, 229, 0.2);
-}
-
+.choice-orb-learn,
+.choice-orb-core,
 .choice-orb-practice {
-  transform: translateY(6px);
+  width: 52px;
+  height: 52px;
+  background: linear-gradient(180deg, rgba(29, 95, 229, 0.12), rgba(255, 255, 255, 0.95));
+  border-color: rgba(29, 95, 229, 0.16);
 }
 
 .choice-orb-icon,
