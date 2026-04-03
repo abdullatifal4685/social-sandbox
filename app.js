@@ -590,7 +590,6 @@ const dashboardRecentScore = document.getElementById("dashboardRecentScore");
 const dashboardCompletionRate = document.getElementById("dashboardCompletionRate");
 const dashboardWeakBreakdown = document.getElementById("dashboardWeakBreakdown");
 const dashboardHistory = document.getElementById("dashboardHistory");
-const dashboardStartStageSelect = document.getElementById("dashboardStartStageSelect");
 const dashboardPracticeAiBtn = document.getElementById("dashboardPracticeAiBtn");
 const dashboardPracticePeerBtn = document.getElementById("dashboardPracticePeerBtn");
 const dashboardBackBtn = document.getElementById("dashboardBackBtn");
@@ -1220,7 +1219,7 @@ function renderPage() {
   });
 }
 
-function getCurrentWeakStageFocus() {
+function getCurrentWeakStageFocusInfo() {
   const finalEntries = state.reflectionHistory.filter((entry) => entry.kind === "final");
   const recent = finalEntries.slice(-8);
   const weakMap = recent.reduce((acc, item) => {
@@ -1229,7 +1228,24 @@ function getCurrentWeakStageFocus() {
     });
     return acc;
   }, {});
-  return Object.entries(weakMap).sort((a, b) => b[1] - a[1])[0]?.[0] || "Listen";
+
+  const sorted = Object.entries(weakMap).sort((a, b) => b[1] - a[1]);
+  const topCount = sorted[0]?.[1] || 0;
+  const tied = sorted.filter((item) => item[1] === topCount).map((item) => item[0]);
+
+  if (!sorted.length) {
+    return {
+      stage: "Introduce",
+      isTie: false,
+      hasData: false,
+    };
+  }
+
+  return {
+    stage: tied.length > 1 ? "Multiple stages" : tied[0],
+    isTie: tied.length > 1,
+    hasData: true,
+  };
 }
 
 function hasFinalHistory() {
@@ -1237,7 +1253,11 @@ function hasFinalHistory() {
 }
 
 function getRecommendedStartStage() {
-  return hasFinalHistory() ? getCurrentWeakStageFocus() : "Introduce";
+  const focus = getCurrentWeakStageFocusInfo();
+  if (!hasFinalHistory()) {
+    return "Introduce";
+  }
+  return focus.isTie ? "Introduce" : focus.stage;
 }
 
 function renderChoiceSnapshot() {
@@ -1251,7 +1271,7 @@ function renderChoiceSnapshot() {
     ? Math.round(recent.reduce((sum, item) => sum + (item.scorePercent || 0), 0) / recent.length)
     : null;
 
-  const weakStage = getCurrentWeakStageFocus();
+  const focus = getCurrentWeakStageFocusInfo();
 
   const attempts = state.improvementTrack.reduce((sum, item) => sum + (item.attempts || 0), 0);
   const completions = state.improvementTrack.reduce((sum, item) => sum + (item.completions || 0), 0);
@@ -1261,7 +1281,12 @@ function renderChoiceSnapshot() {
   if (choiceStageLabel) {
     choiceStageLabel.textContent = isReturning ? "Most frequent weak stage" : "Start here (recommended)";
   }
-  choiceWeakStage.textContent = isReturning ? weakStage : "Introduce";
+  if (isReturning && focus.isTie) {
+    choiceStageLabel.textContent = "Current focus (tie)";
+    choiceWeakStage.textContent = "Multiple stages";
+  } else {
+    choiceWeakStage.textContent = isReturning ? focus.stage : "Introduce";
+  }
   choiceRecentScore.textContent = avgRecent === null ? "No history yet" : `${avgRecent}%`;
   choiceCompletionRate.textContent = `${completionRate}%`;
 }
@@ -1310,8 +1335,7 @@ function renderDashboardPage() {
   const avgRecent = recent.length
     ? Math.round(recent.reduce((sum, item) => sum + (item.scorePercent || 0), 0) / recent.length)
     : null;
-  const weakStage = getCurrentWeakStageFocus();
-  const recommendedStage = getRecommendedStartStage();
+  const focus = getCurrentWeakStageFocusInfo();
   const isReturning = finalEntries.length > 0;
   const attempts = state.improvementTrack.reduce((sum, item) => sum + (item.attempts || 0), 0);
   const completions = state.improvementTrack.reduce((sum, item) => sum + (item.completions || 0), 0);
@@ -1323,10 +1347,14 @@ function renderDashboardPage() {
       : `${getLearnerName()}, start with Introduce or pick any stage you prefer.`;
   }
   if (dashboardStageLabel) {
-    dashboardStageLabel.textContent = isReturning ? "Most frequent weak stage" : "Start here (recommended)";
+    dashboardStageLabel.textContent = isReturning
+      ? (focus.isTie ? "Current focus (tie)" : "Most frequent weak stage")
+      : "Start here (recommended)";
   }
   if (dashboardWeakStage) {
-    dashboardWeakStage.textContent = isReturning ? weakStage : "Introduce";
+    dashboardWeakStage.textContent = isReturning
+      ? (focus.isTie ? "Multiple stages" : focus.stage)
+      : "Introduce";
   }
   if (dashboardRecentScore) {
     dashboardRecentScore.textContent = avgRecent === null ? "No history yet" : `${avgRecent}%`;
@@ -1339,9 +1367,6 @@ function renderDashboardPage() {
   }
   if (dashboardHistory) {
     dashboardHistory.innerHTML = buildDashboardHistoryHtml();
-  }
-  if (dashboardStartStageSelect) {
-    dashboardStartStageSelect.value = recommendedStage;
   }
 }
 
@@ -3711,8 +3736,8 @@ if (dashboardPracticeAiBtn) {
       goToPage("choice");
       return;
     }
-    const selectedStage = dashboardStartStageSelect?.value || getRecommendedStartStage();
-    state.stageIndex = Math.max(0, ILETS.indexOf(selectedStage));
+    const recommendedStage = getRecommendedStartStage();
+    state.stageIndex = Math.max(0, ILETS.indexOf(recommendedStage));
     goToPage("scenarioBriefing");
   });
 }
