@@ -416,6 +416,7 @@ const state = {
   coachNoteHistory: [],
   reflectionHistory: loadReflectionHistory(),
   improvementTrack: loadImprovementTrack(),
+  improvementTrackRange: "all",
   inMomentPrompt: null,
   inMomentPromptAtTurn: 0,
   inMomentSubmitting: false,
@@ -2583,16 +2584,36 @@ function buildImprovementTrackerHtml() {
     return "<p class=\"muted\">No improvement actions yet. Pick one weakness and start a follow-up exercise.</p>";
   }
 
+  const now = Date.now();
+  const weekAgo = now - (7 * 24 * 60 * 60 * 1000);
+  const filtered = state.improvementTrack.filter((item) => {
+    if (state.improvementTrackRange === "week") {
+      return (item.lastUpdated || 0) >= weekAgo;
+    }
+    return true;
+  });
+
+  if (!filtered.length) {
+    return `
+      <div class="improvement-filter-tabs">
+        <button class="improvement-filter-tab ${state.improvementTrackRange === "week" ? "active" : ""}" type="button" data-improve-filter="week">This week</button>
+        <button class="improvement-filter-tab ${state.improvementTrackRange === "all" ? "active" : ""}" type="button" data-improve-filter="all">All time</button>
+      </div>
+      <p class="muted">No actions in this range yet. Try switching to All time or start a new improvement action.</p>
+    `;
+  }
+
   const stageSummary = ILETS.map((stage) => {
-    const entries = state.improvementTrack.filter((item) => item.stage === stage);
+    const entries = filtered.filter((item) => item.stage === stage);
     const attempts = entries.reduce((sum, item) => sum + (item.attempts || 0), 0);
     const completions = entries.reduce((sum, item) => sum + (item.completions || 0), 0);
     const denominator = Math.max(1, attempts, completions);
     const rate = Math.round((completions / denominator) * 100);
-    return { stage, attempts, completions, rate };
+    const label = rate >= 80 ? "Mastered" : (rate >= 50 ? "Consistent" : "Improving");
+    return { stage, attempts, completions, rate, label };
   });
 
-  const recentTrend = state.improvementTrack
+  const recentTrend = filtered
     .slice()
     .sort((a, b) => (a.lastUpdated || 0) - (b.lastUpdated || 0))
     .slice(-10)
@@ -2606,18 +2627,23 @@ function buildImprovementTrackerHtml() {
       return 25;
     });
 
-  const latest = state.improvementTrack
+  const latest = filtered
     .slice()
     .sort((a, b) => (b.lastUpdated || 0) - (a.lastUpdated || 0))
     .slice(0, 6);
 
   return `
+    <div class="improvement-filter-tabs">
+      <button class="improvement-filter-tab ${state.improvementTrackRange === "week" ? "active" : ""}" type="button" data-improve-filter="week">This week</button>
+      <button class="improvement-filter-tab ${state.improvementTrackRange === "all" ? "active" : ""}" type="button" data-improve-filter="all">All time</button>
+    </div>
     <section class="improvement-progress-grid">
       ${stageSummary
         .map((item) => `
           <div class="improvement-progress-row">
-            <span>${escapeHtml(item.stage)}</span>
+            <span>${escapeHtml(item.stage)} <em class="improvement-status improvement-status-${item.label.toLowerCase()}">${item.label}</em></span>
             <div class="improvement-progress-track">
+              <div class="improvement-goal-line" title="Goal: 70%"></div>
               <div class="improvement-progress-fill" style="width:${item.rate}%"></div>
             </div>
             <strong>${item.rate}%</strong>
@@ -2933,6 +2959,19 @@ if (submitInMomentReflectionBtn) {
 }
 
 finalFeedbackContent.addEventListener("click", async (event) => {
+  const filterButton = event.target.closest("[data-improve-filter]");
+  if (filterButton) {
+    const range = filterButton.getAttribute("data-improve-filter");
+    if (range === "week" || range === "all") {
+      state.improvementTrackRange = range;
+      const trackerNode = finalFeedbackContent.querySelector("#improvementTracker");
+      if (trackerNode) {
+        trackerNode.innerHTML = buildImprovementTrackerHtml();
+      }
+    }
+    return;
+  }
+
   const actionButton = event.target.closest("[data-improve-action]");
   if (actionButton) {
     const stage = actionButton.getAttribute("data-stage") || "Listen";
