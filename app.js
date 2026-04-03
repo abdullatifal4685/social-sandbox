@@ -2583,12 +2583,56 @@ function buildImprovementTrackerHtml() {
     return "<p class=\"muted\">No improvement actions yet. Pick one weakness and start a follow-up exercise.</p>";
   }
 
+  const stageSummary = ILETS.map((stage) => {
+    const entries = state.improvementTrack.filter((item) => item.stage === stage);
+    const attempts = entries.reduce((sum, item) => sum + (item.attempts || 0), 0);
+    const completions = entries.reduce((sum, item) => sum + (item.completions || 0), 0);
+    const denominator = Math.max(1, attempts, completions);
+    const rate = Math.round((completions / denominator) * 100);
+    return { stage, attempts, completions, rate };
+  });
+
+  const recentTrend = state.improvementTrack
+    .slice()
+    .sort((a, b) => (a.lastUpdated || 0) - (b.lastUpdated || 0))
+    .slice(-10)
+    .map((item) => {
+      if (item.status === "completed") {
+        return 100;
+      }
+      if (item.status === "started") {
+        return 45;
+      }
+      return 25;
+    });
+
   const latest = state.improvementTrack
     .slice()
     .sort((a, b) => (b.lastUpdated || 0) - (a.lastUpdated || 0))
     .slice(0, 6);
 
   return `
+    <section class="improvement-progress-grid">
+      ${stageSummary
+        .map((item) => `
+          <div class="improvement-progress-row">
+            <span>${escapeHtml(item.stage)}</span>
+            <div class="improvement-progress-track">
+              <div class="improvement-progress-fill" style="width:${item.rate}%"></div>
+            </div>
+            <strong>${item.rate}%</strong>
+          </div>
+        `)
+        .join("")}
+    </section>
+    <section class="improvement-trend-wrap">
+      <p class="muted">Recent improvement trend</p>
+      <div class="improvement-trend-spark" role="img" aria-label="Recent improvement trend">
+        ${recentTrend
+          .map((value) => `<span class="improvement-trend-point" style="height:${Math.max(8, value * 0.28)}px"></span>`)
+          .join("")}
+      </div>
+    </section>
     <ul class="improvement-list">
       ${latest
         .map((item) => `

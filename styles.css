@@ -1706,6 +1706,57 @@ textarea {
   margin: 0.35rem 0;
 }
 
+.improvement-progress-grid {
+  display: grid;
+  gap: 0.38rem;
+}
+
+.improvement-progress-row {
+  display: grid;
+  grid-template-columns: 92px 1fr auto;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.86rem;
+}
+
+.improvement-progress-track {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(20, 97, 255, 0.14);
+  overflow: hidden;
+}
+
+.improvement-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(130deg, #0ea37a, #1461ff);
+}
+
+.improvement-trend-wrap {
+  margin-top: 0.62rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid rgba(20, 97, 255, 0.1);
+}
+
+.improvement-trend-wrap p {
+  margin: 0;
+}
+
+.improvement-trend-spark {
+  margin-top: 0.42rem;
+  min-height: 38px;
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.improvement-trend-point {
+  width: 8px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(20, 97, 255, 0.9), rgba(14, 163, 122, 0.78));
+  display: inline-block;
+}
+
 .mini-bars {
   margin-top: 0.45rem;
   display: grid;
