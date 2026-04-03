@@ -754,6 +754,16 @@ textarea {
   font-size: 0.85rem;
 }
 
+.dashboard-stage-select-wrap {
+  display: grid;
+  gap: 0.28rem;
+  min-width: 210px;
+}
+
+.dashboard-stage-select-wrap select {
+  min-width: 210px;
+}
+
 .dashboard-overview-grid {
   margin-top: 0.9rem;
 }

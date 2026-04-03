@@ -578,16 +578,19 @@ const choiceWelcomeSubtitle = document.getElementById("choiceWelcomeSubtitle");
 const choiceNameInput = document.getElementById("choiceNameInput");
 const choiceSaveNameBtn = document.getElementById("choiceSaveNameBtn");
 const choiceNameStatus = document.getElementById("choiceNameStatus");
+const choiceStageLabel = document.getElementById("choiceStageLabel");
 const choiceWeakStage = document.getElementById("choiceWeakStage");
 const choiceRecentScore = document.getElementById("choiceRecentScore");
 const choiceCompletionRate = document.getElementById("choiceCompletionRate");
 const openDashboardBtn = document.getElementById("openDashboardBtn");
 const dashboardIdentity = document.getElementById("dashboardIdentity");
+const dashboardStageLabel = document.getElementById("dashboardStageLabel");
 const dashboardWeakStage = document.getElementById("dashboardWeakStage");
 const dashboardRecentScore = document.getElementById("dashboardRecentScore");
 const dashboardCompletionRate = document.getElementById("dashboardCompletionRate");
 const dashboardWeakBreakdown = document.getElementById("dashboardWeakBreakdown");
 const dashboardHistory = document.getElementById("dashboardHistory");
+const dashboardStartStageSelect = document.getElementById("dashboardStartStageSelect");
 const dashboardPracticeAiBtn = document.getElementById("dashboardPracticeAiBtn");
 const dashboardPracticePeerBtn = document.getElementById("dashboardPracticePeerBtn");
 const dashboardBackBtn = document.getElementById("dashboardBackBtn");
@@ -1229,6 +1232,14 @@ function getCurrentWeakStageFocus() {
   return Object.entries(weakMap).sort((a, b) => b[1] - a[1])[0]?.[0] || "Listen";
 }
 
+function hasFinalHistory() {
+  return state.reflectionHistory.some((entry) => entry.kind === "final");
+}
+
+function getRecommendedStartStage() {
+  return hasFinalHistory() ? getCurrentWeakStageFocus() : "Introduce";
+}
+
 function renderChoiceSnapshot() {
   if (!choiceWeakStage || !choiceRecentScore || !choiceCompletionRate) {
     return;
@@ -1246,7 +1257,11 @@ function renderChoiceSnapshot() {
   const completions = state.improvementTrack.reduce((sum, item) => sum + (item.completions || 0), 0);
   const completionRate = attempts ? Math.round((completions / attempts) * 100) : 0;
 
-  choiceWeakStage.textContent = finalEntries.length ? weakStage : "No history yet";
+  const isReturning = finalEntries.length > 0;
+  if (choiceStageLabel) {
+    choiceStageLabel.textContent = isReturning ? "Most frequent weak stage" : "Start here (recommended)";
+  }
+  choiceWeakStage.textContent = isReturning ? weakStage : "Introduce";
   choiceRecentScore.textContent = avgRecent === null ? "No history yet" : `${avgRecent}%`;
   choiceCompletionRate.textContent = `${completionRate}%`;
 }
@@ -1296,15 +1311,22 @@ function renderDashboardPage() {
     ? Math.round(recent.reduce((sum, item) => sum + (item.scorePercent || 0), 0) / recent.length)
     : null;
   const weakStage = getCurrentWeakStageFocus();
+  const recommendedStage = getRecommendedStartStage();
+  const isReturning = finalEntries.length > 0;
   const attempts = state.improvementTrack.reduce((sum, item) => sum + (item.attempts || 0), 0);
   const completions = state.improvementTrack.reduce((sum, item) => sum + (item.completions || 0), 0);
   const completionRate = attempts ? Math.round((completions / attempts) * 100) : 0;
 
   if (dashboardIdentity) {
-    dashboardIdentity.textContent = `${getLearnerName()}, review your details before starting the next practice.`;
+    dashboardIdentity.textContent = isReturning
+      ? `${getLearnerName()}, review your details and pick your next focus stage.`
+      : `${getLearnerName()}, start with Introduce or pick any stage you prefer.`;
+  }
+  if (dashboardStageLabel) {
+    dashboardStageLabel.textContent = isReturning ? "Most frequent weak stage" : "Start here (recommended)";
   }
   if (dashboardWeakStage) {
-    dashboardWeakStage.textContent = finalEntries.length ? weakStage : "No history yet";
+    dashboardWeakStage.textContent = isReturning ? weakStage : "Introduce";
   }
   if (dashboardRecentScore) {
     dashboardRecentScore.textContent = avgRecent === null ? "No history yet" : `${avgRecent}%`;
@@ -1317,6 +1339,9 @@ function renderDashboardPage() {
   }
   if (dashboardHistory) {
     dashboardHistory.innerHTML = buildDashboardHistoryHtml();
+  }
+  if (dashboardStartStageSelect) {
+    dashboardStartStageSelect.value = recommendedStage;
   }
 }
 
@@ -3686,8 +3711,8 @@ if (dashboardPracticeAiBtn) {
       goToPage("choice");
       return;
     }
-    const weakStage = getCurrentWeakStageFocus();
-    state.stageIndex = Math.max(0, ILETS.indexOf(weakStage));
+    const selectedStage = dashboardStartStageSelect?.value || getRecommendedStartStage();
+    state.stageIndex = Math.max(0, ILETS.indexOf(selectedStage));
     goToPage("scenarioBriefing");
   });
 }

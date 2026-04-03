@@ -50,7 +50,7 @@
         </div>
         <div class="choice-snapshot-grid">
           <article class="choice-snapshot-card">
-            <p class="choice-snapshot-label">Most frequent weak stage</p>
+            <p id="choiceStageLabel" class="choice-snapshot-label">Most frequent weak stage</p>
             <strong id="choiceWeakStage">No data yet</strong>
           </article>
           <article class="choice-snapshot-card">
@@ -108,11 +108,11 @@
     <div class="flow-card">
       <h2>Practice Dashboard</h2>
       <p id="dashboardIdentity" class="muted">This is your before-practice view: check what to focus on before you start.</p>
-      <p class="dashboard-help muted">Use Dashboard to preview your current weak stage, recent reflection scores, and progress. Use Analytics after practice to review results from the session you just completed.</p>
+      <p class="dashboard-help muted">Use this page to choose your starting stage before practice. New users start with Introduce by default, and returning users get a recommended focus from history.</p>
 
       <div class="choice-snapshot-grid dashboard-overview-grid">
         <article class="choice-snapshot-card">
-          <p class="choice-snapshot-label">Most frequent weak stage</p>
+          <p id="dashboardStageLabel" class="choice-snapshot-label">Most frequent weak stage</p>
           <strong id="dashboardWeakStage">-</strong>
         </article>
         <article class="choice-snapshot-card">
@@ -136,7 +136,17 @@
       </section>
 
       <div class="flow-actions flow-actions-wrap">
-        <button id="dashboardPracticeAiBtn" type="button">Practice Weak Stage with AI</button>
+        <label class="dashboard-stage-select-wrap" for="dashboardStartStageSelect">
+          <span class="choice-snapshot-label">Choose start stage</span>
+          <select id="dashboardStartStageSelect">
+            <option value="Introduce">Introduce</option>
+            <option value="Listen">Listen</option>
+            <option value="Empathize">Empathize</option>
+            <option value="Talk">Talk</option>
+            <option value="Solve">Solve</option>
+          </select>
+        </label>
+        <button id="dashboardPracticeAiBtn" type="button">Start AI Practice</button>
         <button id="dashboardPracticePeerBtn" class="ghost" type="button">Practice with Peer</button>
         <button id="dashboardBackBtn" class="ghost" type="button">Back to Path</button>
       </div>
@@ -703,6 +713,6 @@ Agree on next step" required></textarea>
     </form>
   </dialog>
 
-  <script src="./app.js?v=20260419" defer></script>
+  <script src="./app.js?v=20260420" defer></script>
 </body>
 </html>
