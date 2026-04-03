@@ -243,6 +243,17 @@ h2 {
   border-color: rgba(20, 97, 255, 0.14);
 }
 
+.path-icon-svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+  color: #2556bf;
+}
+
+.path-icon-svg-practice {
+  color: #0f7d63;
+}
+
 .path-btn strong,
 .path-btn span {
   grid-column: 2;
