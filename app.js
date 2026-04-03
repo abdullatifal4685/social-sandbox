@@ -646,6 +646,39 @@ let voiceRecognition = null;
 let voiceSendTimer = null;
 let peerVoiceRecognition = null;
 let peerVoiceSendTimer = null;
+let peerAutoReplyTimer = null;
+
+const PROTOTYPE_PEER_REPLY_MODE = true;
+
+const PEER_REPLY_TEMPLATES = {
+  Introduce: [
+    "Thanks for opening this clearly. What outcome are you hoping for from this conversation?",
+    "I appreciate the direct start. Can you share the core issue in one sentence?",
+  ],
+  Listen: [
+    "From my side, I felt time pressure. What part should we unpack first?",
+    "Good question. I was trying to move quickly. What did you observe most?",
+  ],
+  Empathize: [
+    "Thanks for acknowledging that. I felt tense too.",
+    "I appreciate that framing. It helps keep this constructive.",
+  ],
+  Talk: [
+    "Can you give one concrete example so I can understand the impact?",
+    "That makes sense. Which specific behavior should we adjust first?",
+  ],
+  Solve: [
+    "Let us agree on one next step and a quick follow-up time.",
+    "I am open to that. What action do you want me to commit to now?",
+  ],
+};
+
+function buildPrototypePeerReply(session, learnerText) {
+  const focus = session?.stageFocus || "Introduce";
+  const templates = PEER_REPLY_TEMPLATES[focus] || PEER_REPLY_TEMPLATES.Introduce;
+  const seed = learnerText.length % templates.length;
+  return templates[seed];
+}
 
 state.voice = {
   supported: Boolean(SpeechRecognitionAPI),
@@ -1482,8 +1515,17 @@ function startPeerSession(requestId) {
         text: `Session started with ${peer?.name || "peer"}. Focus on respectful role-play and finish with mutual feedback.`,
         timestamp: Date.now(),
       },
+      {
+        author: "System",
+        text: "Prototype mode is on: peer replies are simulated for demo purposes.",
+        timestamp: Date.now(),
+      },
     ],
   };
+  if (peerAutoReplyTimer) {
+    clearTimeout(peerAutoReplyTimer);
+    peerAutoReplyTimer = null;
+  }
   state.peer.sessionChecklist = {
     Introduce: false,
     Listen: false,
@@ -1528,6 +1570,10 @@ function endPeerSession() {
     completedAt: Date.now(),
   };
   state.peer.activeSession = null;
+  if (peerAutoReplyTimer) {
+    clearTimeout(peerAutoReplyTimer);
+    peerAutoReplyTimer = null;
+  }
   state.peer.activeView = "reflection";
   state.peer.voice.mode = false;
   state.peer.voice.pendingFinal = "";
@@ -3167,6 +3213,29 @@ if (peerChatForm) {
     state.peer.activeSession.messages = state.peer.activeSession.messages.slice(-120);
     peerChatInput.value = "";
     renderPeerSession();
+
+    if (!PROTOTYPE_PEER_REPLY_MODE) {
+      return;
+    }
+
+    const sessionId = state.peer.activeSession.id;
+    if (peerAutoReplyTimer) {
+      clearTimeout(peerAutoReplyTimer);
+    }
+    peerAutoReplyTimer = setTimeout(() => {
+      if (!state.peer.activeSession || state.peer.activeSession.id !== sessionId) {
+        return;
+      }
+      const reply = buildPrototypePeerReply(state.peer.activeSession, text);
+      state.peer.activeSession.messages.push({
+        id: `chat-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        author: state.peer.activeSession.peerName,
+        text: reply,
+        timestamp: Date.now(),
+      });
+      state.peer.activeSession.messages = state.peer.activeSession.messages.slice(-120);
+      renderPeerSession();
+    }, 900);
   });
 }
 
