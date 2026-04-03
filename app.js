@@ -630,7 +630,7 @@ const voiceStatusText = document.getElementById("voiceStatusText");
 const sendBtn = document.getElementById("sendBtn");
 const finishBtn = document.getElementById("finishBtn");
 const goHomeBtn = document.getElementById("goHomeBtn");
-const goConceptBtn = document.getElementById("goConceptBtn");
+const goLearningPathBtn = document.getElementById("goLearningPathBtn");
 const backToBriefingBtn = document.getElementById("backToBriefingBtn");
 
 const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -3012,9 +3012,11 @@ goHomeBtn.addEventListener("click", () => {
   goToPage("landing");
 });
 
-goConceptBtn.addEventListener("click", () => {
-  goToPage("choice");
-});
+if (goLearningPathBtn) {
+  goLearningPathBtn.addEventListener("click", () => {
+    goToPage("choice");
+  });
+}
 
 if (backToBriefingBtn) {
   backToBriefingBtn.addEventListener("click", () => {
