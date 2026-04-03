@@ -2080,6 +2080,37 @@ function renderCoachNote() {
   coachNoteList.innerHTML = items.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
 }
 
+function renderLiveFeedbackPanel() {
+  if (!feedbackPanel || state.page !== "practice") {
+    return;
+  }
+
+  const turns = getUserTurnCount();
+  if (turns === 0) {
+    feedbackPanel.innerHTML = `
+      <h3>Gap Analysis</h3>
+      <p class="muted">No values yet. Send your first response to see live progress here, then click Finish + Feedback for full dashboard analysis.</p>
+    `;
+    return;
+  }
+
+  const scores = getStageScoresFromMessages(state.messages);
+  const weak = scores.filter((item) => item.score === 0).map((item) => item.stage);
+  const strong = scores.filter((item) => item.score === 2).map((item) => item.stage);
+  const stageCoverage = Math.round(((state.stageIndex + 1) / ILETS.length) * 100);
+
+  feedbackPanel.innerHTML = `
+    <h3>Gap Analysis (Live)</h3>
+    <p class="analytics-metric">Turns: ${turns} | Stage coverage: ${stageCoverage}%</p>
+    <p class="muted">Current stage: ${escapeHtml(ILETS[state.stageIndex])}</p>
+    <ul>
+      <li><strong>Strength signal:</strong> ${escapeHtml(strong.length ? strong.join(", ") : "Building baseline")}</li>
+      <li><strong>Focus now:</strong> ${escapeHtml(weak.length ? weak.join(", ") : "Move to next stage with clearer evidence")}</li>
+    </ul>
+    <p class="muted">Finish + Feedback gives full adaptive reflection and session dashboard.</p>
+  `;
+}
+
 function renderRightPanel() {
   const tabs = rightTabs.querySelectorAll(".right-tab");
   tabs.forEach((tab) => {
@@ -2256,6 +2287,7 @@ function render() {
   renderCoachNote();
   renderInMomentReflectionCard();
   renderRightPanel();
+  renderLiveFeedbackPanel();
   renderFocusMode();
   renderColumnVisibility();
   renderTips();
