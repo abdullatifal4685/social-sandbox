@@ -2430,4 +2430,40 @@ body.hide-left.hide-right .layout {
     grid-template-columns: 1fr;
     gap: 0.24rem;
   }
+
+  .brief-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    width: 100%;
+    gap: 0.4rem;
+    border: 0;
+    border-radius: 0;
+    overflow: visible;
+    background: transparent;
+  }
+
+  .brief-tab {
+    border: 1px solid rgba(18, 26, 43, 0.14);
+    border-radius: 10px;
+    padding: 0.5rem 0.3rem;
+    font-size: 0.85rem;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  .brief-tab.active {
+    border-color: var(--accent);
+  }
+
+  .composer textarea {
+    min-height: 72px;
+    max-height: 120px;
+    height: 72px;
+    font-size: 16px;
+  }
+
+  input,
+  textarea {
+    font-size: 16px;
+  }
 }
