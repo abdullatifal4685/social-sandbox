@@ -3013,7 +3013,7 @@ goHomeBtn.addEventListener("click", () => {
 });
 
 goConceptBtn.addEventListener("click", () => {
-  goToPage("learn");
+  goToPage("choice");
 });
 
 if (backToBriefingBtn) {
