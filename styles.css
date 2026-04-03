@@ -2163,6 +2163,36 @@ body.hide-left.hide-right .layout {
   white-space: normal;
 }
 
+.reflection-draft-saved {
+  border: 1.4px solid rgba(14, 163, 122, 0.5) !important;
+  background: linear-gradient(180deg, #f2fff9, #eafff5) !important;
+  box-shadow: inset 0 0 0 1px rgba(14, 163, 122, 0.16);
+}
+
+.reflection-draft-list {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.reflection-draft-list li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.55rem;
+  align-items: center;
+  padding: 0.52rem 0.58rem;
+  border: 1px solid rgba(20, 97, 255, 0.12);
+  border-radius: 10px;
+  background: linear-gradient(180deg, #ffffff, #f7fbff);
+}
+
+.reflection-draft-list p {
+  margin: 0.28rem 0 0;
+  font-size: 0.85rem;
+}
+
 .reflection-question {
   margin: 0.48rem 0 0.22rem;
   color: #2f4f8f;

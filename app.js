@@ -4,6 +4,7 @@ const USER_NAME_KEY = "sandbox.userName";
 const SCENARIO_OVERRIDES_KEY = "sandbox.scenarioOverrides.v1";
 const HIDDEN_SCENARIO_IDS_KEY = "sandbox.hiddenScenarioIds.v1";
 const REFLECTION_HISTORY_KEY = "sandbox.reflectionHistory.v1";
+const REFLECTION_DRAFTS_KEY = "sandbox.reflectionDrafts.v1";
 const IMPROVEMENT_TRACK_KEY = "sandbox.improvementTrack.v1";
 const PEER_ROOM_PREFIX = "sandbox.peer.room.";
 const PEER_USER_ID_KEY = "sandbox.peer.userId";
@@ -330,6 +331,19 @@ function loadReflectionHistory() {
   }
 }
 
+function loadReflectionDrafts() {
+  try {
+    const raw = localStorage.getItem(REFLECTION_DRAFTS_KEY);
+    if (!raw) {
+      return [];
+    }
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 function loadImprovementTrack() {
   try {
     const raw = localStorage.getItem(IMPROVEMENT_TRACK_KEY);
@@ -415,6 +429,8 @@ const state = {
   coachNote: "Type a message and I’ll give you a quick note here.",
   coachNoteHistory: [],
   reflectionHistory: loadReflectionHistory(),
+  reflectionDrafts: loadReflectionDrafts(),
+  finalReflectionDraftLocked: false,
   improvementTrack: loadImprovementTrack(),
   improvementTrackRange: "all",
   inMomentPrompt: null,
@@ -508,6 +524,11 @@ function persistHiddenScenarioIds() {
 function persistReflectionHistory() {
   const trimmed = state.reflectionHistory.slice(-60);
   localStorage.setItem(REFLECTION_HISTORY_KEY, JSON.stringify(trimmed));
+}
+
+function persistReflectionDrafts() {
+  const trimmed = state.reflectionDrafts.slice(-40);
+  localStorage.setItem(REFLECTION_DRAFTS_KEY, JSON.stringify(trimmed));
 }
 
 function persistImprovementTrack() {
@@ -2502,6 +2523,56 @@ function buildReflectionTrendHtml() {
   `;
 }
 
+function buildReflectionDraftHistoryHtml() {
+  if (!state.reflectionDrafts.length) {
+    return "<p class=\"muted\">No saved drafts yet.</p>";
+  }
+
+  const recent = state.reflectionDrafts
+    .slice()
+    .sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0))
+    .slice(0, 6);
+
+  return `
+    <ul class="reflection-draft-list">
+      ${recent
+        .map((item) => `
+          <li>
+            <div>
+              <strong>${new Date(item.savedAt).toLocaleString()}</strong>
+              <p class="muted">${escapeHtml((item.answers?.join(" | ") || "").slice(0, 110)) || "Saved reflection draft"}</p>
+            </div>
+            <button class="ghost" type="button" data-reflection-draft-load="${escapeHtml(item.id)}">Load</button>
+          </li>
+        `)
+        .join("")}
+    </ul>
+  `;
+}
+
+function setReflectionDraftLock(locked) {
+  state.finalReflectionDraftLocked = locked;
+  ["#reflectionAnswer1", "#reflectionAnswer2", "#reflectionAnswer3"].forEach((selector) => {
+    const node = finalFeedbackContent.querySelector(selector);
+    if (!node) {
+      return;
+    }
+    node.readOnly = locked;
+    node.classList.toggle("reflection-draft-saved", locked);
+  });
+
+  const saveBtn = finalFeedbackContent.querySelector("#saveReflectionDraftBtn");
+  if (saveBtn) {
+    saveBtn.disabled = locked;
+    saveBtn.textContent = locked ? "Draft Saved" : "Save Draft";
+  }
+
+  const editBtn = finalFeedbackContent.querySelector("#editReflectionDraftBtn");
+  if (editBtn) {
+    editBtn.disabled = !locked;
+  }
+}
+
 function getWeaknessLabel(score) {
   if (score <= 0) {
     return "Needs attention";
@@ -2782,10 +2853,16 @@ function generateFeedback() {
         <textarea id="reflectionAnswer3" rows="3" placeholder="Write your reflection..."></textarea>
       </section>
 
-      <div class="flow-actions">
+      <div class="flow-actions flow-actions-wrap">
+        <button id="saveReflectionDraftBtn" class="ghost" type="button">Save Draft</button>
+        <button id="editReflectionDraftBtn" class="ghost" type="button" disabled>Edit Draft</button>
         <button id="submitReflectionBtn" type="button">Get Adaptive Coach Feedback</button>
       </div>
+      <p id="reflectionDraftStatus" class="muted">Draft not saved yet.</p>
       <div id="reflectionAiFeedback" class="reflection-feedback muted"></div>
+
+      <h4>Draft History</h4>
+      <div id="reflectionDraftHistory" class="reflection-trend">${buildReflectionDraftHistoryHtml()}</div>
 
       <h4>Reflection Trend</h4>
       <div id="reflectionTrend" class="reflection-trend">${buildReflectionTrendHtml()}</div>
@@ -2833,6 +2910,7 @@ function generateFeedback() {
 
   feedbackPanel.innerHTML = html;
   finalFeedbackContent.innerHTML = html;
+  setReflectionDraftLock(false);
   finalIdentity.textContent = `${getLearnerName()}, here is your latest feedback summary.`;
   renderFinalTab("coaching");
 }
@@ -2960,6 +3038,76 @@ if (submitInMomentReflectionBtn) {
 }
 
 finalFeedbackContent.addEventListener("click", async (event) => {
+  const loadDraftButton = event.target.closest("[data-reflection-draft-load]");
+  if (loadDraftButton) {
+    const draftId = loadDraftButton.getAttribute("data-reflection-draft-load");
+    const draft = state.reflectionDrafts.find((item) => item.id === draftId);
+    if (!draft) {
+      return;
+    }
+
+    const [a1 = "", a2 = "", a3 = ""] = draft.answers || [];
+    const n1 = finalFeedbackContent.querySelector("#reflectionAnswer1");
+    const n2 = finalFeedbackContent.querySelector("#reflectionAnswer2");
+    const n3 = finalFeedbackContent.querySelector("#reflectionAnswer3");
+    if (n1) n1.value = a1;
+    if (n2) n2.value = a2;
+    if (n3) n3.value = a3;
+
+    const statusNode = finalFeedbackContent.querySelector("#reflectionDraftStatus");
+    if (statusNode) {
+      statusNode.textContent = `Draft loaded from ${new Date(draft.savedAt).toLocaleString()}.`;
+    }
+    setReflectionDraftLock(false);
+    return;
+  }
+
+  const saveDraftButton = event.target.closest("#saveReflectionDraftBtn");
+  if (saveDraftButton) {
+    const answer1 = finalFeedbackContent.querySelector("#reflectionAnswer1")?.value?.trim() || "";
+    const answer2 = finalFeedbackContent.querySelector("#reflectionAnswer2")?.value?.trim() || "";
+    const answer3 = finalFeedbackContent.querySelector("#reflectionAnswer3")?.value?.trim() || "";
+    const answers = [answer1, answer2, answer3];
+    if (!answers.some((value) => value.length)) {
+      return;
+    }
+
+    const weakStages = state.latestStageScores.filter((item) => item.score < 2).map((item) => item.stage);
+    state.reflectionDrafts.unshift({
+      id: `draft-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      savedAt: Date.now(),
+      scenarioId: getScenario().id,
+      weakStages,
+      answers,
+    });
+    state.reflectionDrafts = state.reflectionDrafts.slice(0, 40);
+    persistReflectionDrafts();
+
+    const historyNode = finalFeedbackContent.querySelector("#reflectionDraftHistory");
+    if (historyNode) {
+      historyNode.innerHTML = buildReflectionDraftHistoryHtml();
+    }
+
+    const statusNode = finalFeedbackContent.querySelector("#reflectionDraftStatus");
+    if (statusNode) {
+      statusNode.textContent = "Draft saved. Click Edit Draft to revise.";
+    }
+
+    setReflectionDraftLock(true);
+    return;
+  }
+
+  const editDraftButton = event.target.closest("#editReflectionDraftBtn");
+  if (editDraftButton) {
+    setReflectionDraftLock(false);
+    const statusNode = finalFeedbackContent.querySelector("#reflectionDraftStatus");
+    if (statusNode) {
+      statusNode.textContent = "Editing enabled. Save draft when ready.";
+    }
+    finalFeedbackContent.querySelector("#reflectionAnswer1")?.focus();
+    return;
+  }
+
   const actionButton = event.target.closest("[data-improve-action]");
   if (actionButton) {
     const stage = actionButton.getAttribute("data-stage") || "Listen";
@@ -3064,9 +3212,28 @@ finalFeedbackContent.addEventListener("click", async (event) => {
     trendNode.innerHTML = buildReflectionTrendHtml();
   }
 
+  const statusNode = finalFeedbackContent.querySelector("#reflectionDraftStatus");
+  if (statusNode) {
+    statusNode.textContent = "Reflection submitted and recorded.";
+  }
+
   state.finalReflectionSubmitting = false;
   submitButton.disabled = false;
   submitButton.textContent = "Get Adaptive Coach Feedback";
+});
+
+finalFeedbackContent.addEventListener("input", (event) => {
+  const reflectionInput = event.target.closest("#reflectionAnswer1, #reflectionAnswer2, #reflectionAnswer3");
+  if (!reflectionInput) {
+    return;
+  }
+
+  if (!state.finalReflectionDraftLocked) {
+    const statusNode = finalFeedbackContent.querySelector("#reflectionDraftStatus");
+    if (statusNode) {
+      statusNode.textContent = "Unsaved changes.";
+    }
+  }
 });
 
 analyticsSummary.addEventListener("click", (event) => {
