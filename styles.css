@@ -220,10 +220,9 @@ h2 {
 }
 
 .path-btn {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: start;
-  column-gap: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   text-align: left;
 }
 
@@ -236,6 +235,8 @@ h2 {
   background: linear-gradient(180deg, #ffffff, #eef4ff);
   border: 1px solid rgba(20, 97, 255, 0.14);
   box-shadow: 0 10px 26px rgba(20, 97, 255, 0.08);
+  align-self: center;
+  margin-bottom: 0.65rem;
 }
 
 .path-icon-wrap-accent {
@@ -256,7 +257,7 @@ h2 {
 
 .path-btn strong,
 .path-btn span {
-  grid-column: 2;
+  display: block;
 }
 
 .hero-mark {
