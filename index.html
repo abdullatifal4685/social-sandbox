@@ -213,11 +213,22 @@
       <p id="finalIdentity" class="muted">Results from your latest practice session.</p>
       <p class="dashboard-help muted">This is your after-practice view. It keeps coaching notes and session results in one place so you can review what happened and what to improve next.</p>
 
-      <section id="finalCoachingSection" class="dashboard-section active">
+      <div class="dashboard-tabs" role="tablist" aria-label="Dashboard sections">
+        <button id="finalTabOverview" class="dashboard-tab active" type="button">Strength, Growth, Follow-up</button>
+        <button id="finalTabReflection" class="dashboard-tab" type="button">Adaptive Reflection</button>
+        <button id="finalTabSession" class="dashboard-tab" type="button">Session Dashboard</button>
+      </div>
+
+      <section id="finalOverviewSection" class="dashboard-section active">
         <div id="finalFeedbackContent" class="feedback-panel"></div>
       </section>
 
-      <section id="finalAnalyticsSection" class="dashboard-section active">
+      <section id="finalReflectionSection" class="dashboard-section">
+        <p class="dashboard-help muted">Adaptive reflection helps you think through what happened and how to improve next time.</p>
+        <div id="finalReflectionContent" class="analytics-grid"></div>
+      </section>
+
+      <section id="finalSessionSection" class="dashboard-section">
         <p class="dashboard-help muted">Session results and progress tracking appear here in the same view.</p>
         <div id="analyticsSummary" class="analytics-grid"></div>
       </section>
@@ -692,6 +703,6 @@ Agree on next step" required></textarea>
     </form>
   </dialog>
 
-  <script src="./app.js?v=20260418" defer></script>
+  <script src="./app.js?v=20260419" defer></script>
 </body>
 </html>

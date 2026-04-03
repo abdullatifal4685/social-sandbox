@@ -605,12 +605,15 @@ const moduleQuiz = document.getElementById("moduleQuiz");
 const submitQuizBtn = document.getElementById("submitQuizBtn");
 const quizResultText = document.getElementById("quizResultText");
 const finalIdentity = document.getElementById("finalIdentity");
+const finalTabOverview = document.getElementById("finalTabOverview");
+const finalTabReflection = document.getElementById("finalTabReflection");
+const finalTabSession = document.getElementById("finalTabSession");
+const finalOverviewSection = document.getElementById("finalOverviewSection");
+const finalReflectionSection = document.getElementById("finalReflectionSection");
+const finalSessionSection = document.getElementById("finalSessionSection");
 const finalFeedbackContent = document.getElementById("finalFeedbackContent");
+const finalReflectionContent = document.getElementById("finalReflectionContent");
 const analyticsSummary = document.getElementById("analyticsSummary");
-const finalTabCoaching = document.getElementById("finalTabCoaching");
-const finalTabAnalytics = document.getElementById("finalTabAnalytics");
-const finalCoachingSection = document.getElementById("finalCoachingSection");
-const finalAnalyticsSection = document.getElementById("finalAnalyticsSection");
 const restartPracticeBtn = document.getElementById("restartPracticeBtn");
 const backToChoiceBtn = document.getElementById("backToChoiceBtn");
 const toggleScenariosBtn = document.getElementById("toggleScenariosBtn");
@@ -1314,6 +1317,30 @@ function renderDashboardPage() {
   }
   if (dashboardHistory) {
     dashboardHistory.innerHTML = buildDashboardHistoryHtml();
+  }
+}
+
+function renderDashboardTabs(tab) {
+  const activeTab = tab || "overview";
+
+  if (finalTabOverview) {
+    finalTabOverview.classList.toggle("active", activeTab === "overview");
+  }
+  if (finalTabReflection) {
+    finalTabReflection.classList.toggle("active", activeTab === "reflection");
+  }
+  if (finalTabSession) {
+    finalTabSession.classList.toggle("active", activeTab === "session");
+  }
+
+  if (finalOverviewSection) {
+    finalOverviewSection.classList.toggle("active", activeTab === "overview");
+  }
+  if (finalReflectionSection) {
+    finalReflectionSection.classList.toggle("active", activeTab === "reflection");
+  }
+  if (finalSessionSection) {
+    finalSessionSection.classList.toggle("active", activeTab === "session");
   }
 }
 
@@ -2755,7 +2782,7 @@ function buildReflectionDraftHistoryHtml() {
 function setReflectionDraftLock(locked) {
   state.finalReflectionDraftLocked = locked;
   ["#reflectionAnswer1", "#reflectionAnswer2", "#reflectionAnswer3"].forEach((selector) => {
-    const node = finalFeedbackContent.querySelector(selector);
+    const node = finalReflectionContent?.querySelector(selector);
     if (!node) {
       return;
     }
@@ -2763,13 +2790,13 @@ function setReflectionDraftLock(locked) {
     node.classList.toggle("reflection-draft-saved", locked);
   });
 
-  const saveBtn = finalFeedbackContent.querySelector("#saveReflectionDraftBtn");
+  const saveBtn = finalReflectionContent?.querySelector("#saveReflectionDraftBtn");
   if (saveBtn) {
     saveBtn.disabled = locked;
     saveBtn.textContent = locked ? "Draft Saved" : "Save Draft";
   }
 
-  const editBtn = finalFeedbackContent.querySelector("#editReflectionDraftBtn");
+  const editBtn = finalReflectionContent?.querySelector("#editReflectionDraftBtn");
   if (editBtn) {
     editBtn.disabled = !locked;
   }
@@ -2988,7 +3015,7 @@ function generateFeedback() {
     "transfer-plan": "Transfer Plan",
   };
 
-  const html = `
+  const overviewHtml = `
     <article class="analytics-card">
       <h4>Strength</h4>
       <p class="analytics-metric">You demonstrated strength in ${strong.length ? strong.join(", ") : "conversation momentum"}.</p>
@@ -3024,6 +3051,9 @@ function generateFeedback() {
           .join("")}
       </div>
     </article>
+  `;
+
+  const reflectionHtml = `
     <article class="analytics-card reflection-form-card">
       <h4>Adaptive Reflection</h4>
       <p class="muted">Answer these prompts in your own words. AI feedback will adapt to weak stages: ${escapeHtml(weak.join(", ") || "None")}</p>
@@ -3072,7 +3102,7 @@ function generateFeedback() {
   `;
 
   const analytics = computeAnalytics();
-  analyticsSummary.innerHTML = `
+  const sessionHtml = `
     <article class="analytics-card">
       <h4>Session Dashboard</h4>
       <p class="analytics-metric">Turns: ${analytics.totalTurns} | Avg words/turn: ${analytics.avgWords}</p>
@@ -3110,10 +3140,17 @@ function generateFeedback() {
     </article>
   `;
 
-  feedbackPanel.innerHTML = html;
-  finalFeedbackContent.innerHTML = html;
+  feedbackPanel.innerHTML = overviewHtml;
+  finalFeedbackContent.innerHTML = overviewHtml;
+  if (finalReflectionContent) {
+    finalReflectionContent.innerHTML = reflectionHtml;
+  }
+  if (analyticsSummary) {
+    analyticsSummary.innerHTML = sessionHtml;
+  }
   setReflectionDraftLock(false);
   finalIdentity.textContent = `${getLearnerName()}, here is your latest dashboard.`;
+  renderDashboardTabs("overview");
 }
 
 async function handleSend(event) {
@@ -3238,7 +3275,8 @@ if (submitInMomentReflectionBtn) {
   });
 }
 
-finalFeedbackContent.addEventListener("click", async (event) => {
+if (finalReflectionContent) {
+  finalReflectionContent.addEventListener("click", async (event) => {
   const loadDraftButton = event.target.closest("[data-reflection-draft-load]");
   if (loadDraftButton) {
     const draftId = loadDraftButton.getAttribute("data-reflection-draft-load");
@@ -3368,9 +3406,9 @@ finalFeedbackContent.addEventListener("click", async (event) => {
     return;
   }
 
-  const answer1 = finalFeedbackContent.querySelector("#reflectionAnswer1")?.value?.trim() || "";
-  const answer2 = finalFeedbackContent.querySelector("#reflectionAnswer2")?.value?.trim() || "";
-  const answer3 = finalFeedbackContent.querySelector("#reflectionAnswer3")?.value?.trim() || "";
+  const answer1 = finalReflectionContent.querySelector("#reflectionAnswer1")?.value?.trim() || "";
+  const answer2 = finalReflectionContent.querySelector("#reflectionAnswer2")?.value?.trim() || "";
+  const answer3 = finalReflectionContent.querySelector("#reflectionAnswer3")?.value?.trim() || "";
 
   if (!answer1 || !answer2 || !answer3) {
     return;
@@ -3402,18 +3440,18 @@ finalFeedbackContent.addEventListener("click", async (event) => {
     turns: getUserTurnCount(),
   });
 
-  const feedbackPanelNode = finalFeedbackContent.querySelector("#reflectionAiFeedback");
+  const feedbackPanelNode = finalReflectionContent.querySelector("#reflectionAiFeedback");
   if (feedbackPanelNode) {
     feedbackPanelNode.innerHTML = escapeHtml(feedback).replaceAll("\n", "<br />");
     feedbackPanelNode.classList.remove("muted");
   }
 
-  const trendNode = finalFeedbackContent.querySelector("#reflectionTrend");
+  const trendNode = finalReflectionContent.querySelector("#reflectionTrend");
   if (trendNode) {
     trendNode.innerHTML = buildReflectionTrendHtml();
   }
 
-  const statusNode = finalFeedbackContent.querySelector("#reflectionDraftStatus");
+  const statusNode = finalReflectionContent.querySelector("#reflectionDraftStatus");
   if (statusNode) {
     statusNode.textContent = "Reflection submitted and recorded.";
   }
@@ -3421,21 +3459,31 @@ finalFeedbackContent.addEventListener("click", async (event) => {
   state.finalReflectionSubmitting = false;
   submitButton.disabled = false;
   submitButton.textContent = "Get Adaptive Coach Feedback";
-});
+  });
 
-finalFeedbackContent.addEventListener("input", (event) => {
-  const reflectionInput = event.target.closest("#reflectionAnswer1, #reflectionAnswer2, #reflectionAnswer3");
-  if (!reflectionInput) {
-    return;
-  }
-
-  if (!state.finalReflectionDraftLocked) {
-    const statusNode = finalFeedbackContent.querySelector("#reflectionDraftStatus");
-    if (statusNode) {
-      statusNode.textContent = "Unsaved changes.";
+  finalReflectionContent.addEventListener("input", (event) => {
+    const reflectionInput = event.target.closest("#reflectionAnswer1, #reflectionAnswer2, #reflectionAnswer3");
+    if (!reflectionInput) {
+      return;
     }
-  }
-});
+
+    if (!state.finalReflectionDraftLocked) {
+      const statusNode = finalReflectionContent.querySelector("#reflectionDraftStatus");
+      if (statusNode) {
+        statusNode.textContent = "Unsaved changes.";
+      }
+    }
+  });
+}
+
+if (finalTabOverview && finalTabReflection && finalTabSession) {
+  [finalTabOverview, finalTabReflection, finalTabSession].forEach((button) => {
+    button.addEventListener("click", () => {
+      const tab = button === finalTabOverview ? "overview" : button === finalTabReflection ? "reflection" : "session";
+      renderDashboardTabs(tab);
+    });
+  });
+}
 
 analyticsSummary.addEventListener("click", (event) => {
   const filterButton = event.target.closest("[data-improve-filter]");

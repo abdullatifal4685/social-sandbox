@@ -1708,6 +1708,11 @@ textarea {
   background: linear-gradient(130deg, #1958d8, #0d46b4);
 }
 
+.dashboard-tab:focus-visible {
+  outline: 2px solid rgba(20, 97, 255, 0.35);
+  outline-offset: 2px;
+}
+
 .dashboard-section {
   display: none;
   margin-top: 0.95rem;
