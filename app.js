@@ -2719,7 +2719,7 @@ function generateFeedback() {
     <article class="analytics-card">
       <h4>Strength</h4>
       <p class="analytics-metric">You demonstrated strength in ${strong.length ? strong.join(", ") : "conversation momentum"}.</p>
-      <p class="muted">Current score: ${total}/${max}. Keep this baseline and improve one stage next round.</p>
+      <p class="muted">Keep this behavior consistent while you focus your next practice on one weaker stage.</p>
     </article>
     <article class="analytics-card">
       <h4>Growth Area</h4>
@@ -2790,10 +2790,6 @@ function generateFeedback() {
       <h4>Reflection Trend</h4>
       <div id="reflectionTrend" class="reflection-trend">${buildReflectionTrendHtml()}</div>
     </article>
-    <article class="analytics-card">
-      <h4>Improvement Tracker</h4>
-      <div id="improvementTracker">${buildImprovementTrackerHtml()}</div>
-    </article>
   `;
 
   const analytics = computeAnalytics();
@@ -2827,6 +2823,11 @@ function generateFeedback() {
           <strong>${Math.round((total / max) * 100)}%</strong>
         </div>
       </div>
+    </article>
+    <article class="analytics-card">
+      <h4>Improvement Tracker</h4>
+      <p class="muted">Quantitative tracking of your follow-up practice attempts and completions.</p>
+      <div id="improvementTrackerAnalytics">${buildImprovementTrackerHtml()}</div>
     </article>
   `;
 
@@ -2959,19 +2960,6 @@ if (submitInMomentReflectionBtn) {
 }
 
 finalFeedbackContent.addEventListener("click", async (event) => {
-  const filterButton = event.target.closest("[data-improve-filter]");
-  if (filterButton) {
-    const range = filterButton.getAttribute("data-improve-filter");
-    if (range === "week" || range === "all") {
-      state.improvementTrackRange = range;
-      const trackerNode = finalFeedbackContent.querySelector("#improvementTracker");
-      if (trackerNode) {
-        trackerNode.innerHTML = buildImprovementTrackerHtml();
-      }
-    }
-    return;
-  }
-
   const actionButton = event.target.closest("[data-improve-action]");
   if (actionButton) {
     const stage = actionButton.getAttribute("data-stage") || "Listen";
@@ -2999,7 +2987,7 @@ finalFeedbackContent.addEventListener("click", async (event) => {
 
     if (action === "mark-done") {
       upsertImprovementTrack({ stage, mode: "self", status: "completed" });
-      const trackerNode = finalFeedbackContent.querySelector("#improvementTracker");
+      const trackerNode = document.getElementById("improvementTrackerAnalytics");
       if (trackerNode) {
         trackerNode.innerHTML = buildImprovementTrackerHtml();
       }
@@ -3016,7 +3004,7 @@ finalFeedbackContent.addEventListener("click", async (event) => {
         targetNode.classList.remove("muted");
       }
       upsertImprovementTrack({ stage, mode: "drill", status: "started" });
-      const trackerNode = finalFeedbackContent.querySelector("#improvementTracker");
+      const trackerNode = document.getElementById("improvementTrackerAnalytics");
       if (trackerNode) {
         trackerNode.innerHTML = buildImprovementTrackerHtml();
       }
@@ -3079,6 +3067,22 @@ finalFeedbackContent.addEventListener("click", async (event) => {
   state.finalReflectionSubmitting = false;
   submitButton.disabled = false;
   submitButton.textContent = "Get Adaptive Coach Feedback";
+});
+
+analyticsSummary.addEventListener("click", (event) => {
+  const filterButton = event.target.closest("[data-improve-filter]");
+  if (!filterButton) {
+    return;
+  }
+
+  const range = filterButton.getAttribute("data-improve-filter");
+  if (range === "week" || range === "all") {
+    state.improvementTrackRange = range;
+    const trackerNode = document.getElementById("improvementTrackerAnalytics");
+    if (trackerNode) {
+      trackerNode.innerHTML = buildImprovementTrackerHtml();
+    }
+  }
 });
 
 voiceModeBtn.addEventListener("click", () => {
