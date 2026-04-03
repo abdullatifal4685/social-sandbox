@@ -429,6 +429,9 @@ const state = {
       Solve: false,
     },
     sharedNotes: "",
+    sharedNotesSaved: false,
+    feedbackDraft: "",
+    feedbackSent: false,
     feedbackNotes: [],
   },
 };
@@ -656,9 +659,6 @@ state.voice = {
   pendingFinal: "",
 };
 
-    sharedNotesSaved: false,
-    feedbackDraft: "",
-    feedbackSent: false,
 state.peer.voice = {
   supported: Boolean(SpeechRecognitionAPI),
   mode: false,
