@@ -31,8 +31,17 @@
 
   <section id="pageChoice" class="flow-page flow-page-choice is-hidden">
     <div class="flow-card flow-card-choice">
-      <h2>Choose Your Path</h2>
-      <p class="muted">Select your learning preference below.</p>
+      <h2 id="choiceWelcomeTitle">Choose Your Path</h2>
+      <p id="choiceWelcomeSubtitle" class="muted">Select your learning preference below.</p>
+
+      <section class="choice-identity" aria-label="Learner profile">
+        <label class="flow-label" for="choiceNameInput">Your name (set once)</label>
+        <div class="choice-identity-row">
+          <input id="choiceNameInput" type="text" maxlength="40" placeholder="for example: Abdul" />
+          <button id="choiceSaveNameBtn" class="ghost" type="button">Save Name</button>
+        </div>
+        <p id="choiceNameStatus" class="muted">This name is used for AI practice and peer practicum.</p>
+      </section>
 
       <section id="choiceSnapshot" class="choice-snapshot">
         <div class="choice-snapshot-head">
@@ -54,8 +63,7 @@
           </article>
         </div>
         <div class="choice-snapshot-actions">
-          <button id="focusAiPracticeBtn" class="ghost" type="button">Practice Weak Stage with AI</button>
-          <button id="focusPeerPracticeBtn" class="ghost" type="button">Practice with Peer</button>
+          <button id="openDashboardBtn" class="ghost" type="button">Open Full Dashboard</button>
         </div>
       </section>
 
@@ -92,6 +100,44 @@
           <strong>Peer Practicum</strong>
           <span>Join a peer practice space with separate community, session, and reflection pages.</span>
         </button>
+      </div>
+    </div>
+  </section>
+
+  <section id="pageDashboard" class="flow-page is-hidden">
+    <div class="flow-card">
+      <h2>Learning Dashboard</h2>
+      <p id="dashboardIdentity" class="muted">Detailed view of your strengths, weak stages, and improvement progress.</p>
+
+      <div class="choice-snapshot-grid dashboard-overview-grid">
+        <article class="choice-snapshot-card">
+          <p class="choice-snapshot-label">Most frequent weak stage</p>
+          <strong id="dashboardWeakStage">-</strong>
+        </article>
+        <article class="choice-snapshot-card">
+          <p class="choice-snapshot-label">Avg reflection score (last 5)</p>
+          <strong id="dashboardRecentScore">-</strong>
+        </article>
+        <article class="choice-snapshot-card">
+          <p class="choice-snapshot-label">Improvement completion rate</p>
+          <strong id="dashboardCompletionRate">-</strong>
+        </article>
+      </div>
+
+      <section class="dashboard-panel">
+        <h3>Weak Stage Breakdown</h3>
+        <div id="dashboardWeakBreakdown" class="reflection-trend">No data yet.</div>
+      </section>
+
+      <section class="dashboard-panel">
+        <h3>Recent Reflection History</h3>
+        <div id="dashboardHistory" class="reflection-trend">No reflection history yet.</div>
+      </section>
+
+      <div class="flow-actions flow-actions-wrap">
+        <button id="dashboardPracticeAiBtn" type="button">Practice Weak Stage with AI</button>
+        <button id="dashboardPracticePeerBtn" class="ghost" type="button">Practice with Peer</button>
+        <button id="dashboardBackBtn" class="ghost" type="button">Back to Path</button>
       </div>
     </div>
   </section>
@@ -333,12 +379,14 @@
   <section id="pageScenarioBriefing" class="flow-page is-hidden">
     <div class="flow-card">
       <h2 id="briefingTitle">Choose Your Scenario</h2>
-      <p id="briefingSubtitle" class="muted">Add your name, then choose or create a scenario below.</p>
+      <p id="briefingSubtitle" class="muted">Choose or create a scenario below.</p>
 
       <!-- Scenario picker (shown first) -->
       <div id="scenarioPickerSection" class="scenario-picker">
-        <label class="flow-label" for="userNameInput">Your name</label>
-        <input id="userNameInput" type="text" maxlength="40" placeholder="for example: Aulia" />
+        <div id="scenarioNameSetup" class="scenario-name-setup">
+          <label class="flow-label" for="userNameInput">Your name</label>
+          <input id="userNameInput" type="text" maxlength="40" placeholder="for example: Aulia" />
+        </div>
         <button id="createScenarioBriefingBtn" class="scenario-create-btn" type="button">+ Create Your Own Scenario</button>
         <div id="scenarioPickerGrid" class="scenario-picker-grid"></div>
         <button id="toggleScenarioPickerListBtn" class="scenario-list-more ghost is-hidden" type="button">More scenarios</button>
@@ -644,6 +692,6 @@ Agree on next step" required></textarea>
     </form>
   </dialog>
 
-  <script src="./app.js?v=20260416" defer></script>
+  <script src="./app.js?v=20260417" defer></script>
 </body>
 </html>

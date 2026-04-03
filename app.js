@@ -542,6 +542,7 @@ const pageChoice = document.getElementById("pageChoice");
 const pageLearn = document.getElementById("pageLearn");
 const pagePeerPracticum = document.getElementById("pagePeerPracticum");
 const pageScenarioBriefing = document.getElementById("pageScenarioBriefing");
+const pageDashboard = document.getElementById("pageDashboard");
 const pageFinal = document.getElementById("pageFinal");
 const practiceShell = document.getElementById("practiceShell");
 
@@ -568,14 +569,28 @@ const beginPracticeBtn = document.getElementById("beginPracticeBtn");
 const pickerActions = document.getElementById("pickerActions");
 const goToChoiceBtn = document.getElementById("goToChoiceBtn");
 const userNameInput = document.getElementById("userNameInput");
+const scenarioNameSetup = document.getElementById("scenarioNameSetup");
 const chooseLearnBtn = document.getElementById("chooseLearnBtn");
 const choosePracticeBtn = document.getElementById("choosePracticeBtn");
 const choosePeerBtn = document.getElementById("choosePeerBtn");
+const choiceWelcomeTitle = document.getElementById("choiceWelcomeTitle");
+const choiceWelcomeSubtitle = document.getElementById("choiceWelcomeSubtitle");
+const choiceNameInput = document.getElementById("choiceNameInput");
+const choiceSaveNameBtn = document.getElementById("choiceSaveNameBtn");
+const choiceNameStatus = document.getElementById("choiceNameStatus");
 const choiceWeakStage = document.getElementById("choiceWeakStage");
 const choiceRecentScore = document.getElementById("choiceRecentScore");
 const choiceCompletionRate = document.getElementById("choiceCompletionRate");
-const focusAiPracticeBtn = document.getElementById("focusAiPracticeBtn");
-const focusPeerPracticeBtn = document.getElementById("focusPeerPracticeBtn");
+const openDashboardBtn = document.getElementById("openDashboardBtn");
+const dashboardIdentity = document.getElementById("dashboardIdentity");
+const dashboardWeakStage = document.getElementById("dashboardWeakStage");
+const dashboardRecentScore = document.getElementById("dashboardRecentScore");
+const dashboardCompletionRate = document.getElementById("dashboardCompletionRate");
+const dashboardWeakBreakdown = document.getElementById("dashboardWeakBreakdown");
+const dashboardHistory = document.getElementById("dashboardHistory");
+const dashboardPracticeAiBtn = document.getElementById("dashboardPracticeAiBtn");
+const dashboardPracticePeerBtn = document.getElementById("dashboardPracticePeerBtn");
+const dashboardBackBtn = document.getElementById("dashboardBackBtn");
 const learnBackBtn = document.getElementById("learnBackBtn");
 const startPracticeBtn = document.getElementById("startPracticeBtn");
 const moduleProgressLabel = document.getElementById("moduleProgressLabel");
@@ -1117,8 +1132,63 @@ function getLearnerName() {
 }
 
 function saveUserName(value) {
-  state.userName = value.trim();
+  state.userName = typeof value === "string" ? value.trim() : "";
   localStorage.setItem(USER_NAME_KEY, state.userName);
+}
+
+function hasLearnerName() {
+  return Boolean((state.userName || "").trim());
+}
+
+function setChoiceNameStatus(message) {
+  if (!choiceNameStatus) {
+    return;
+  }
+  choiceNameStatus.textContent = message;
+}
+
+function ensureLearnerNameSet() {
+  const candidate = (state.userName || choiceNameInput?.value || userNameInput?.value || "").trim();
+  if (candidate) {
+    if (candidate !== state.userName) {
+      saveUserName(candidate);
+    }
+    return true;
+  }
+
+  setChoiceNameStatus("Please set your name once before continuing.");
+  if (choiceNameInput) {
+    choiceNameInput.focus();
+    choiceNameInput.select();
+  }
+  return false;
+}
+
+function renderChoiceIdentity() {
+  const learner = (state.userName || "").trim();
+
+  if (choiceWelcomeTitle) {
+    choiceWelcomeTitle.textContent = learner ? `Hi ${learner}, choose your path` : "Choose Your Path";
+  }
+  if (choiceWelcomeSubtitle) {
+    choiceWelcomeSubtitle.textContent = learner
+      ? "Select your learning preference below."
+      : "Set your name once, then select your learning preference below.";
+  }
+
+  if (choiceNameInput && document.activeElement !== choiceNameInput) {
+    choiceNameInput.value = state.userName;
+  }
+
+  if (!choiceNameStatus) {
+    return;
+  }
+
+  if (learner) {
+    choiceNameStatus.textContent = "Name saved. This identity is used in AI practice and peer practicum.";
+  } else {
+    choiceNameStatus.textContent = "This name is used for AI practice and peer practicum.";
+  }
 }
 
 function renderUserNameSummary() {
@@ -1132,6 +1202,7 @@ function renderPage() {
     landing: pageLanding,
     choice: pageChoice,
     learn: pageLearn,
+    dashboard: pageDashboard,
     peerPracticum: pagePeerPracticum,
     scenarioBriefing: pageScenarioBriefing,
     practice: practiceShell,
@@ -1177,6 +1248,75 @@ function renderChoiceSnapshot() {
   choiceCompletionRate.textContent = `${completionRate}%`;
 }
 
+function buildDashboardWeakBreakdownHtml() {
+  const finalEntries = state.reflectionHistory.filter((entry) => entry.kind === "final").slice(-12);
+  const weakMap = finalEntries.reduce((acc, item) => {
+    (item.weakStages || []).forEach((stage) => {
+      acc[stage] = (acc[stage] || 0) + 1;
+    });
+    return acc;
+  }, {});
+
+  const rows = Object.entries(weakMap).sort((a, b) => b[1] - a[1]);
+  if (!rows.length) {
+    return "<p class=\"muted\">No weak-stage data yet.</p>";
+  }
+
+  return `<ul class=\"dashboard-list\">${rows
+    .map(([stage, count]) => `<li><strong>${escapeHtml(stage)}</strong>: ${count} session(s)</li>`)
+    .join("")}</ul>`;
+}
+
+function buildDashboardHistoryHtml() {
+  const items = state.reflectionHistory
+    .filter((entry) => entry.kind === "final")
+    .slice(-6)
+    .reverse();
+
+  if (!items.length) {
+    return "<p class=\"muted\">No reflection history yet.</p>";
+  }
+
+  return `<ul class=\"dashboard-list\">${items
+    .map((entry) => {
+      const date = new Date(entry.createdAt).toLocaleDateString();
+      const weak = (entry.weakStages || []).join(", ") || "-";
+      return `<li><strong>${escapeHtml(date)}</strong> - Score ${entry.scorePercent || 0}% - Focus: ${escapeHtml(weak)}</li>`;
+    })
+    .join("")}</ul>`;
+}
+
+function renderDashboardPage() {
+  const finalEntries = state.reflectionHistory.filter((entry) => entry.kind === "final");
+  const recent = finalEntries.slice(-5);
+  const avgRecent = recent.length
+    ? Math.round(recent.reduce((sum, item) => sum + (item.scorePercent || 0), 0) / recent.length)
+    : null;
+  const weakStage = getCurrentWeakStageFocus();
+  const attempts = state.improvementTrack.reduce((sum, item) => sum + (item.attempts || 0), 0);
+  const completions = state.improvementTrack.reduce((sum, item) => sum + (item.completions || 0), 0);
+  const completionRate = attempts ? Math.round((completions / attempts) * 100) : 0;
+
+  if (dashboardIdentity) {
+    dashboardIdentity.textContent = `${getLearnerName()}, review your details before starting the next practice.`;
+  }
+  if (dashboardWeakStage) {
+    dashboardWeakStage.textContent = finalEntries.length ? weakStage : "No history yet";
+  }
+  if (dashboardRecentScore) {
+    dashboardRecentScore.textContent = avgRecent === null ? "No history yet" : `${avgRecent}%`;
+  }
+  if (dashboardCompletionRate) {
+    dashboardCompletionRate.textContent = `${completionRate}%`;
+  }
+  if (dashboardWeakBreakdown) {
+    dashboardWeakBreakdown.innerHTML = buildDashboardWeakBreakdownHtml();
+  }
+  if (dashboardHistory) {
+    dashboardHistory.innerHTML = buildDashboardHistoryHtml();
+  }
+}
+
 function goToPage(page) {
   if (page !== "practice" && state.voice?.mode) {
     state.voice.mode = false;
@@ -1206,7 +1346,11 @@ function goToPage(page) {
     renderModule();
   }
   if (page === "choice") {
+    renderChoiceIdentity();
     renderChoiceSnapshot();
+  }
+  if (page === "dashboard") {
+    renderDashboardPage();
   }
   if (page === "scenarioBriefing") {
     renderScenarioPicker();
@@ -1220,9 +1364,6 @@ function goToPage(page) {
 
 window.__ssNavigate = (targetPage) => {
   if (targetPage === "choice") {
-    if (userNameInput) {
-      userNameInput.value = "";
-    }
     goToPage("choice");
     return;
   }
@@ -1241,13 +1382,16 @@ window.__ssNavigate = (targetPage) => {
   }
 
   if (targetPage === "scenarioBriefing") {
+    if (!ensureLearnerNameSet()) {
+      return;
+    }
     goToPage("scenarioBriefing");
     return;
   }
 
   if (targetPage === "peerPracticum") {
-    if (!getLearnerName() || getLearnerName() === "Learner") {
-      saveUserName((userNameInput?.value || state.userName || "").trim());
+    if (!ensureLearnerNameSet()) {
+      return;
     }
     goToPage("peerPracticum");
     return;
@@ -1319,7 +1463,19 @@ function renderScenarioPicker() {
     ? orderedScenarios
     : orderedScenarios.slice(0, previewCount);
 
-  userNameInput.value = "";
+  if (userNameInput && document.activeElement !== userNameInput) {
+    userNameInput.value = state.userName;
+  }
+
+  if (scenarioNameSetup) {
+    scenarioNameSetup.classList.toggle("is-hidden", hasLearnerName());
+  }
+
+  if (briefingSubtitle) {
+    briefingSubtitle.textContent = hasLearnerName()
+      ? "Choose or create a scenario below."
+      : "Set your name once, then choose or create a scenario below.";
+  }
 
   scenarioPickerGrid.innerHTML = visibleScenarios
     .map((scenario) => `
@@ -3432,7 +3588,6 @@ settingsForm.addEventListener("reset", () => {
 });
 
 goToChoiceBtn.addEventListener("click", () => {
-  userNameInput.value = "";
   goToPage("choice");
 });
 
@@ -3447,30 +3602,50 @@ chooseLearnBtn.addEventListener("click", () => {
 });
 
 choosePracticeBtn.addEventListener("click", () => {
+  if (!ensureLearnerNameSet()) {
+    return;
+  }
   goToPage("scenarioBriefing");
 });
 
-if (focusAiPracticeBtn) {
-  focusAiPracticeBtn.addEventListener("click", () => {
+if (openDashboardBtn) {
+  openDashboardBtn.addEventListener("click", () => {
+    goToPage("dashboard");
+  });
+}
+
+if (choosePeerBtn) {
+  choosePeerBtn.addEventListener("click", () => {
+    if (!ensureLearnerNameSet()) {
+      return;
+    }
+    goToPage("peerPracticum");
+  });
+}
+
+if (dashboardBackBtn) {
+  dashboardBackBtn.addEventListener("click", () => {
+    goToPage("choice");
+  });
+}
+
+if (dashboardPracticeAiBtn) {
+  dashboardPracticeAiBtn.addEventListener("click", () => {
+    if (!ensureLearnerNameSet()) {
+      goToPage("choice");
+      return;
+    }
     const weakStage = getCurrentWeakStageFocus();
     state.stageIndex = Math.max(0, ILETS.indexOf(weakStage));
     goToPage("scenarioBriefing");
   });
 }
 
-if (focusPeerPracticeBtn) {
-  focusPeerPracticeBtn.addEventListener("click", () => {
-    if (!getLearnerName() || getLearnerName() === "Learner") {
-      saveUserName(userNameInput.value || state.userName);
-    }
-    goToPage("peerPracticum");
-  });
-}
-
-if (choosePeerBtn) {
-  choosePeerBtn.addEventListener("click", () => {
-    if (!getLearnerName() || getLearnerName() === "Learner") {
-      saveUserName(userNameInput.value || state.userName);
+if (dashboardPracticePeerBtn) {
+  dashboardPracticePeerBtn.addEventListener("click", () => {
+    if (!ensureLearnerNameSet()) {
+      goToPage("choice");
+      return;
     }
     goToPage("peerPracticum");
   });
@@ -3481,10 +3656,14 @@ learnBackBtn.addEventListener("click", () => {
 });
 
 startPracticeBtn.addEventListener("click", () => {
-  const enteredName = userNameInput.value.trim();
+  const enteredName = (state.userName || userNameInput?.value || "").trim();
   if (!enteredName) {
-    window.alert("Please enter your name before choosing a scenario.");
-    userNameInput.focus();
+    goToPage("choice");
+    setChoiceNameStatus("Please set your name once before starting practice.");
+    if (choiceNameInput) {
+      choiceNameInput.focus();
+      choiceNameInput.select();
+    }
     return;
   }
   saveUserName(enteredName);
@@ -3580,11 +3759,39 @@ scenarioPickerGrid.addEventListener("click", (event) => {
   }
   const scenarioId = selectButton.getAttribute("data-scenario-id");
   if (scenarioId) {
-    saveUserName(userNameInput.value);
+    const typedName = (userNameInput?.value || "").trim();
+    if (typedName) {
+      saveUserName(typedName);
+    }
     state.selectedScenarioId = scenarioId;
     renderBriefingPage();
   }
 });
+
+if (choiceSaveNameBtn && choiceNameInput) {
+  choiceSaveNameBtn.addEventListener("click", () => {
+    const typed = choiceNameInput.value.trim();
+    if (!typed) {
+      setChoiceNameStatus("Please enter your name first.");
+      choiceNameInput.focus();
+      return;
+    }
+    saveUserName(typed);
+    renderChoiceIdentity();
+    renderUserNameSummary();
+    renderHeader();
+    if (state.page === "peerPracticum") {
+      renderPeerPracticum();
+    }
+  });
+
+  choiceNameInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      choiceSaveNameBtn.click();
+    }
+  });
+}
 
 toggleScenarioPickerListBtn.addEventListener("click", () => {
   state.scenarioPickerExpanded = !state.scenarioPickerExpanded;
