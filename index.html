@@ -273,9 +273,13 @@
 
           <section class="peer-panel">
             <h3>Shared Notes</h3>
-            <p class="muted">Capture takeaways and strategy adjustments together.</p>
+            <p class="muted">Capture takeaways and strategy adjustments together, then continue to Mutual Feedback.</p>
             <label class="flow-label" for="peerSharedNotes">Shared reflection notes</label>
             <textarea id="peerSharedNotes" rows="5" placeholder="Capture takeaways and strategy adjustments together..."></textarea>
+            <div class="peer-notes-actions">
+              <button id="peerSaveSharedNotesBtn" class="ghost" type="button">Save Notes</button>
+              <p id="peerSharedNotesStatus" class="muted peer-notes-status">Not saved yet.</p>
+            </div>
           </section>
 
           <section class="peer-panel">

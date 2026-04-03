@@ -621,6 +621,8 @@ const peerChatMessages = document.getElementById("peerChatMessages");
 const peerChatForm = document.getElementById("peerChatForm");
 const peerChatInput = document.getElementById("peerChatInput");
 const peerSharedNotes = document.getElementById("peerSharedNotes");
+const peerSaveSharedNotesBtn = document.getElementById("peerSaveSharedNotesBtn");
+const peerSharedNotesStatus = document.getElementById("peerSharedNotesStatus");
 const peerFeedbackInput = document.getElementById("peerFeedbackInput");
 const peerSubmitFeedbackBtn = document.getElementById("peerSubmitFeedbackBtn");
 const peerFeedbackList = document.getElementById("peerFeedbackList");
@@ -1382,6 +1384,12 @@ function renderPeerSession() {
 
   if (document.activeElement !== peerSharedNotes) {
     peerSharedNotes.value = state.peer.sharedNotes;
+  }
+
+  if (peerSharedNotesStatus) {
+    peerSharedNotesStatus.textContent = state.peer.sharedNotes
+      ? "Saved. Next: add Mutual Feedback below."
+      : "Not saved yet.";
   }
 
   if (peerReflectionMeta) {
@@ -3114,8 +3122,30 @@ if (peerVoiceModeBtn) {
 }
 
 if (peerSharedNotes) {
+  peerSharedNotes.addEventListener("input", () => {
+    if (peerSharedNotesStatus) {
+      peerSharedNotesStatus.textContent = "Unsaved changes.";
+    }
+  });
+
   peerSharedNotes.addEventListener("change", () => {
     state.peer.sharedNotes = peerSharedNotes.value.trim();
+    if (peerSharedNotesStatus) {
+      peerSharedNotesStatus.textContent = state.peer.sharedNotes
+        ? "Saved. Next: add Mutual Feedback below."
+        : "Not saved yet.";
+    }
+  });
+}
+
+if (peerSaveSharedNotesBtn) {
+  peerSaveSharedNotesBtn.addEventListener("click", () => {
+    state.peer.sharedNotes = peerSharedNotes?.value.trim() || "";
+    if (peerSharedNotesStatus) {
+      peerSharedNotesStatus.textContent = state.peer.sharedNotes
+        ? "Saved. Next: add Mutual Feedback below."
+        : "Not saved yet.";
+    }
   });
 }
 

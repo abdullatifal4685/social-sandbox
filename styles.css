@@ -916,6 +916,18 @@ textarea {
   margin: 0 0 0.4rem;
 }
 
+.peer-notes-actions {
+  margin-top: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.peer-notes-status {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
 .peer-participant-list {
   margin: 0;
   padding-left: 1rem;
