@@ -1204,6 +1204,10 @@ function renderScenarioPicker() {
           <p class="picker-card-role">Partner: ${escapeHtml(scenario.aiRole)}</p>
         </button>
         <div class="picker-card-actions">
+          <button class="picker-card-choose-btn picker-card-select" data-scenario-id="${escapeHtml(scenario.id)}" type="button">
+            Choose this scenario
+          </button>
+          <div class="picker-card-actions-right">
           <button class="picker-card-icon-btn" data-scenario-action="edit" data-scenario-id="${escapeHtml(scenario.id)}" type="button" aria-label="Edit scenario ${escapeHtml(scenario.title)}" title="Edit scenario">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M4 15.5V20h4.5L19.7 8.8a1.8 1.8 0 0 0 0-2.6l-1.9-1.9a1.8 1.8 0 0 0-2.6 0L4 15.5Zm2 1.1 9.5-9.5 1.8 1.8L7.8 18.4H6v-1.8Z" />
@@ -1214,6 +1218,7 @@ function renderScenarioPicker() {
               <path d="M8.5 4.5h7l.6 1.6H20v2h-1.4l-.8 10.4A2.3 2.3 0 0 1 15.5 20h-7a2.3 2.3 0 0 1-2.3-1.5L5.4 8.1H4v-2h3l1.5-1.6Zm1.2 1.6-.4.5h5.4l-.3-.5H9.7Zm-1 3 .7 8.7c0 .2.2.4.5.4h6.3c.3 0 .5-.2.5-.4l.7-8.7H8.7Zm2.1 1.3h1.9v5.2h-1.9v-5.2Zm3.2 0h1.9v5.2H14v-5.2Z" />
             </svg>
           </button>
+          </div>
         </div>
       </article>
     `)

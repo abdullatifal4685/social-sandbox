@@ -1129,7 +1129,30 @@ textarea {
   padding: 0 0.95rem 0.85rem;
   display: flex;
   gap: 0.5rem;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.picker-card-choose-btn {
+  min-width: 0;
+  padding: 0.48rem 0.7rem;
+  border-radius: 10px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #244fae;
+  background: linear-gradient(180deg, #ffffff, #edf3ff);
+  border: 1px solid rgba(20, 97, 255, 0.22);
+  box-shadow: none;
+}
+
+.picker-card-choose-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(20, 97, 255, 0.14);
+}
+
+.picker-card-actions-right {
+  display: flex;
+  gap: 0.5rem;
 }
 
 .picker-card-icon-btn {
@@ -1286,6 +1309,19 @@ textarea {
 
   .scenario-picker-card {
     padding: 0.3rem;
+  }
+
+  .picker-card-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .picker-card-choose-btn {
+    width: 100%;
+  }
+
+  .picker-card-actions-right {
+    margin-left: auto;
   }
 }
 
