@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Social Sandbox | Difficult Conversation Trainer</title>
+  <meta name="description" content="Practice difficult conversations with AI using ILETS scaffolding, formative feedback, and structured scenarios." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="page-glow page-glow-a"></div>
+  <div class="page-glow page-glow-b"></div>
+
+  <section id="pageLanding" class="flow-page flow-page-landing">
+    <div class="flow-card flow-card-landing">
+      <div class="landing-copy">
+        <div class="hero-mark landing-mark" aria-hidden="true">SS</div>
+        <p class="eyebrow landing-eyebrow">Social Sandbox</p>
+        <h2>Practice difficult conversations<br />with clarity</h2>
+        <p class="muted landing-subtitle">A guided simulator for difficult conversations at work, school, and leadership settings.</p>
+        <p class="muted landing-note">Learn the concept first, then practice with AI coaching and reflection.</p>
+        <div class="flow-actions landing-actions">
+          <button id="goToChoiceBtn" type="button">Start Learning Journey</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pageChoice" class="flow-page flow-page-choice is-hidden">
+    <div class="flow-card flow-card-choice">
+      <div class="choice-visual" aria-hidden="true">
+        <span class="choice-orb choice-orb-learn">
+          <span class="choice-orb-icon icon-book"></span>
+        </span>
+        <span class="choice-orb choice-orb-core">
+          <span class="choice-orb-icon icon-bridge"></span>
+        </span>
+        <span class="choice-orb choice-orb-practice">
+          <span class="choice-orb-icon icon-chat"></span>
+        </span>
+      </div>
+      <h2>Choose Your Path</h2>
+      <p class="muted">Select your learning preference below.</p>
+      <div class="path-grid">
+        <button id="chooseLearnBtn" class="path-btn" type="button">
+          <span class="path-icon-wrap" aria-hidden="true"><span class="path-icon icon-book"></span></span>
+          <strong>Learn the Concept</strong>
+          <span>Read a short course on difficult conversation principles before practice.</span>
+        </button>
+        <button id="choosePracticeBtn" class="path-btn" type="button">
+          <span class="path-icon-wrap path-icon-wrap-accent" aria-hidden="true"><span class="path-icon icon-chat"></span></span>
+          <strong>Practice Difficult Conversations</strong>
+          <span>Start roleplay now with stage tips and live coaching.</span>
+        </button>
+        <button id="choosePeerBtn" class="path-btn" type="button">
+          <span class="path-icon-wrap" aria-hidden="true"><span class="path-icon icon-bridge"></span></span>
+          <strong>Peer Practicum</strong>
+          <span>Join a peer practice space with separate community, session, and reflection pages.</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section id="pageLearn" class="flow-page is-hidden">
+    <div class="flow-card">
+      <h2>Understanding Difficult Conversations</h2>
+      <p class="muted">Estimated reading time: 8–10 minutes. Learn the framework, then jump straight to practice.</p>
+      <div class="module-progress-wrap">
+        <div class="module-progress-head">
+          <strong id="moduleProgressLabel">Module 1/6</strong>
+          <span id="moduleProgressPercent" class="muted">17%</span>
+        </div>
+        <div class="module-progress-track">
+          <div id="moduleProgressBar" class="module-progress-bar" style="width: 17%"></div>
+        </div>
+      </div>
+
+      <article class="module-overview">
+        <h3 id="moduleTitle">Learning Outcomes</h3>
+        <p id="moduleSummary" class="muted">A practical sequence to approach difficult conversations with less defensiveness and clearer outcomes.</p>
+      </article>
+
+      <article id="moduleSectionCard" class="module-item"></article>
+
+      <section id="moduleQuiz" class="module-quiz is-hidden">
+        <h3>Checkpoint Reflection</h3>
+        <p class="muted">Choose the response you would actually use in a real conversation.</p>
+
+        <fieldset class="quiz-block">
+          <legend>1) You need to raise missed milestones with a senior manager. What is the strongest first line?</legend>
+          <label><input type="radio" name="q1" value="a" /> "You have let this slip too far, and we need to fix it now."</label>
+          <label><input type="radio" name="q1" value="b" /> "I want to protect the project early and work through the risk together."</label>
+          <label><input type="radio" name="q1" value="c" /> "There is no point explaining this if the timeline is already broken."</label>
+        </fieldset>
+
+        <fieldset class="quiz-block">
+          <legend>2) The other person says, "We had to move fast because the deadline was tight." What is the best next move?</legend>
+          <label><input type="radio" name="q2" value="a" /> Jump straight to the fix so the conversation does not take too long.</label>
+          <label><input type="radio" name="q2" value="b" /> Repeat your complaint with stronger wording so they understand the pressure.</label>
+          <label><input type="radio" name="q2" value="c" /> Acknowledge the pressure and ask one open question about what happened.</label>
+        </fieldset>
+
+        <fieldset class="quiz-block">
+          <legend>3) You have explained the issue and now need a close. What sounds most effective?</legend>
+          <label><input type="radio" name="q3" value="a" /> "Please just be more careful next time."</label>
+          <label><input type="radio" name="q3" value="b" /> "Can we agree on one action, one owner, and a follow-up time today?"</label>
+          <label><input type="radio" name="q3" value="c" /> "Let us leave it here for now and see what happens."</label>
+        </fieldset>
+
+        <div class="flow-actions">
+          <button id="submitQuizBtn" type="button">Check My Choices</button>
+        </div>
+        <p id="quizResultText" class="muted quiz-summary">Reflect on what you learned before moving to practice.</p>
+      </section>
+
+      <div class="flow-actions flow-actions-spread">
+        <button id="modulePrevBtn" class="ghost" type="button">Previous Section</button>
+        <button id="moduleNextBtn" class="ghost" type="button">Next Section</button>
+      </div>
+
+      <div class="flow-actions">
+        <button id="learnBackBtn" class="ghost" type="button">Back</button>
+        <button id="startPracticeBtn" type="button" disabled>Start Conversation Practice</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="pageFinal" class="flow-page is-hidden">
+    <div class="flow-card">
+      <h2>Practice Feedback Summary</h2>
+      <p id="finalIdentity" class="muted">Session reflection.</p>
+      <div class="dashboard-tabs">
+        <button id="finalTabCoaching" class="dashboard-tab active" type="button">Coaching</button>
+        <button id="finalTabAnalytics" class="dashboard-tab" type="button">Analytics</button>
+      </div>
+
+      <section id="finalCoachingSection" class="dashboard-section active">
+        <div id="finalFeedbackContent" class="feedback-panel"></div>
+      </section>
+
+      <section id="finalAnalyticsSection" class="dashboard-section">
+        <div id="analyticsSummary" class="analytics-grid"></div>
+      </section>
+
+      <div class="flow-actions">
+        <button id="backToChoiceBtn" class="ghost" type="button">New Learning Path</button>
+        <button id="restartPracticeBtn" type="button">Practice Again</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="pagePeerPracticum" class="flow-page is-hidden">
+    <div class="flow-card peer-card">
+      <h2>Layer 3: Peer Practicum</h2>
+      <p class="muted">Practice difficult conversations with real peers, then exchange advice and feedback after each session.</p>
+
+      <div class="peer-identity">
+        <p class="flow-label">Practicing as</p>
+        <p id="peerIdentityName" class="name-summary">Learner</p>
+      </div>
+
+      <div class="peer-view-tabs" role="tablist" aria-label="Peer practicum sections">
+        <button id="peerTabCommunity" class="peer-view-tab active" type="button" data-peer-view="community">Community</button>
+        <button id="peerTabSession" class="peer-view-tab" type="button" data-peer-view="session">Live Session</button>
+        <button id="peerTabReflection" class="peer-view-tab" type="button" data-peer-view="reflection">Reflection</button>
+      </div>
+
+      <div id="peerCommunityView" class="peer-community-view">
+        <div class="peer-room-head">
+          <h3>Community Practice Directory</h3>
+          <button id="peerBackToChoiceBtn" class="ghost" type="button">Back</button>
+        </div>
+        <div id="peerUserDirectory" class="peer-user-directory"></div>
+
+        <section class="peer-panel">
+          <h3>Practice Requests</h3>
+          <p class="muted">Send requests to peers and start conversation when one is accepted.</p>
+          <ul id="peerRequestList" class="peer-participant-list"></ul>
+        </section>
+      </div>
+
+      <div id="peerSessionView" class="is-hidden">
+        <div class="peer-room-head">
+          <div>
+            <h3 id="peerSessionTitle">Conversation with Peer</h3>
+            <p id="peerSessionMeta" class="muted">Session in progress</p>
+          </div>
+          <div class="flow-actions">
+            <button id="peerEndSessionBtn" class="ghost" type="button">End Session</button>
+          </div>
+        </div>
+
+        <div class="peer-room-layout peer-session-layout">
+          <section class="peer-panel peer-chat-panel">
+            <h3>Live Conversation</h3>
+            <div id="peerChatMessages" class="peer-chat-messages"></div>
+            <form id="peerChatForm" class="composer" autocomplete="off">
+              <label for="peerChatInput" class="sr-only">Peer conversation message</label>
+              <textarea id="peerChatInput" rows="2" placeholder="Write your response to your peer..." required></textarea>
+              <div class="composer-actions">
+                <button id="peerVoiceModeBtn" class="peer-voice-btn" type="button" aria-pressed="false" title="Start peer voice mode" aria-label="Start peer voice mode">
+                  <svg class="composer-icon composer-icon-mic" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <rect x="7.6" y="3.9" width="8.8" height="11.8" rx="4.4" fill="none" stroke="currentColor" stroke-width="1.8"/>
+                    <path d="M12 16.4v2.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    <path d="M8.9 20.2h6.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    <path d="M5.5 11.1c0 3.6 2.9 6.5 6.5 6.5s6.5-2.9 6.5-6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  </svg>
+                </button>
+                <button id="peerSendBtn" class="composer-send-btn" type="submit" aria-label="Send peer message" title="Send peer message">
+                  <svg class="composer-icon composer-icon-send" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M4.5 12 19.2 4.8 14.8 19.2 12.2 13.1 4.5 12Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+                    <path d="M12.2 13.1 19.2 4.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  </svg>
+                </button>
+              </div>
+            </form>
+            <div class="peer-voice-strip">
+              <p id="peerVoiceStatusText" class="muted peer-voice-status">Voice mode is off.</p>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div id="peerFeedbackView" class="peer-feedback-view is-hidden">
+        <div class="peer-room-head">
+          <div>
+            <h3>Post-Session Reflection</h3>
+            <p id="peerReflectionMeta" class="muted">Finish a conversation to exchange feedback and capture notes.</p>
+          </div>
+          <div class="flow-actions">
+            <button id="peerBackToCommunityBtn" class="ghost" type="button">Back to Community</button>
+          </div>
+        </div>
+
+        <section class="peer-panel peer-summary-panel">
+          <h3>Session Summary</h3>
+          <p id="peerReflectionSummary" class="muted">No session summary yet.</p>
+        </section>
+
+        <section class="peer-panel peer-reflection-intro">
+          <h3>Reflection Workspace</h3>
+          <p class="muted">Use this tab to review the session, mark the ILETS stages you practiced, and leave notes or feedback after the conversation.</p>
+        </section>
+
+        <div class="peer-reflection-grid">
+          <section class="peer-panel">
+            <h3>Collaborative ILETS Tracker</h3>
+            <p class="muted">Check off stages you have successfully practiced in this conversation.</p>
+            <div class="peer-checklist">
+              <label><input type="checkbox" data-peer-stage="Introduce" /> <span>Introduce</span></label>
+              <label><input type="checkbox" data-peer-stage="Listen" /> <span>Listen</span></label>
+              <label><input type="checkbox" data-peer-stage="Empathize" /> <span>Empathize</span></label>
+              <label><input type="checkbox" data-peer-stage="Talk" /> <span>Talk</span></label>
+              <label><input type="checkbox" data-peer-stage="Solve" /> <span>Solve</span></label>
+            </div>
+          </section>
+
+          <section class="peer-panel">
+            <h3>Shared Notes</h3>
+            <p class="muted">Capture takeaways and strategy adjustments together.</p>
+            <label class="flow-label" for="peerSharedNotes">Shared reflection notes</label>
+            <textarea id="peerSharedNotes" rows="5" placeholder="Capture takeaways and strategy adjustments together..."></textarea>
+          </section>
+
+          <section class="peer-panel">
+            <h3>Mutual Feedback</h3>
+            <p class="muted">After ending the conversation, exchange one strength and one growth suggestion.</p>
+            <label class="flow-label" for="peerFeedbackInput">Feedback to your peer</label>
+            <textarea id="peerFeedbackInput" rows="4" placeholder="What worked well? What could improve next time?"></textarea>
+            <button id="peerSubmitFeedbackBtn" class="ghost" type="button">Send Feedback</button>
+            <ul id="peerFeedbackList" class="coach-note-list"></ul>
+          </section>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pageScenarioBriefing" class="flow-page is-hidden">
+    <div class="flow-card">
+      <h2 id="briefingTitle">Choose Your Scenario</h2>
+      <p id="briefingSubtitle" class="muted">Add your name so the simulator can address you naturally.</p>
+
+      <!-- Scenario picker (shown first) -->
+      <div id="scenarioPickerSection" class="scenario-picker">
+        <label class="flow-label" for="userNameInput">Your name</label>
+        <input id="userNameInput" type="text" maxlength="40" placeholder="for example: Aulia" />
+        <button id="createScenarioBriefingBtn" class="scenario-create-btn" type="button">+ Create Your Own Scenario</button>
+        <div id="scenarioPickerGrid" class="scenario-picker-grid"></div>
+        <button id="toggleScenarioPickerListBtn" class="scenario-list-more ghost is-hidden" type="button">More scenarios</button>
+      </div>
+
+      <!-- Briefing details (shown after selection) -->
+      <div id="scenarioBriefingSection" class="is-hidden">
+        <h2>Scenario Briefing</h2>
+        <p class="muted">Review the details below before you begin.</p>
+        <div class="name-summary-row">
+          <div>
+            <p class="flow-label">Your name</p>
+            <p id="selectedUserName" class="name-summary">Learner</p>
+          </div>
+          <button id="editUserNameBtn" class="ghost name-edit-btn" type="button">Edit</button>
+        </div>
+        <div id="userNameEditor" class="name-editor is-hidden">
+          <label class="flow-label" for="briefUserNameInput">Edit your name</label>
+          <input id="briefUserNameInput" type="text" maxlength="40" placeholder="for example: Aulia" />
+        </div>
+
+        <div id="scenarioBriefingContent" class="briefing-content">
+          <!-- Scenario title and difficulty -->
+          <div class="briefing-section">
+            <h3 id="briefScenarioTitle">Scenario Title</h3>
+            <p id="briefScenarioDifficulty" class="briefing-badge">Difficulty: -</p>
+          </div>
+
+          <!-- Context -->
+          <div class="briefing-section">
+            <h4 class="briefing-label">Your Situation</h4>
+            <p id="briefContext" class="briefing-text">-</p>
+          </div>
+
+          <!-- Role badge -->
+          <div class="briefing-section">
+            <h4 class="briefing-label">Your Role</h4>
+            <p id="briefRole" class="briefing-role">-</p>
+          </div>
+
+          <!-- Goals -->
+          <div class="briefing-section">
+            <h4 class="briefing-label">What You're Aiming For</h4>
+            <ul id="briefGoals" class="briefing-goals"></ul>
+          </div>
+
+          <!-- AI Opening -->
+          <div class="briefing-section">
+            <h4 class="briefing-label">How They'll Open</h4>
+            <blockquote id="briefOpening" class="briefing-quote">-</blockquote>
+          </div>
+        </div>
+
+        <div class="flow-actions flow-actions-spread">
+          <button id="backFromBriefingBtn" class="ghost" type="button">Back</button>
+          <button id="beginPracticeBtn" type="button">Begin Practice</button>
+        </div>
+      </div>
+
+      <div class="flow-actions flow-actions-spread" id="pickerActions">
+        <button id="cancelBriefingBtn" class="ghost" type="button">Back</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="practiceShell" class="is-hidden">
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <div>
+        <p class="eyebrow">Social Sandbox</p>
+        <h1>Difficult Conversation Trainer</h1>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button id="backToBriefingBtn" class="ghost" type="button">← Back</button>
+      <button id="goHomeBtn" class="ghost" type="button">Home</button>
+      <button id="goConceptBtn" class="ghost" type="button">Concept</button>
+      <button id="toggleFocusBtn" class="ghost hidden-control" type="button" title="Toggle focus mode" aria-label="Toggle focus mode">Focus</button>
+      <button id="openSettingsBtn" class="ghost" type="button">Settings</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="panel panel-scenarios">
+      <div class="scenarios-head">
+        <button id="toggleLeftColumnBtn" class="ghost icon-btn column-toggle" type="button" title="Toggle left panel" aria-label="Toggle left panel">
+          <span class="icon icon-menu" aria-hidden="true"></span>
+        </button>
+        <h2>Scenarios</h2>
+        <button id="toggleScenariosBtn" class="ghost meta-toggle" type="button">Hide</button>
+      </div>
+      <div id="scenariosBody" class="scenarios-body">
+        <p class="muted">Start with AI practice before peer practicum.</p>
+        <button id="openScenarioBuilderBtn" class="ghost scenario-create-btn" type="button">Create Scenario</button>
+        <div id="scenarioList" class="scenario-list"></div>
+      </div>
+
+      <div class="meta-card">
+        <div class="meta-head">
+          <h3>ILETS Framework</h3>
+          <button id="toggleIletsBtn" class="ghost meta-toggle" type="button">Hide</button>
+        </div>
+        <div id="iletsBody" class="meta-body">
+          <ol id="stageList" class="stage-list"></ol>
+          <p id="stageProgress" class="stage-progress">Progress: 1 of 5 stages</p>
+          <p id="stageHelp" class="stage-help muted">Click a stage to practice it directly.</p>
+        </div>
+      </div>
+    </aside>
+
+    <section class="panel panel-chat">
+      <header class="chat-head">
+        <div>
+          <h2 id="scenarioTitle">Select a scenario</h2>
+          <p id="scenarioContext" class="muted">Your AI roleplay partner will appear here.</p>
+          <p id="roleBadge" class="role-badge">Role: -</p>
+          <p id="practiceIdentity" class="muted">Practicing as: Learner</p>
+        </div>
+        <div class="actions-row">
+          <button id="finishBtn" type="button">Finish + Feedback</button>
+        </div>
+      </header>
+
+      <section class="scenario-brief">
+        <div class="brief-head">
+          <div class="brief-tabs" id="briefTabs" role="tablist" aria-label="Scenario details tabs">
+            <button class="brief-tab active" type="button" data-tab="scenario" role="tab" aria-selected="true">Scenario</button>
+            <button class="brief-tab" type="button" data-tab="context" role="tab" aria-selected="false">Context</button>
+            <button class="brief-tab" type="button" data-tab="goals" role="tab" aria-selected="false">Goal Focus</button>
+          </div>
+          <button id="toggleScenarioBriefBtn" class="ghost brief-toggle" type="button">Hide Details</button>
+        </div>
+        <div id="scenarioBriefBody" class="brief-body">
+          <div id="scenarioBriefContent" class="brief-content" role="tabpanel"></div>
+        </div>
+      </section>
+
+      <p class="chat-practice-label">Practice Conversation</p>
+
+      <section id="chatMessages" class="messages" aria-live="polite"></section>
+
+      <form id="chatForm" class="composer" autocomplete="off">
+        <label for="promptInput" class="sr-only">Your response</label>
+        <textarea id="promptInput" rows="2" placeholder="Respond using the current ILETS stage..." required></textarea>
+        <div class="composer-actions">
+          <button id="voiceModeBtn" class="voice-mode-btn" type="button" aria-pressed="false" title="Start voice mode" aria-label="Start voice mode">
+            <svg class="composer-icon composer-icon-mic" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <rect x="7.6" y="3.9" width="8.8" height="11.8" rx="4.4" fill="none" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M12 16.4v2.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M8.9 20.2h6.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M5.5 11.1c0 3.6 2.9 6.5 6.5 6.5s6.5-2.9 6.5-6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <button id="sendBtn" class="composer-send-btn" type="submit" aria-label="Send message" title="Send message">
+            <svg class="composer-icon composer-icon-send" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M4.5 12 19.2 4.8 14.8 19.2 12.2 13.1 4.5 12Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+              <path d="M12.2 13.1 19.2 4.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+      </form>
+      <p id="voiceStatusText" class="muted voice-status">Voice mode is off.</p>
+    </section>
+
+    <aside class="panel panel-feedback">
+      <div class="feedback-head">
+        <button id="toggleRightColumnBtn" class="ghost icon-btn column-toggle" type="button" title="Toggle right panel" aria-label="Toggle right panel">
+          <span class="icon icon-menu" aria-hidden="true"></span>
+        </button>
+        <h2>Formative Feedback</h2>
+      </div>
+      <div class="right-tabs" id="rightTabs">
+        <button class="right-tab active" data-right-tab="coach" type="button">Coach</button>
+        <button class="right-tab" data-right-tab="feedback" type="button">Feedback</button>
+        <button class="right-tab" data-right-tab="practice" type="button">Practice</button>
+      </div>
+
+      <section id="sectionCoach" class="panel-section active" aria-live="polite">
+        <section class="live-notes">
+          <p class="practice-label">Live Coach Note</p>
+          <div id="coachNote" class="coach-note">Type a message and I’ll give you a quick note here.</div>
+          <ul id="coachNoteList" class="coach-note-list"></ul>
+        </section>
+
+        <section id="inMomentReflectionCard" class="reflection-card is-hidden">
+          <p class="practice-label">In-the-moment reflection</p>
+          <p id="inMomentPromptText" class="muted">Pause and reflect on your current strategy.</p>
+          <label class="sr-only" for="inMomentAnswerInput">In-moment reflection answer</label>
+          <textarea id="inMomentAnswerInput" rows="3" placeholder="Write a short reflection before sending your next messages..."></textarea>
+          <button id="submitInMomentReflectionBtn" class="ghost" type="button">Save Reflection</button>
+          <p id="inMomentReflectionFeedback" class="muted"></p>
+        </section>
+
+        <section class="tips-card">
+          <button id="toggleTipsBtn" class="ghost tips-toggle" type="button" aria-expanded="false">Show Coaching Tips</button>
+          <div id="tipsContent" class="tips-content is-collapsed">
+            <p id="tipsLead" class="muted">Tips will appear here as you practice.</p>
+            <ul id="tipsList"></ul>
+          </div>
+        </section>
+      </section>
+
+      <section id="sectionFeedback" class="panel-section">
+        <div id="feedbackPanel" class="feedback-panel">
+          <h3>Gap Analysis</h3>
+          <p class="muted">Complete a session, then click Finish + Feedback.</p>
+        </div>
+      </section>
+
+      <section id="sectionPractice" class="panel-section" aria-label="ILETS practice helper">
+        <section class="practice-strip practice-strip-side">
+          <div>
+            <p class="practice-label">Current Practice Step</p>
+            <h3 id="stageObjectiveTitle">Introduce</h3>
+            <p id="stageObjectiveText" class="muted">Open with purpose and respectful intent.</p>
+          </div>
+          <div class="starter-wrap">
+            <p class="practice-label">Sentence Starters</p>
+            <div id="stageStarters" class="starter-list"></div>
+          </div>
+          <button id="nextStageBtn" class="ghost" type="button">Mark Stage Done</button>
+        </section>
+      </section>
+    </aside>
+  </main>
+  </div>
+
+  <dialog id="settingsDialog" class="settings-dialog">
+    <form id="settingsForm" method="dialog" class="settings-form">
+      <h3>Connection Settings</h3>
+
+      <label>
+        Connection mode
+        <select id="modeSelect">
+          <option value="openai" selected>OpenAI API (simple setup)</option>
+          <option value="proxy">Proxy API (optional)</option>
+        </select>
+      </label>
+
+      <label>
+        Proxy URL
+        <input id="proxyUrlInput" type="url" placeholder="http://localhost:8787/api/chat" />
+      </label>
+
+      <label>
+        OpenAI API Key
+        <input id="apiKeyInput" type="password" placeholder="sk-..." />
+      </label>
+
+      <menu>
+        <button value="cancel" class="ghost" type="reset">Cancel</button>
+        <button id="saveSettingsBtn" value="default" type="submit">Save</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="scenarioBuilderDialog" class="scenario-builder-dialog">
+    <form id="scenarioBuilderForm" method="dialog" class="scenario-builder-form">
+      <h3>Create Custom Scenario</h3>
+
+      <label>
+        Scenario Title
+        <input id="builderTitle" type="text" placeholder="Handle Client Escalation" required />
+      </label>
+
+      <label>
+        AI Role
+        <input id="builderRole" type="text" placeholder="Client Director" required />
+      </label>
+
+      <label>
+        Difficulty
+        <select id="builderDifficulty">
+          <option value="Low tension">Low tension</option>
+          <option value="Medium tension" selected>Medium tension</option>
+          <option value="High tension">High tension</option>
+        </select>
+      </label>
+
+      <label>
+        Context
+        <textarea id="builderContext" rows="3" placeholder="Describe the situation, risk, and why this conversation is difficult." required></textarea>
+      </label>
+
+      <label>
+        Goal Focus
+        <textarea id="builderGoals" rows="4" placeholder="One goal per line, for example:
+State the concern clearly
+Understand the other side
+Agree on next step" required></textarea>
+      </label>
+
+      <label>
+        Opening Line from AI Role
+        <textarea id="builderOpening" rows="2" placeholder="I understand you wanted to speak with me. What is this about?" required></textarea>
+      </label>
+
+      <menu>
+        <button class="ghost" type="reset">Cancel</button>
+        <button id="createScenarioBtn" type="submit">Create Scenario</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
