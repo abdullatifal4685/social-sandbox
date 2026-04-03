@@ -571,6 +571,11 @@ const userNameInput = document.getElementById("userNameInput");
 const chooseLearnBtn = document.getElementById("chooseLearnBtn");
 const choosePracticeBtn = document.getElementById("choosePracticeBtn");
 const choosePeerBtn = document.getElementById("choosePeerBtn");
+const choiceWeakStage = document.getElementById("choiceWeakStage");
+const choiceRecentScore = document.getElementById("choiceRecentScore");
+const choiceCompletionRate = document.getElementById("choiceCompletionRate");
+const focusAiPracticeBtn = document.getElementById("focusAiPracticeBtn");
+const focusPeerPracticeBtn = document.getElementById("focusPeerPracticeBtn");
 const learnBackBtn = document.getElementById("learnBackBtn");
 const startPracticeBtn = document.getElementById("startPracticeBtn");
 const moduleProgressLabel = document.getElementById("moduleProgressLabel");
@@ -1138,6 +1143,40 @@ function renderPage() {
   });
 }
 
+function getCurrentWeakStageFocus() {
+  const finalEntries = state.reflectionHistory.filter((entry) => entry.kind === "final");
+  const recent = finalEntries.slice(-8);
+  const weakMap = recent.reduce((acc, item) => {
+    (item.weakStages || []).forEach((stage) => {
+      acc[stage] = (acc[stage] || 0) + 1;
+    });
+    return acc;
+  }, {});
+  return Object.entries(weakMap).sort((a, b) => b[1] - a[1])[0]?.[0] || "Listen";
+}
+
+function renderChoiceSnapshot() {
+  if (!choiceWeakStage || !choiceRecentScore || !choiceCompletionRate) {
+    return;
+  }
+
+  const finalEntries = state.reflectionHistory.filter((entry) => entry.kind === "final");
+  const recent = finalEntries.slice(-5);
+  const avgRecent = recent.length
+    ? Math.round(recent.reduce((sum, item) => sum + (item.scorePercent || 0), 0) / recent.length)
+    : null;
+
+  const weakStage = getCurrentWeakStageFocus();
+
+  const attempts = state.improvementTrack.reduce((sum, item) => sum + (item.attempts || 0), 0);
+  const completions = state.improvementTrack.reduce((sum, item) => sum + (item.completions || 0), 0);
+  const completionRate = attempts ? Math.round((completions / attempts) * 100) : 0;
+
+  choiceWeakStage.textContent = finalEntries.length ? weakStage : "No history yet";
+  choiceRecentScore.textContent = avgRecent === null ? "No history yet" : `${avgRecent}%`;
+  choiceCompletionRate.textContent = `${completionRate}%`;
+}
+
 function goToPage(page) {
   if (page !== "practice" && state.voice?.mode) {
     state.voice.mode = false;
@@ -1165,6 +1204,9 @@ function goToPage(page) {
   state.page = page;
   if (page === "learn") {
     renderModule();
+  }
+  if (page === "choice") {
+    renderChoiceSnapshot();
   }
   if (page === "scenarioBriefing") {
     renderScenarioPicker();
@@ -3407,6 +3449,23 @@ chooseLearnBtn.addEventListener("click", () => {
 choosePracticeBtn.addEventListener("click", () => {
   goToPage("scenarioBriefing");
 });
+
+if (focusAiPracticeBtn) {
+  focusAiPracticeBtn.addEventListener("click", () => {
+    const weakStage = getCurrentWeakStageFocus();
+    state.stageIndex = Math.max(0, ILETS.indexOf(weakStage));
+    goToPage("scenarioBriefing");
+  });
+}
+
+if (focusPeerPracticeBtn) {
+  focusPeerPracticeBtn.addEventListener("click", () => {
+    if (!getLearnerName() || getLearnerName() === "Learner") {
+      saveUserName(userNameInput.value || state.userName);
+    }
+    goToPage("peerPracticum");
+  });
+}
 
 if (choosePeerBtn) {
   choosePeerBtn.addEventListener("click", () => {

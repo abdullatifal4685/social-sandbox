@@ -33,6 +33,32 @@
     <div class="flow-card flow-card-choice">
       <h2>Choose Your Path</h2>
       <p class="muted">Select your learning preference below.</p>
+
+      <section id="choiceSnapshot" class="choice-snapshot">
+        <div class="choice-snapshot-head">
+          <h3>Your Focus Snapshot</h3>
+          <p class="muted">Quick check before you practice: what to focus on right now.</p>
+        </div>
+        <div class="choice-snapshot-grid">
+          <article class="choice-snapshot-card">
+            <p class="choice-snapshot-label">Most frequent weak stage</p>
+            <strong id="choiceWeakStage">No data yet</strong>
+          </article>
+          <article class="choice-snapshot-card">
+            <p class="choice-snapshot-label">Avg reflection score (last 5)</p>
+            <strong id="choiceRecentScore">-</strong>
+          </article>
+          <article class="choice-snapshot-card">
+            <p class="choice-snapshot-label">Improvement completion rate</p>
+            <strong id="choiceCompletionRate">-</strong>
+          </article>
+        </div>
+        <div class="choice-snapshot-actions">
+          <button id="focusAiPracticeBtn" class="ghost" type="button">Practice Weak Stage with AI</button>
+          <button id="focusPeerPracticeBtn" class="ghost" type="button">Practice with Peer</button>
+        </div>
+      </section>
+
       <div class="path-grid">
         <button id="chooseLearnBtn" class="path-btn" type="button" onclick="if(window.__ssNavigate){window.__ssNavigate('learn')}else{document.getElementById('pageChoice')?.classList.add('is-hidden');document.getElementById('pageLearn')?.classList.remove('is-hidden');window.scrollTo(0,0);}">
           <span class="path-icon-wrap" aria-hidden="true">
@@ -618,6 +644,6 @@ Agree on next step" required></textarea>
     </form>
   </dialog>
 
-  <script src="./app.js?v=20260415" defer></script>
+  <script src="./app.js?v=20260416" defer></script>
 </body>
 </html>

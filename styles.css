@@ -671,6 +671,62 @@ textarea {
   gap: 1.2rem;
 }
 
+.choice-snapshot {
+  margin-top: 1rem;
+  border: 1.5px solid rgba(20, 97, 255, 0.14);
+  border-radius: 14px;
+  padding: 0.9rem 1rem;
+  background: linear-gradient(180deg, #fbfdff, #f3f8ff);
+}
+
+.choice-snapshot-head h3 {
+  margin: 0;
+  font-size: 1.02rem;
+}
+
+.choice-snapshot-head .muted {
+  margin: 0.25rem 0 0;
+}
+
+.choice-snapshot-grid {
+  margin-top: 0.65rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.choice-snapshot-card {
+  border: 1px solid rgba(20, 97, 255, 0.12);
+  border-radius: 11px;
+  padding: 0.58rem 0.62rem;
+  background: linear-gradient(180deg, #ffffff, #f7fbff);
+}
+
+.choice-snapshot-label {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #5f6f8b;
+}
+
+.choice-snapshot-card strong {
+  display: block;
+  margin-top: 0.26rem;
+  color: #143a86;
+  font-size: 0.95rem;
+}
+
+.choice-snapshot-actions {
+  margin-top: 0.7rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.choice-snapshot-actions .ghost {
+  padding: 0.56rem 0.82rem;
+  font-size: 0.85rem;
+}
+
 .path-btn {
   text-align: left;
   border: 1.5px solid rgba(18, 26, 43, 0.12);
@@ -2551,6 +2607,10 @@ body.hide-left.hide-right .layout {
 }
 
 @media (max-width: 820px) {
+  .choice-snapshot-grid {
+    grid-template-columns: 1fr;
+  }
+
   .path-grid {
     grid-template-columns: 1fr;
   }
