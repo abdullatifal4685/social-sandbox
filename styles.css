@@ -223,7 +223,9 @@ h2 {
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  justify-content: center;
   text-align: left;
+  min-height: 250px;
 }
 
 .path-icon-wrap {
@@ -236,7 +238,7 @@ h2 {
   border: 1px solid rgba(20, 97, 255, 0.14);
   box-shadow: 0 10px 26px rgba(20, 97, 255, 0.08);
   align-self: center;
-  margin-bottom: 0.65rem;
+  margin-bottom: 0.9rem;
 }
 
 .path-icon-wrap-accent {
