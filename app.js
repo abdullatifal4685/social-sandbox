@@ -690,9 +690,11 @@ const peerUserNameInput = document.getElementById("peerUserNameInput");
 const peerTabCommunity = document.getElementById("peerTabCommunity");
 const peerTabSession = document.getElementById("peerTabSession");
 const peerTabReflection = document.getElementById("peerTabReflection");
+const peerTabDashboard = document.getElementById("peerTabDashboard");
 const peerCommunityView = document.getElementById("peerCommunityView");
 const peerSessionView = document.getElementById("peerSessionView");
 const peerFeedbackView = document.getElementById("peerFeedbackView");
+const peerDashboardView = document.getElementById("peerDashboardView");
 const peerUserDirectory = document.getElementById("peerUserDirectory");
 const peerRequestList = document.getElementById("peerRequestList");
 const peerBackToChoiceBtn = document.getElementById("peerBackToChoiceBtn");
@@ -1703,6 +1705,10 @@ function renderPeerTabs() {
   if (peerTabReflection) {
     peerTabReflection.classList.toggle("active", state.peer.activeView === "reflection");
   }
+
+  if (peerTabDashboard) {
+    peerTabDashboard.classList.toggle("active", state.peer.activeView === "dashboard");
+  }
 }
 
 function renderPeerDashboardTab(view) {
@@ -1841,7 +1847,7 @@ function setPeerView(view) {
 }
 
 function renderPeerSession() {
-  if (!peerCommunityView || !peerSessionView || !peerFeedbackView) {
+  if (!peerCommunityView || !peerSessionView || !peerFeedbackView || !peerDashboardView) {
     return;
   }
 
@@ -1855,6 +1861,7 @@ function renderPeerSession() {
   peerCommunityView.classList.toggle("is-hidden", state.peer.activeView !== "community");
   peerSessionView.classList.toggle("is-hidden", state.peer.activeView !== "session" || !session);
   peerFeedbackView.classList.toggle("is-hidden", state.peer.activeView !== "reflection");
+  peerDashboardView.classList.toggle("is-hidden", state.peer.activeView !== "dashboard");
 
   if (session) {
     peerSessionTitle.textContent = `Conversation with ${session.peerName}`;
@@ -2050,7 +2057,7 @@ function endPeerSession() {
 }
 
 function renderPeerPracticum() {
-  if (!peerCommunityView || !peerSessionView || !peerFeedbackView) {
+  if (!peerCommunityView || !peerSessionView || !peerFeedbackView || !peerDashboardView) {
     return;
   }
 
@@ -4355,7 +4362,7 @@ if (peerEndSessionBtn) {
   });
 }
 
-if (peerTabCommunity || peerTabSession || peerTabReflection) {
+if (peerTabCommunity || peerTabSession || peerTabReflection || peerTabDashboard) {
   document.querySelectorAll("[data-peer-view]").forEach((button) => {
     button.addEventListener("click", () => {
       const view = button.getAttribute("data-peer-view");
