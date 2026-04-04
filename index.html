@@ -331,6 +331,23 @@
           </div>
         </div>
 
+        <section class="peer-panel peer-dashboard-panel">
+          <div class="peer-room-head">
+            <div>
+              <h3>Peer Dashboard</h3>
+              <p class="muted">Review session quality, reflection trends, and recent peer practice records.</p>
+            </div>
+          </div>
+          <div class="peer-dashboard-tabs" role="tablist" aria-label="Peer dashboard sections">
+            <button id="peerDashboardTabSummary" class="peer-dashboard-tab active" type="button" data-peer-dashboard-view="summary">Summary</button>
+            <button id="peerDashboardTabTrend" class="peer-dashboard-tab" type="button" data-peer-dashboard-view="trend">Reflection Trend</button>
+            <button id="peerDashboardTabSession" class="peer-dashboard-tab" type="button" data-peer-dashboard-view="session">Session Dashboard</button>
+          </div>
+          <div id="peerDashboardSummary" class="peer-dashboard-view active"></div>
+          <div id="peerDashboardTrend" class="peer-dashboard-view"></div>
+          <div id="peerDashboardSession" class="peer-dashboard-view"></div>
+        </section>
+
         <section class="peer-panel peer-summary-panel">
           <h3>Session Summary</h3>
           <p id="peerReflectionSummary" class="muted">No session summary yet.</p>

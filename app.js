@@ -9,6 +9,7 @@ const IMPROVEMENT_TRACK_KEY = "sandbox.improvementTrack.v1";
 const PEER_ROOM_PREFIX = "sandbox.peer.room.";
 const PEER_USER_ID_KEY = "sandbox.peer.userId";
 const PEER_REQUESTS_KEY = "sandbox.peer.requests.v1";
+const PEER_SESSION_HISTORY_KEY = "sandbox.peer.sessionHistory.v1";
 
 const MODULE_SECTIONS = [
   {
@@ -370,6 +371,19 @@ function loadPeerRequests() {
   }
 }
 
+function loadPeerSessionHistory() {
+  try {
+    const raw = localStorage.getItem(PEER_SESSION_HISTORY_KEY);
+    if (!raw) {
+      return [];
+    }
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 function getPeerUserId() {
   const existing = localStorage.getItem(PEER_USER_ID_KEY);
   if (existing) {
@@ -449,8 +463,10 @@ const state = {
   },
   peer: {
     requests: loadPeerRequests(),
+    sessionHistory: loadPeerSessionHistory(),
     activeSession: null,
     activeView: "community",
+    dashboardView: "summary",
     nameEditorOpen: false,
     lastSessionSummary: null,
     sessionChecklist: {
@@ -699,6 +715,9 @@ const peerSubmitFeedbackBtn = document.getElementById("peerSubmitFeedbackBtn");
 const peerEditFeedbackBtn = document.getElementById("peerEditFeedbackBtn");
 const peerFeedbackStatus = document.getElementById("peerFeedbackStatus");
 const peerFeedbackList = document.getElementById("peerFeedbackList");
+const peerDashboardSummary = document.getElementById("peerDashboardSummary");
+const peerDashboardTrend = document.getElementById("peerDashboardTrend");
+const peerDashboardSession = document.getElementById("peerDashboardSession");
 
 const chatMessages = document.getElementById("chatMessages");
 const chatForm = document.getElementById("chatForm");
@@ -1629,6 +1648,10 @@ function persistPeerRequests() {
   localStorage.setItem(PEER_REQUESTS_KEY, JSON.stringify(state.peer.requests.slice(-50)));
 }
 
+function persistPeerSessionHistory() {
+  localStorage.setItem(PEER_SESSION_HISTORY_KEY, JSON.stringify(state.peer.sessionHistory.slice(-60)));
+}
+
 function renderPeerDirectory() {
   peerUserDirectory.innerHTML = PEER_DIRECTORY.map((user) => `
     <article class="peer-user-card">
@@ -1680,6 +1703,120 @@ function renderPeerTabs() {
   if (peerTabReflection) {
     peerTabReflection.classList.toggle("active", state.peer.activeView === "reflection");
   }
+}
+
+function renderPeerDashboardTab(view) {
+  state.peer.dashboardView = view;
+
+  document.querySelectorAll("[data-peer-dashboard-view]").forEach((button) => {
+    const tabView = button.getAttribute("data-peer-dashboard-view");
+    button.classList.toggle("active", tabView === view);
+  });
+
+  if (peerDashboardSummary) {
+    peerDashboardSummary.classList.toggle("active", view === "summary");
+  }
+  if (peerDashboardTrend) {
+    peerDashboardTrend.classList.toggle("active", view === "trend");
+  }
+  if (peerDashboardSession) {
+    peerDashboardSession.classList.toggle("active", view === "session");
+  }
+}
+
+function renderPeerDashboard() {
+  if (!peerDashboardSummary || !peerDashboardTrend || !peerDashboardSession) {
+    return;
+  }
+
+  const sessions = state.peer.sessionHistory
+    .slice()
+    .sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0));
+  const totalSessions = sessions.length;
+  const totalTurns = sessions.reduce((sum, entry) => sum + Number(entry.turns || 0), 0);
+  const averageTurns = totalSessions ? Math.round((totalTurns / totalSessions) * 10) / 10 : 0;
+  const stageCompletionRate = totalSessions
+    ? Math.round((sessions.filter((entry) => (entry.completedStages || []).length > 0).length / totalSessions) * 100)
+    : 0;
+
+  const stageCounts = ILETS.reduce((acc, stage) => {
+    acc[stage] = 0;
+    return acc;
+  }, {});
+
+  sessions.forEach((entry) => {
+    (entry.completedStages || []).forEach((stage) => {
+      if (stageCounts[stage] !== undefined) {
+        stageCounts[stage] += 1;
+      }
+    });
+  });
+
+  const strongestStageEntry = Object.entries(stageCounts).sort((a, b) => b[1] - a[1])[0];
+  const strongestStage = strongestStageEntry && strongestStageEntry[1] > 0
+    ? strongestStageEntry[0]
+    : "No data yet";
+
+  peerDashboardSummary.innerHTML = `
+    <div class="peer-dashboard-grid">
+      <article class="peer-dashboard-card">
+        <p class="muted">Completed Sessions</p>
+        <strong>${totalSessions}</strong>
+      </article>
+      <article class="peer-dashboard-card">
+        <p class="muted">Average Learner Turns</p>
+        <strong>${averageTurns}</strong>
+      </article>
+      <article class="peer-dashboard-card">
+        <p class="muted">Stage Completion Rate</p>
+        <strong>${stageCompletionRate}%</strong>
+      </article>
+      <article class="peer-dashboard-card">
+        <p class="muted">Most Practiced Stage</p>
+        <strong>${escapeHtml(strongestStage)}</strong>
+      </article>
+    </div>
+  `;
+
+  peerDashboardTrend.innerHTML = `
+    <ul class="peer-trend-list">
+      ${ILETS.map((stage) => {
+    const count = stageCounts[stage] || 0;
+    const percent = totalSessions ? Math.round((count / totalSessions) * 100) : 0;
+    return `
+        <li>
+          <div class="peer-trend-row">
+            <span>${escapeHtml(stage)}</span>
+            <strong>${count} sessions</strong>
+          </div>
+          <div class="peer-trend-bar"><span style="width:${percent}%"></span></div>
+        </li>
+      `;
+  }).join("")}
+    </ul>
+  `;
+
+  if (!sessions.length) {
+    peerDashboardSession.innerHTML = "<p class=\"muted\">No completed peer sessions yet. Finish one conversation to populate session analytics.</p>";
+  } else {
+    peerDashboardSession.innerHTML = sessions
+      .slice(0, 8)
+      .map((entry) => {
+        const completedStages = (entry.completedStages || []).length
+          ? entry.completedStages.join(", ")
+          : "None recorded";
+        return `
+          <article class="peer-session-item">
+            <p><strong>${escapeHtml(entry.peerName || "Peer")}</strong> • ${new Date(entry.completedAt).toLocaleString()}</p>
+            <p class="muted">Turns: ${entry.turns || 0} • Duration: ${entry.durationMin || 0} min</p>
+            <p class="muted">Stages: ${escapeHtml(completedStages)}</p>
+          </article>
+        `;
+      })
+      .join("");
+  }
+
+  renderPeerDashboardTab(state.peer.dashboardView || "summary");
 }
 
 function setPeerView(view) {
@@ -1809,6 +1946,8 @@ function renderPeerSession() {
     peerReflectionSummary.textContent = state.peer.lastSessionSummary?.summary || "No session summary yet.";
   }
 
+  renderPeerDashboard();
+
   peerFeedbackList.innerHTML = state.peer.feedbackNotes
     .slice()
     .reverse()
@@ -1852,6 +1991,7 @@ function startPeerSession(requestId) {
   state.peer.feedbackSent = false;
   state.peer.feedbackNotes = [];
   state.peer.activeView = "session";
+  state.peer.dashboardView = "summary";
   state.peer.lastSessionSummary = null;
   state.peer.voice.mode = false;
   state.peer.voice.pendingFinal = "";
@@ -1867,6 +2007,9 @@ function endPeerSession() {
   }
 
   const completed = Object.entries(state.peer.sessionChecklist).filter((entry) => entry[1]).map((entry) => entry[0]);
+  const learnerTurns = state.peer.activeSession.messages.filter((message) => message.author === getLearnerName()).length;
+  const durationMin = Math.max(1, Math.round((Date.now() - state.peer.activeSession.startedAt) / 60000));
+  const completedAt = Date.now();
   const summary = `Session ended. Completed ILETS stages: ${completed.length ? completed.join(", ") : "None recorded yet"}.`;
   state.peer.requests.unshift({
     id: `rec-${Date.now()}`,
@@ -1880,8 +2023,21 @@ function endPeerSession() {
   state.peer.lastSessionSummary = {
     peerName: state.peer.activeSession.peerName,
     summary,
-    completedAt: Date.now(),
+    completedAt,
   };
+
+  state.peer.sessionHistory.push({
+    id: `peer-log-${completedAt}`,
+    peerId: state.peer.activeSession.peerId,
+    peerName: state.peer.activeSession.peerName,
+    completedAt,
+    completedStages: completed,
+    turns: learnerTurns,
+    durationMin,
+  });
+  state.peer.sessionHistory = state.peer.sessionHistory.slice(-60);
+  persistPeerSessionHistory();
+
   state.peer.activeSession = null;
   state.peer.activeView = "reflection";
   state.peer.voice.mode = false;
@@ -4210,6 +4366,16 @@ if (peerTabCommunity || peerTabSession || peerTabReflection) {
     });
   });
 }
+
+document.querySelectorAll("[data-peer-dashboard-view]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const view = button.getAttribute("data-peer-dashboard-view");
+    if (!view) {
+      return;
+    }
+    renderPeerDashboardTab(view);
+  });
+});
 
 window.addEventListener("storage", (event) => {
   if (event.key !== PEER_REQUESTS_KEY) {

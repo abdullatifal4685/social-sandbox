@@ -1181,6 +1181,111 @@ textarea {
   background: linear-gradient(135deg, rgba(20, 97, 255, 0.06), rgba(14, 163, 122, 0.05));
 }
 
+.peer-dashboard-panel {
+  margin-top: 0.1rem;
+}
+
+.peer-dashboard-tabs {
+  margin-top: 0.55rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.peer-dashboard-tab {
+  border: 1px solid rgba(20, 97, 255, 0.2);
+  background: #ffffff;
+  color: var(--ink-soft);
+  border-radius: 10px;
+  padding: 0.5rem 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.peer-dashboard-tab.active {
+  border-color: rgba(20, 97, 255, 0.45);
+  color: var(--accent);
+  background: linear-gradient(180deg, rgba(20, 97, 255, 0.08), rgba(14, 163, 122, 0.06));
+}
+
+.peer-dashboard-view {
+  display: none;
+  margin-top: 0.7rem;
+}
+
+.peer-dashboard-view.active {
+  display: block;
+}
+
+.peer-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.peer-dashboard-card {
+  border: 1px solid rgba(20, 97, 255, 0.16);
+  border-radius: 12px;
+  padding: 0.65rem 0.7rem;
+  background: linear-gradient(180deg, #ffffff, #f6faff);
+}
+
+.peer-dashboard-card p {
+  margin: 0;
+}
+
+.peer-dashboard-card strong {
+  display: block;
+  margin-top: 0.38rem;
+  font-size: 1.28rem;
+}
+
+.peer-trend-list {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.peer-trend-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.7rem;
+  color: var(--ink-soft);
+  margin-bottom: 0.24rem;
+}
+
+.peer-trend-bar {
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(20, 97, 255, 0.14);
+  overflow: hidden;
+}
+
+.peer-trend-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #1461ff, #0ea37a);
+}
+
+.peer-session-item {
+  border: 1px solid rgba(20, 97, 255, 0.14);
+  border-radius: 12px;
+  padding: 0.62rem 0.7rem;
+  background: #ffffff;
+}
+
+.peer-session-item + .peer-session-item {
+  margin-top: 0.55rem;
+}
+
+.peer-session-item p {
+  margin: 0.2rem 0;
+}
+
 .peer-reflection-grid .peer-panel:first-child .peer-checklist {
   margin-top: 0.75rem;
 }
@@ -1456,6 +1561,10 @@ textarea {
   .peer-voice-status {
     flex: 1 1 100%;
   }
+
+  .peer-dashboard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 560px) {
@@ -1486,6 +1595,10 @@ textarea {
 
   .picker-card-actions-right {
     margin-left: auto;
+  }
+
+  .peer-dashboard-grid {
+    grid-template-columns: 1fr;
   }
 }
 
