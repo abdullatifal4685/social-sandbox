@@ -4219,14 +4219,6 @@ window.addEventListener("storage", (event) => {
   renderPeerRequests();
 });
 
-finalTabCoaching.addEventListener("click", () => {
-  renderFinalTab("coaching");
-});
-
-finalTabAnalytics.addEventListener("click", () => {
-  renderFinalTab("analytics");
-});
-
 openScenarioBuilderBtn.addEventListener("click", () => {
   openScenarioBuilderForCreate();
 });
