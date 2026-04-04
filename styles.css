@@ -234,6 +234,7 @@ h2 {
   border-radius: 18px;
   display: grid;
   place-items: center;
+  line-height: 0;
   background: linear-gradient(180deg, #ffffff, #eef4ff);
   border: 1px solid rgba(20, 97, 255, 0.14);
   box-shadow: 0 10px 26px rgba(20, 97, 255, 0.08);
@@ -250,6 +251,8 @@ h2 {
   width: 24px;
   height: 24px;
   display: block;
+  margin: 0 auto;
+  transform: translateY(1px);
   color: #2556bf;
 }
 
