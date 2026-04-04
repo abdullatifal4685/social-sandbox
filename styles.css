@@ -234,8 +234,7 @@ h2 {
   width: 52px;
   height: 52px;
   border-radius: 18px;
-  display: grid;
-  place-items: center;
+  position: relative;
   line-height: 0;
   background: linear-gradient(180deg, #ffffff, #eef4ff);
   border: 1px solid rgba(20, 97, 255, 0.14);
@@ -250,24 +249,15 @@ h2 {
 }
 
 .path-icon-svg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
   width: 24px;
   height: 24px;
   display: block;
-  margin: 0 auto;
-  transform: translateY(0);
+  margin: 0;
+  transform: translate(-50%, -50%);
   color: #2556bf;
-}
-
-#chooseLearnBtn .path-icon-svg {
-  transform: translateY(4px);
-}
-
-#choosePracticeBtn .path-icon-svg {
-  transform: translateY(4px);
-}
-
-#choosePeerBtn .path-icon-svg {
-  transform: translateY(5px);
 }
 
 .path-icon-svg-practice {
