@@ -254,8 +254,20 @@ h2 {
   height: 24px;
   display: block;
   margin: 0 auto;
-  transform: translateY(3px);
+  transform: translateY(0);
   color: #2556bf;
+}
+
+#chooseLearnBtn .path-icon-svg {
+  transform: translateY(4px);
+}
+
+#choosePracticeBtn .path-icon-svg {
+  transform: translateY(4px);
+}
+
+#choosePeerBtn .path-icon-svg {
+  transform: translateY(5px);
 }
 
 .path-icon-svg-practice {
