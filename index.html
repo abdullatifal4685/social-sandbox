@@ -554,7 +554,13 @@
           <p id="roleBadge" class="role-badge">Role: -</p>
           <p id="practiceIdentity" class="muted">Practicing as: Learner</p>
           <div class="practice-scaffold-menu-wrap">
-            <button id="practiceScaffoldMenuBtn" class="ghost practice-scaffold-menu-btn" type="button" aria-expanded="false">Scaffold: Level 1: Fully Guided</button>
+            <button id="practiceScaffoldMenuBtn" class="ghost practice-scaffold-menu-btn" type="button" aria-expanded="false" aria-label="Change scaffold level">
+              <span class="scaffold-menu-title">Scaffold Level</span>
+              <span class="scaffold-menu-current">Level 1: Fully Guided</span>
+              <span class="scaffold-menu-change">Change</span>
+              <span class="scaffold-menu-caret" aria-hidden="true">▾</span>
+            </button>
+            <p class="muted practice-scaffold-helper">Tap to change support level.</p>
             <div id="practiceScaffoldMenu" class="practice-scaffold-menu is-hidden" role="menu" aria-label="Select scaffold level">
               <button type="button" class="practice-scaffold-option" data-practice-scaffold="1" role="menuitem">Level 1 Fully Guided</button>
               <button type="button" class="practice-scaffold-option" data-practice-scaffold="2" role="menuitem">Level 2 Assisted</button>

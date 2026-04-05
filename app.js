@@ -2478,7 +2478,25 @@ function renderHeader() {
   roleBadge.textContent = `AI Role: ${scenario.aiRole}`;
   practiceIdentity.textContent = `Practicing as: ${getLearnerName()}`;
   if (practiceScaffoldMenuBtn) {
-    practiceScaffoldMenuBtn.textContent = `Scaffold: ${scaffold.label}`;
+    practiceScaffoldMenuBtn.innerHTML = `
+      <span class="scaffold-menu-title">Scaffold Level</span>
+      <span class="scaffold-menu-current">${escapeHtml(scaffold.label)}</span>
+      <span class="scaffold-menu-change">Change</span>
+      <span class="scaffold-menu-caret" aria-hidden="true">▾</span>
+    `;
+    practiceScaffoldMenuBtn.title = "Change scaffold level";
+    practiceScaffoldMenuBtn.setAttribute("aria-label", `Change scaffold level. Current ${scaffold.label}`);
+  }
+
+  if (practiceScaffoldMenu) {
+    practiceScaffoldMenu.querySelectorAll("[data-practice-scaffold]").forEach((option) => {
+      const level = normalizeScaffoldLevel(Number(option.getAttribute("data-practice-scaffold")));
+      const baseLabel = option.getAttribute("data-base-label") || option.textContent?.replace(/^\u2713\s*/, "") || "";
+      option.setAttribute("data-base-label", baseLabel);
+      const active = level === state.scaffold.level;
+      option.classList.toggle("active", active);
+      option.textContent = active ? `✓ ${baseLabel}` : baseLabel;
+    });
   }
 }
 

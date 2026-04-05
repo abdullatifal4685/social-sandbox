@@ -2584,9 +2584,53 @@ body.hide-left.hide-right .layout {
 }
 
 .practice-scaffold-menu-btn {
-  padding: 0.34rem 0.62rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  padding: 0.4rem 0.66rem;
   font-size: 0.8rem;
   border-radius: 999px;
+  border-color: rgba(20, 97, 255, 0.22);
+}
+
+.practice-scaffold-menu-btn:hover:not(:disabled) {
+  border-color: rgba(20, 97, 255, 0.38);
+}
+
+.scaffold-menu-title {
+  font-size: 0.69rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #4f6690;
+}
+
+.scaffold-menu-current {
+  font-weight: 700;
+  color: #173f97;
+}
+
+.scaffold-menu-change {
+  font-size: 0.74rem;
+  color: #2a57bf;
+  border: 1px solid rgba(42, 87, 191, 0.24);
+  border-radius: 999px;
+  padding: 0.08rem 0.42rem;
+}
+
+.scaffold-menu-caret {
+  font-size: 0.72rem;
+  color: #3553ad;
+  transition: transform 160ms ease;
+}
+
+.practice-scaffold-menu-btn[aria-expanded="true"] .scaffold-menu-caret {
+  transform: rotate(180deg);
+}
+
+.practice-scaffold-helper {
+  margin: 0.28rem 0 0;
+  font-size: 0.78rem;
 }
 
 .practice-scaffold-menu {
@@ -2612,6 +2656,13 @@ body.hide-left.hide-right .layout {
   color: var(--ink);
   padding: 0.45rem 0.55rem;
   font-size: 0.84rem;
+}
+
+.practice-scaffold-option.active {
+  border-color: rgba(20, 97, 255, 0.28);
+  background: linear-gradient(180deg, #f3f8ff, #eaf2ff);
+  color: #173f97;
+  font-weight: 700;
 }
 
 .practice-scaffold-option:hover:not(:disabled) {
