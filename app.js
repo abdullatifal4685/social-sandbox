@@ -688,6 +688,7 @@ const stageStartersMeta = document.getElementById("stageStartersMeta");
 const stageStarters = document.getElementById("stageStarters");
 const toggleStartersBtn = document.getElementById("toggleStartersBtn");
 const nextStageBtn = document.getElementById("nextStageBtn");
+const practiceScaffoldChip = document.getElementById("practiceScaffoldChip");
 const rightTabs = document.getElementById("rightTabs");
 const sectionCoach = document.getElementById("sectionCoach");
 const sectionFeedback = document.getElementById("sectionFeedback");
@@ -771,6 +772,39 @@ let voiceRecognition = null;
 let voiceSendTimer = null;
 let peerVoiceRecognition = null;
 let peerVoiceSendTimer = null;
+let scaffoldPauseTimer = null;
+
+function clearScaffoldPauseTimer() {
+  if (scaffoldPauseTimer) {
+    clearTimeout(scaffoldPauseTimer);
+    scaffoldPauseTimer = null;
+  }
+}
+
+function maybeTriggerScaffoldPauseSupport() {
+  if (state.page !== "practice" || state.scaffold.level !== 2 || state.isTyping) {
+    return;
+  }
+
+  if (!state.scaffold.hintsVisible) {
+    state.scaffold.hintsVisible = true;
+    state.coachNote = "Pause support: hints are now visible. Pick one starter and adapt it in your own words.";
+    state.coachNoteHistory.unshift("Pause support: Use one hint, then continue in your own words.");
+    state.coachNoteHistory = state.coachNoteHistory.slice(0, 4);
+    renderPracticeStrip();
+    renderCoachNote();
+  }
+}
+
+function armScaffoldPauseTimer() {
+  clearScaffoldPauseTimer();
+  if (state.page !== "practice" || state.scaffold.level !== 2) {
+    return;
+  }
+  scaffoldPauseTimer = window.setTimeout(() => {
+    maybeTriggerScaffoldPauseSupport();
+  }, 10000);
+}
 
 state.voice = {
   supported: Boolean(SpeechRecognitionAPI),
@@ -2271,6 +2305,13 @@ function renderPracticeStrip() {
       : "Hints are hidden. Try your own opening first, then use Show Hints if needed.";
   }
 
+  if (practiceScaffoldChip) {
+    const chipDetail = state.scaffold.level === 1
+      ? "Always-on hints"
+      : (showHints ? "Hints revealed after pause" : "Hints hidden until request or pause");
+    practiceScaffoldChip.textContent = `Active Scaffold: ${scaffold.label} (${chipDetail})`;
+  }
+
   if (toggleStartersBtn) {
     toggleStartersBtn.disabled = hintsAlwaysVisible;
     toggleStartersBtn.textContent = hintsAlwaysVisible ? "Hints Always On" : (showHints ? "Hide Hints" : "Show Hints");
@@ -2557,6 +2598,13 @@ function openSessionIntro() {
     <h3>Gap Analysis</h3>
     <p class="muted">Session reset. Practice each ILETS stage, then click Finish + Feedback.</p>
   `;
+  if (state.scaffold.level === 2) {
+    state.coachNote = "Level 2 active: start independently. If you pause for 10 seconds, support hints will appear.";
+    state.coachNoteHistory.unshift("Level 2: independent start enabled.");
+    state.coachNoteHistory = state.coachNoteHistory.slice(0, 4);
+    state.rightTab = "practice";
+  }
+  armScaffoldPauseTimer();
 }
 
 function setScaffoldLevel(level) {
@@ -3474,6 +3522,7 @@ function generateFeedback() {
 
 async function handleSend(event) {
   event.preventDefault();
+  clearScaffoldPauseTimer();
   const userText = promptInput.value.trim();
   if (!userText) {
     return;
@@ -3523,6 +3572,7 @@ async function handleSend(event) {
       startVoiceListening();
     }
     promptInput.focus();
+    armScaffoldPauseTimer();
   }
 }
 
@@ -3825,9 +3875,18 @@ voiceModeBtn.addEventListener("click", () => {
 });
 
 promptInput.addEventListener("keydown", (event) => {
+  if (state.scaffold.level === 2 && !state.isTyping) {
+    armScaffoldPauseTimer();
+  }
   if (event.key === "Enter" && !event.shiftKey) {
     event.preventDefault();
     chatForm.requestSubmit();
+  }
+});
+
+promptInput.addEventListener("input", () => {
+  if (state.scaffold.level === 2 && !state.isTyping) {
+    armScaffoldPauseTimer();
   }
 });
 

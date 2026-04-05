@@ -2730,6 +2730,20 @@ body.hide-left.hide-right .layout {
   gap: 0.5rem;
 }
 
+.practice-scaffold-chip {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.3rem 0.62rem;
+  border-radius: 999px;
+  border: 1px solid rgba(20, 97, 255, 0.2);
+  background: linear-gradient(180deg, #f7fbff, #eef5ff);
+  color: #173f97;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
 .starter-list {
   display: flex;
   flex-wrap: wrap;
