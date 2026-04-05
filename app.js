@@ -1803,7 +1803,7 @@ function renderPeerDashboard() {
   `;
 
   if (!sessions.length) {
-    peerDashboardSession.innerHTML = "<p class=\"muted\">No completed peer sessions yet. Finish one conversation to populate session analytics.</p>";
+    peerDashboardSession.innerHTML = "<p class=\"muted\">No completed peer sessions yet. Finish one conversation to populate analytics.</p>";
   } else {
     peerDashboardSession.innerHTML = sessions
       .slice(0, 8)
