@@ -63,7 +63,7 @@
           </article>
         </div>
         <div class="choice-snapshot-actions">
-          <button id="openDashboardBtn" class="ghost" type="button">Open Full Dashboard</button>
+          <button id="openDashboardBtn" class="ghost" type="button">Open Practice Hub</button>
         </div>
       </section>
 
@@ -106,7 +106,7 @@
 
   <section id="pageDashboard" class="flow-page is-hidden">
     <div class="flow-card">
-      <h2>Practice Dashboard</h2>
+      <h2>Practice Hub</h2>
       <p id="dashboardIdentity" class="muted">This is your before-practice view: check what to focus on before you start.</p>
       <p class="dashboard-help muted">Use this page to see your recommended starting focus before practice. New users start with Introduce by default, and returning users get a focus recommendation from history.</p>
 
@@ -209,14 +209,14 @@
 
   <section id="pageFinal" class="flow-page is-hidden">
     <div class="flow-card">
-      <h2>Dashboard</h2>
+      <h2>Session Analytics</h2>
       <p id="finalIdentity" class="muted">Results from your latest practice session.</p>
       <p class="dashboard-help muted">This is your after-practice view. It keeps coaching notes and session results in one place so you can review what happened and what to improve next.</p>
 
-      <div class="dashboard-tabs" role="tablist" aria-label="Dashboard sections">
+      <div class="dashboard-tabs" role="tablist" aria-label="Session analytics sections">
         <button id="finalTabOverview" class="dashboard-tab active" type="button">Strength, Growth, Follow-up</button>
         <button id="finalTabReflection" class="dashboard-tab" type="button">Adaptive Reflection</button>
-        <button id="finalTabSession" class="dashboard-tab" type="button">Session Dashboard</button>
+        <button id="finalTabSession" class="dashboard-tab" type="button">Session Analytics</button>
       </div>
 
       <section id="finalOverviewSection" class="dashboard-section active">
@@ -266,7 +266,7 @@
         <button id="peerTabCommunity" class="peer-view-tab active" type="button" data-peer-view="community">Community</button>
         <button id="peerTabSession" class="peer-view-tab" type="button" data-peer-view="session">Live Session</button>
         <button id="peerTabReflection" class="peer-view-tab" type="button" data-peer-view="reflection">Reflection</button>
-        <button id="peerTabDashboard" class="peer-view-tab" type="button" data-peer-view="dashboard">Dashboard</button>
+        <button id="peerTabDashboard" class="peer-view-tab" type="button" data-peer-view="dashboard">Analytics</button>
       </div>
 
       <div id="peerCommunityView" class="peer-community-view">
@@ -385,7 +385,7 @@
       <div id="peerDashboardView" class="peer-feedback-view is-hidden">
         <div class="peer-room-head">
           <div>
-            <h3>Peer Dashboard</h3>
+            <h3>Peer Analytics</h3>
             <p class="muted">Review session quality, reflection trends, and recent peer practice records.</p>
           </div>
         </div>
@@ -394,7 +394,7 @@
           <div class="peer-dashboard-tabs" role="tablist" aria-label="Peer dashboard sections">
             <button id="peerDashboardTabSummary" class="peer-dashboard-tab active" type="button" data-peer-dashboard-view="summary">Summary</button>
             <button id="peerDashboardTabTrend" class="peer-dashboard-tab" type="button" data-peer-dashboard-view="trend">Reflection Trend</button>
-            <button id="peerDashboardTabSession" class="peer-dashboard-tab" type="button" data-peer-dashboard-view="session">Session Dashboard</button>
+            <button id="peerDashboardTabSession" class="peer-dashboard-tab" type="button" data-peer-dashboard-view="session">Session Analytics</button>
           </div>
           <div id="peerDashboardSummary" class="peer-dashboard-view active"></div>
           <div id="peerDashboardTrend" class="peer-dashboard-view"></div>
