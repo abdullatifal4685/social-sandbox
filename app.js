@@ -2252,7 +2252,7 @@ function renderLiveFeedbackPanel() {
   if (turns === 0) {
     feedbackPanel.innerHTML = `
       <h3>Gap Analysis</h3>
-      <p class="muted">No values yet. Send your first response to see live progress here, then click Finish + Feedback for full session analytics.</p>
+      <p class="muted">No values yet. Send your first response to see live progress here, then click Finish + Feedback for full session review.</p>
     `;
     return;
   }
@@ -2270,7 +2270,7 @@ function renderLiveFeedbackPanel() {
       <li><strong>Strength signal:</strong> ${escapeHtml(strong.length ? strong.join(", ") : "Building baseline")}</li>
       <li><strong>Focus now:</strong> ${escapeHtml(weak.length ? weak.join(", ") : "Move to next stage with clearer evidence")}</li>
     </ul>
-    <p class="muted">Finish + Feedback gives full adaptive reflection and session analytics.</p>
+    <p class="muted">Finish + Feedback gives full coaching, reflection, and analytics.</p>
   `;
 }
 
@@ -3300,7 +3300,7 @@ function generateFeedback() {
 
   const reflectionHtml = `
     <article class="analytics-card reflection-form-card">
-      <h4>Adaptive Reflection</h4>
+      <h4>Reflection</h4>
       <p class="muted">Answer these prompts in your own words. AI feedback will adapt to weak stages: ${escapeHtml(weak.join(", ") || "None")}</p>
 
       <section class="reflection-item">
@@ -3349,7 +3349,7 @@ function generateFeedback() {
   const analytics = computeAnalytics();
   const sessionHtml = `
     <article class="analytics-card">
-      <h4>Session Analytics</h4>
+      <h4>Analytics Overview</h4>
       <p class="analytics-metric">Turns: ${analytics.totalTurns} | Avg words/turn: ${analytics.avgWords}</p>
       <p class="muted">Stage coverage: ${analytics.stageCoverage}%</p>
     </article>
@@ -3394,7 +3394,7 @@ function generateFeedback() {
     analyticsSummary.innerHTML = sessionHtml;
   }
   setReflectionDraftLock(false);
-  finalIdentity.textContent = `${getLearnerName()}, here is your latest session analytics.`;
+  finalIdentity.textContent = `${getLearnerName()}, here is your latest session review.`;
   renderDashboardTabs("overview");
 }
 
