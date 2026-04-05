@@ -674,6 +674,7 @@ const scenarioTitle = document.getElementById("scenarioTitle");
 const scenarioContext = document.getElementById("scenarioContext");
 const roleBadge = document.getElementById("roleBadge");
 const practiceIdentity = document.getElementById("practiceIdentity");
+const practiceScaffoldLevel = document.getElementById("practiceScaffoldLevel");
 const feedbackPanel = document.getElementById("feedbackPanel");
 const stageHelp = document.getElementById("stageHelp");
 const stageProgress = document.getElementById("stageProgress");
@@ -2383,10 +2384,14 @@ function renderChat() {
 
 function renderHeader() {
   const scenario = getScenario();
+  const scaffold = getScaffoldLevelConfig();
   scenarioTitle.textContent = scenario.title;
   scenarioContext.textContent = `${scenario.context} Current stage: ${ILETS[state.stageIndex]}.`;
   roleBadge.textContent = `AI Role: ${scenario.aiRole}`;
   practiceIdentity.textContent = `Practicing as: ${getLearnerName()}`;
+  if (practiceScaffoldLevel) {
+    practiceScaffoldLevel.textContent = `Scaffold: ${scaffold.label}`;
+  }
 }
 
 function renderBrief() {

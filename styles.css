@@ -2558,6 +2558,13 @@ body.hide-left.hide-right .layout {
   font-weight: 600;
 }
 
+.practice-scaffold-level {
+  margin: 0.32rem 0 0;
+  font-size: 0.82rem;
+  color: #204da8;
+  font-weight: 600;
+}
+
 .brief-tabs {
   display: inline-flex;
   border: 1px solid rgba(18, 26, 43, 0.14);
