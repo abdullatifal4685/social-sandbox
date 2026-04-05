@@ -796,6 +796,19 @@ function clearScaffoldPauseTimer() {
   }
 }
 
+function pushCoachNoteHistory(note) {
+  if (!note) {
+    return;
+  }
+  const normalized = note.trim();
+  if (!normalized) {
+    return;
+  }
+  const existing = state.coachNoteHistory || [];
+  const withoutDupes = existing.filter((item) => item.trim() !== normalized);
+  state.coachNoteHistory = [normalized, ...withoutDupes].slice(0, 4);
+}
+
 function maybeTriggerScaffoldPauseSupport() {
   if (state.page !== "practice" || state.scaffold.level !== 2 || state.isTyping) {
     return;
@@ -804,8 +817,7 @@ function maybeTriggerScaffoldPauseSupport() {
   if (!state.scaffold.hintsVisible) {
     state.scaffold.hintsVisible = true;
     state.coachNote = "Pause support: hints are now visible. Pick one starter and adapt it in your own words.";
-    state.coachNoteHistory.unshift("Pause support: Use one hint, then continue in your own words.");
-    state.coachNoteHistory = state.coachNoteHistory.slice(0, 4);
+    pushCoachNoteHistory("Pause support: Use one hint, then continue in your own words.");
     renderPracticeStrip();
     renderCoachNote();
   }
@@ -2227,18 +2239,6 @@ function computeAnalytics() {
   };
 }
 
-function renderFinalTab(tab) {
-  if (!finalTabCoaching || !finalTabAnalytics || !finalCoachingSection || !finalAnalyticsSection) {
-    return;
-  }
-
-  const coachingActive = tab === "coaching";
-  finalTabCoaching.classList.toggle("active", coachingActive);
-  finalTabAnalytics.classList.toggle("active", !coachingActive);
-  finalCoachingSection.classList.toggle("active", coachingActive);
-  finalAnalyticsSection.classList.toggle("active", !coachingActive);
-}
-
 function getScenario() {
   return state.scenarios.find((s) => s.id === state.selectedScenarioId) || state.scenarios[0];
 }
@@ -2374,8 +2374,11 @@ function renderPracticeStrip() {
 
 function renderCoachNote() {
   coachNote.textContent = state.coachNote || "Type a message and I’ll give you a quick note here.";
-  const items = state.coachNoteHistory?.length
-    ? state.coachNoteHistory
+  const current = (state.coachNote || "").trim();
+  const uniqueHistory = [...new Set((state.coachNoteHistory || []).map((item) => item.trim()).filter(Boolean))]
+    .filter((item) => item !== current);
+  const items = uniqueHistory.length
+    ? uniqueHistory
     : [
         "Keep the opening short and purposeful.",
         "Use a question after you state the issue.",
@@ -2652,13 +2655,11 @@ function openSessionIntro() {
   `;
   if (state.scaffold.level === 2) {
     state.coachNote = "Level 2 active: start independently. If you pause for 10 seconds, support hints will appear.";
-    state.coachNoteHistory.unshift("Level 2: independent start enabled.");
-    state.coachNoteHistory = state.coachNoteHistory.slice(0, 4);
+    pushCoachNoteHistory("Level 2: independent start enabled.");
     state.rightTab = "practice";
   } else if (state.scaffold.level === 3) {
     state.coachNote = "Level 3 active: independent mode. Apply ILETS without sentence starters.";
-    state.coachNoteHistory.unshift("Level 3: independent practice mode enabled.");
-    state.coachNoteHistory = state.coachNoteHistory.slice(0, 4);
+    pushCoachNoteHistory("Level 3: independent practice mode enabled.");
     state.rightTab = "practice";
   }
   armScaffoldPauseTimer();
@@ -2933,8 +2934,7 @@ function addCoachNote(userText, replyObject) {
   }
 
   state.coachNote = note;
-  state.coachNoteHistory.unshift(note);
-  state.coachNoteHistory = state.coachNoteHistory.slice(0, 4);
+  pushCoachNoteHistory(note);
 }
 
 function buildCustomPractice(goals, roleLabel) {
@@ -3717,8 +3717,7 @@ if (submitInMomentReflectionBtn) {
     state.inMomentSubmitting = false;
     state.inMomentPrompt = null;
     state.coachNote = feedback;
-    state.coachNoteHistory.unshift(`Reflection (${prompt.stage}): ${feedback.split("\n")[0]}`);
-    state.coachNoteHistory = state.coachNoteHistory.slice(0, 4);
+    pushCoachNoteHistory(`Reflection (${prompt.stage}): ${feedback.split("\n")[0]}`);
     render();
   });
 }
