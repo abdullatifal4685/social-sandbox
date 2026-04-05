@@ -727,7 +727,7 @@ textarea {
 .choice-snapshot-grid {
   margin-top: 0.65rem;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.6rem;
 }
 
@@ -761,6 +761,10 @@ textarea {
 .choice-snapshot-actions .ghost {
   padding: 0.56rem 0.82rem;
   font-size: 0.85rem;
+}
+
+#choiceScaffoldLevel {
+  color: #0f4ed0;
 }
 
 .dashboard-overview-grid {
@@ -2723,6 +2727,27 @@ body.hide-left.hide-right .layout {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
+}
+
+.starter-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.starter-toggle-btn {
+  padding: 0.34rem 0.62rem;
+  font-size: 0.8rem;
+}
+
+.starter-meta {
+  margin: 0.15rem 0 0.35rem;
+  font-size: 0.82rem;
+}
+
+.starter-empty {
+  margin: 0;
 }
 
 .starter-chip {

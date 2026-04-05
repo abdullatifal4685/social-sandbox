@@ -6,10 +6,22 @@ const HIDDEN_SCENARIO_IDS_KEY = "sandbox.hiddenScenarioIds.v1";
 const REFLECTION_HISTORY_KEY = "sandbox.reflectionHistory.v1";
 const REFLECTION_DRAFTS_KEY = "sandbox.reflectionDrafts.v1";
 const IMPROVEMENT_TRACK_KEY = "sandbox.improvementTrack.v1";
+const SCAFFOLD_LEVEL_KEY = "sandbox.scaffoldLevel";
 const PEER_ROOM_PREFIX = "sandbox.peer.room.";
 const PEER_USER_ID_KEY = "sandbox.peer.userId";
 const PEER_REQUESTS_KEY = "sandbox.peer.requests.v1";
 const PEER_SESSION_HISTORY_KEY = "sandbox.peer.sessionHistory.v1";
+
+const SCAFFOLD_LEVELS = {
+  1: {
+    label: "Level 1: Fully Guided",
+    summary: "Scenario Catalyst, sentence starters, and coach support are always visible.",
+  },
+  2: {
+    label: "Level 2: Assisted",
+    summary: "Scenario Catalyst stays visible, but hints fade unless you request them.",
+  },
+};
 
 const MODULE_SECTIONS = [
   {
@@ -398,6 +410,19 @@ function buildPeerRoomCode() {
   return Math.random().toString(36).slice(2, 8).toUpperCase();
 }
 
+function loadScaffoldLevel() {
+  const raw = Number(localStorage.getItem(SCAFFOLD_LEVEL_KEY));
+  return raw === 2 ? 2 : 1;
+}
+
+function getScaffoldLevelConfig() {
+  return SCAFFOLD_LEVELS[state.scaffold.level] || SCAFFOLD_LEVELS[1];
+}
+
+function persistScaffoldLevel() {
+  localStorage.setItem(SCAFFOLD_LEVEL_KEY, String(state.scaffold.level));
+}
+
 function buildInitialScenarios() {
   const overrides = loadScenarioOverrides();
   const hiddenIds = new Set(loadHiddenScenarioIds());
@@ -460,6 +485,10 @@ const state = {
     proxyUrl: localStorage.getItem("sandbox.proxyUrl") || "http://localhost:8787/api/chat",
     apiKey: localStorage.getItem("sandbox.apiKey") || "",
     model: localStorage.getItem("sandbox.model") || "gpt-4.1-mini",
+  },
+  scaffold: {
+    level: loadScaffoldLevel(),
+    hintsVisible: loadScaffoldLevel() === 1,
   },
   peer: {
     requests: loadPeerRequests(),
@@ -598,6 +627,8 @@ const choiceStageLabel = document.getElementById("choiceStageLabel");
 const choiceWeakStage = document.getElementById("choiceWeakStage");
 const choiceRecentScore = document.getElementById("choiceRecentScore");
 const choiceCompletionRate = document.getElementById("choiceCompletionRate");
+const choiceScaffoldLevel = document.getElementById("choiceScaffoldLevel");
+const cycleScaffoldLevelBtn = document.getElementById("cycleScaffoldLevelBtn");
 const openDashboardBtn = document.getElementById("openDashboardBtn");
 const dashboardIdentity = document.getElementById("dashboardIdentity");
 const dashboardStageLabel = document.getElementById("dashboardStageLabel");
@@ -652,7 +683,9 @@ const scenarioBriefBody = document.getElementById("scenarioBriefBody");
 const scenarioBriefContent = document.getElementById("scenarioBriefContent");
 const stageObjectiveTitle = document.getElementById("stageObjectiveTitle");
 const stageObjectiveText = document.getElementById("stageObjectiveText");
+const stageStartersMeta = document.getElementById("stageStartersMeta");
 const stageStarters = document.getElementById("stageStarters");
+const toggleStartersBtn = document.getElementById("toggleStartersBtn");
 const nextStageBtn = document.getElementById("nextStageBtn");
 const rightTabs = document.getElementById("rightTabs");
 const sectionCoach = document.getElementById("sectionCoach");
@@ -1310,6 +1343,14 @@ function renderChoiceSnapshot() {
   }
   choiceRecentScore.textContent = avgRecent === null ? "No history yet" : `${avgRecent}%`;
   choiceCompletionRate.textContent = `${completionRate}%`;
+
+  const scaffold = getScaffoldLevelConfig();
+  if (choiceScaffoldLevel) {
+    choiceScaffoldLevel.textContent = scaffold.label;
+  }
+  if (cycleScaffoldLevelBtn) {
+    cycleScaffoldLevelBtn.textContent = state.scaffold.level === 1 ? "Switch to Level 2" : "Switch to Level 1";
+  }
 }
 
 function buildDashboardWeakBreakdownHtml() {
@@ -2216,15 +2257,35 @@ function renderPracticeStrip() {
   const currentStage = ILETS[state.stageIndex];
   const scenario = getScenario();
   const guide = scenario.practice?.[currentStage] || STAGE_GUIDE[currentStage];
+  const scaffold = getScaffoldLevelConfig();
+  const hintsAlwaysVisible = state.scaffold.level === 1;
+  const showHints = hintsAlwaysVisible || state.scaffold.hintsVisible;
 
   stageObjectiveTitle.textContent = currentStage;
   stageObjectiveText.textContent = guide.objective;
-  stageStarters.innerHTML = guide.starters
-    .map(
-      (starter) =>
-        `<button class="starter-chip" type="button" data-starter="${escapeHtml(starter)}">${escapeHtml(starter)}</button>`
-    )
-    .join("");
+
+  if (stageStartersMeta) {
+    stageStartersMeta.textContent = showHints
+      ? scaffold.summary
+      : "Hints are hidden. Try your own opening first, then use Show Hints if needed.";
+  }
+
+  if (toggleStartersBtn) {
+    toggleStartersBtn.disabled = hintsAlwaysVisible;
+    toggleStartersBtn.textContent = hintsAlwaysVisible ? "Hints Always On" : (showHints ? "Hide Hints" : "Show Hints");
+    toggleStartersBtn.setAttribute("aria-pressed", showHints ? "true" : "false");
+  }
+
+  if (showHints) {
+    stageStarters.innerHTML = guide.starters
+      .map(
+        (starter) =>
+          `<button class="starter-chip" type="button" data-starter="${escapeHtml(starter)}">${escapeHtml(starter)}</button>`
+      )
+      .join("");
+  } else {
+    stageStarters.innerHTML = "<p class=\"muted starter-empty\">Hints are hidden for this level.</p>";
+  }
 
   nextStageBtn.disabled = state.stageIndex === ILETS.length - 1;
   nextStageBtn.textContent =
@@ -2470,6 +2531,7 @@ function setPending(isPending) {
 
 function openSessionIntro() {
   const scenario = getScenario();
+  state.scaffold.hintsVisible = state.scaffold.level === 1;
   state.messages = [
     {
       role: "assistant",
@@ -2490,6 +2552,13 @@ function openSessionIntro() {
     <h3>Gap Analysis</h3>
     <p class="muted">Session reset. Practice each ILETS stage, then click Finish + Feedback.</p>
   `;
+}
+
+function setScaffoldLevel(level) {
+  const normalized = level === 2 ? 2 : 1;
+  state.scaffold.level = normalized;
+  state.scaffold.hintsVisible = normalized === 1;
+  persistScaffoldLevel();
 }
 
 function messageShowsStageProgress(text, stageName) {
@@ -3819,6 +3888,25 @@ toggleTipsBtn.addEventListener("click", () => {
   state.tipsExpanded = !state.tipsExpanded;
   renderTips();
 });
+
+if (cycleScaffoldLevelBtn) {
+  cycleScaffoldLevelBtn.addEventListener("click", () => {
+    const nextLevel = state.scaffold.level === 1 ? 2 : 1;
+    setScaffoldLevel(nextLevel);
+    renderChoiceSnapshot();
+    renderPracticeStrip();
+  });
+}
+
+if (toggleStartersBtn) {
+  toggleStartersBtn.addEventListener("click", () => {
+    if (state.scaffold.level === 1) {
+      return;
+    }
+    state.scaffold.hintsVisible = !state.scaffold.hintsVisible;
+    renderPracticeStrip();
+  });
+}
 
 toggleIletsBtn.addEventListener("click", () => {
   state.iletsExpanded = !state.iletsExpanded;

@@ -61,8 +61,13 @@
             <p class="choice-snapshot-label">Improvement completion rate</p>
             <strong id="choiceCompletionRate">-</strong>
           </article>
+          <article class="choice-snapshot-card">
+            <p class="choice-snapshot-label">Scaffold level</p>
+            <strong id="choiceScaffoldLevel">Level 1: Fully Guided</strong>
+          </article>
         </div>
         <div class="choice-snapshot-actions">
+          <button id="cycleScaffoldLevelBtn" class="ghost" type="button">Switch to Level 2</button>
           <button id="openDashboardBtn" class="ghost" type="button">Open Practice Hub</button>
         </div>
       </section>
@@ -467,7 +472,8 @@
 
           <!-- AI Opening -->
           <div class="briefing-section">
-            <h4 class="briefing-label">How They'll Open</h4>
+            <h4 class="briefing-label">Scenario Catalyst</h4>
+            <p class="muted">High-tension trigger to help you plan your first move.</p>
             <blockquote id="briefOpening" class="briefing-quote">-</blockquote>
           </div>
         </div>
@@ -637,7 +643,11 @@
             <p id="stageObjectiveText" class="muted">Open with purpose and respectful intent.</p>
           </div>
           <div class="starter-wrap">
-            <p class="practice-label">Sentence Starters</p>
+            <div class="starter-head">
+              <p class="practice-label">Sentence Starters</p>
+              <button id="toggleStartersBtn" class="ghost starter-toggle-btn" type="button">Hide Hints</button>
+            </div>
+            <p id="stageStartersMeta" class="muted starter-meta">Hints are visible to support your current stage.</p>
             <div id="stageStarters" class="starter-list"></div>
           </div>
           <button id="nextStageBtn" class="ghost" type="button">Mark Stage Done</button>
