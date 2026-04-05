@@ -21,6 +21,10 @@ const SCAFFOLD_LEVELS = {
     label: "Level 2: Assisted",
     summary: "Scenario Catalyst stays visible, but hints fade unless you request them.",
   },
+  3: {
+    label: "Level 3: Independent",
+    summary: "Scenario Catalyst stays visible, while sentence starters and live prompts stay off.",
+  },
 };
 
 const MODULE_SECTIONS = [
@@ -412,11 +416,15 @@ function buildPeerRoomCode() {
 
 function loadScaffoldLevel() {
   const raw = Number(localStorage.getItem(SCAFFOLD_LEVEL_KEY));
-  return raw === 2 ? 2 : 1;
+  return raw === 2 || raw === 3 ? raw : 1;
 }
 
 function getScaffoldLevelConfig() {
   return SCAFFOLD_LEVELS[state.scaffold.level] || SCAFFOLD_LEVELS[1];
+}
+
+function normalizeScaffoldLevel(value) {
+  return value === 2 || value === 3 ? value : 1;
 }
 
 function persistScaffoldLevel() {
@@ -489,6 +497,7 @@ const state = {
   scaffold: {
     level: loadScaffoldLevel(),
     hintsVisible: loadScaffoldLevel() === 1,
+    lastScenarioAppliedId: null,
   },
   peer: {
     requests: loadPeerRequests(),
@@ -539,6 +548,7 @@ function persistScenarioOverrides() {
         baseline.context !== scenario.context ||
         baseline.aiRole !== scenario.aiRole ||
         baseline.opening !== scenario.opening ||
+        normalizeScaffoldLevel(Number(baseline.scaffoldLevel || 1)) !== normalizeScaffoldLevel(Number(scenario.scaffoldLevel || 1)) ||
         JSON.stringify(baseline.goals) !== JSON.stringify(scenario.goals);
 
       if (changed) {
@@ -548,6 +558,7 @@ function persistScenarioOverrides() {
           context: scenario.context,
           aiRole: scenario.aiRole,
           opening: scenario.opening,
+          scaffoldLevel: normalizeScaffoldLevel(Number(scenario.scaffoldLevel || 1)),
           goals: scenario.goals,
           practice: scenario.practice,
         };
@@ -608,6 +619,8 @@ const briefContext = document.getElementById("briefContext");
 const briefRole = document.getElementById("briefRole");
 const briefGoals = document.getElementById("briefGoals");
 const briefOpening = document.getElementById("briefOpening");
+const briefScaffoldHint = document.getElementById("briefScaffoldHint");
+const briefScaffoldLevelGroup = document.getElementById("briefScaffoldLevelGroup");
 const cancelBriefingBtn = document.getElementById("cancelBriefingBtn");
 const backFromBriefingBtn = document.getElementById("backFromBriefingBtn");
 const beginPracticeBtn = document.getElementById("beginPracticeBtn");
@@ -674,7 +687,8 @@ const scenarioTitle = document.getElementById("scenarioTitle");
 const scenarioContext = document.getElementById("scenarioContext");
 const roleBadge = document.getElementById("roleBadge");
 const practiceIdentity = document.getElementById("practiceIdentity");
-const practiceScaffoldLevel = document.getElementById("practiceScaffoldLevel");
+const practiceScaffoldMenuBtn = document.getElementById("practiceScaffoldMenuBtn");
+const practiceScaffoldMenu = document.getElementById("practiceScaffoldMenu");
 const feedbackPanel = document.getElementById("feedbackPanel");
 const stageHelp = document.getElementById("stageHelp");
 const stageProgress = document.getElementById("stageProgress");
@@ -706,6 +720,7 @@ const builderDifficulty = document.getElementById("builderDifficulty");
 const builderContext = document.getElementById("builderContext");
 const builderGoals = document.getElementById("builderGoals");
 const builderOpening = document.getElementById("builderOpening");
+const builderScaffoldLevel = document.getElementById("builderScaffoldLevel");
 const coachNote = document.getElementById("coachNote");
 const coachNoteList = document.getElementById("coachNoteList");
 const inMomentReflectionCard = document.getElementById("inMomentReflectionCard");
@@ -1384,7 +1399,8 @@ function renderChoiceSnapshot() {
     choiceScaffoldLevel.textContent = scaffold.label;
   }
   if (cycleScaffoldLevelBtn) {
-    cycleScaffoldLevelBtn.textContent = state.scaffold.level === 1 ? "Switch to Level 2" : "Switch to Level 1";
+    const nextLevel = state.scaffold.level === 1 ? 2 : (state.scaffold.level === 2 ? 3 : 1);
+    cycleScaffoldLevelBtn.textContent = `Switch to Level ${nextLevel}`;
   }
 }
 
@@ -1527,6 +1543,7 @@ function goToPage(page) {
     renderDashboardPage();
   }
   if (page === "scenarioBriefing") {
+    applyScenarioScaffoldDefault(state.selectedScenarioId);
     renderScenarioPicker();
   }
   if (page === "peerPracticum") {
@@ -1599,6 +1616,7 @@ function renderModule() {
 
 function renderBriefingPage() {
   const scenario = getScenario();
+  const scenarioScaffoldLevel = normalizeScaffoldLevel(Number(scenario.scaffoldLevel || 1));
 
   briefScenarioTitle.textContent = scenario.title;
   briefScenarioDifficulty.textContent = `Challenge: ${scenario.difficulty}`;
@@ -1623,6 +1641,19 @@ function renderBriefingPage() {
     .join("");
   
   briefOpening.innerHTML = `<em>${escapeHtml(scenario.opening)}</em>`;
+
+  if (briefScaffoldHint) {
+    briefScaffoldHint.textContent = `Choose how much support you want before starting. Scenario default: ${SCAFFOLD_LEVELS[scenarioScaffoldLevel].label}.`;
+  }
+
+  if (briefScaffoldLevelGroup) {
+    briefScaffoldLevelGroup.querySelectorAll("[data-brief-scaffold]").forEach((button) => {
+      const level = normalizeScaffoldLevel(Number(button.getAttribute("data-brief-scaffold")));
+      const active = level === state.scaffold.level;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+  }
   
   scenarioPickerSection.classList.add("is-hidden");
   scenarioBriefingSection.classList.remove("is-hidden");
@@ -2294,31 +2325,38 @@ function renderPracticeStrip() {
   const guide = scenario.practice?.[currentStage] || STAGE_GUIDE[currentStage];
   const scaffold = getScaffoldLevelConfig();
   const hintsAlwaysVisible = state.scaffold.level === 1;
+  const hintsDisabled = state.scaffold.level === 3;
   const showHints = hintsAlwaysVisible || state.scaffold.hintsVisible;
 
   stageObjectiveTitle.textContent = currentStage;
   stageObjectiveText.textContent = guide.objective;
 
   if (stageStartersMeta) {
-    stageStartersMeta.textContent = showHints
-      ? scaffold.summary
-      : "Hints are hidden. Try your own opening first, then use Show Hints if needed.";
+    stageStartersMeta.textContent = hintsDisabled
+      ? "Level 3 minimizes support. Continue without sentence starters."
+      : (showHints
+        ? scaffold.summary
+        : "Hints are hidden. Try your own opening first, then use Show Hints if needed.");
   }
 
   if (practiceScaffoldChip) {
     const chipDetail = state.scaffold.level === 1
       ? "Always-on hints"
-      : (showHints ? "Hints revealed after pause" : "Hints hidden until request or pause");
+      : (state.scaffold.level === 2
+        ? (showHints ? "Hints revealed after pause" : "Hints hidden until request or pause")
+        : "Independent mode");
     practiceScaffoldChip.textContent = `Active Scaffold: ${scaffold.label} (${chipDetail})`;
   }
 
   if (toggleStartersBtn) {
-    toggleStartersBtn.disabled = hintsAlwaysVisible;
-    toggleStartersBtn.textContent = hintsAlwaysVisible ? "Hints Always On" : (showHints ? "Hide Hints" : "Show Hints");
+    toggleStartersBtn.disabled = hintsAlwaysVisible || hintsDisabled;
+    toggleStartersBtn.textContent = hintsAlwaysVisible
+      ? "Hints Always On"
+      : (hintsDisabled ? "Hints Off in Level 3" : (showHints ? "Hide Hints" : "Show Hints"));
     toggleStartersBtn.setAttribute("aria-pressed", showHints ? "true" : "false");
   }
 
-  if (showHints) {
+  if (showHints && !hintsDisabled) {
     stageStarters.innerHTML = guide.starters
       .map(
         (starter) =>
@@ -2430,9 +2468,17 @@ function renderHeader() {
   scenarioContext.textContent = `${scenario.context} Current stage: ${ILETS[state.stageIndex]}.`;
   roleBadge.textContent = `AI Role: ${scenario.aiRole}`;
   practiceIdentity.textContent = `Practicing as: ${getLearnerName()}`;
-  if (practiceScaffoldLevel) {
-    practiceScaffoldLevel.textContent = `Scaffold: ${scaffold.label}`;
+  if (practiceScaffoldMenuBtn) {
+    practiceScaffoldMenuBtn.textContent = `Scaffold: ${scaffold.label}`;
   }
+}
+
+function setPracticeScaffoldMenuOpen(open) {
+  if (!practiceScaffoldMenu || !practiceScaffoldMenuBtn) {
+    return;
+  }
+  practiceScaffoldMenu.classList.toggle("is-hidden", !open);
+  practiceScaffoldMenuBtn.setAttribute("aria-expanded", open ? "true" : "false");
 }
 
 function renderBrief() {
@@ -2467,6 +2513,9 @@ function openScenarioBuilderForCreate() {
   state.editingScenarioId = null;
   scenarioBuilderForm.reset();
   builderDifficulty.value = "Medium tension";
+  if (builderScaffoldLevel) {
+    builderScaffoldLevel.value = "1";
+  }
   createScenarioBtn.textContent = "Create Scenario";
   scenarioBuilderDialog.showModal();
 }
@@ -2484,6 +2533,9 @@ function openScenarioBuilderForEdit(scenarioId) {
   builderContext.value = scenario.context;
   builderGoals.value = scenario.goals.join("\n");
   builderOpening.value = scenario.opening;
+  if (builderScaffoldLevel) {
+    builderScaffoldLevel.value = String(normalizeScaffoldLevel(Number(scenario.scaffoldLevel || 1)));
+  }
   createScenarioBtn.textContent = "Save Changes";
   scenarioBuilderDialog.showModal();
 }
@@ -2603,15 +2655,41 @@ function openSessionIntro() {
     state.coachNoteHistory.unshift("Level 2: independent start enabled.");
     state.coachNoteHistory = state.coachNoteHistory.slice(0, 4);
     state.rightTab = "practice";
+  } else if (state.scaffold.level === 3) {
+    state.coachNote = "Level 3 active: independent mode. Apply ILETS without sentence starters.";
+    state.coachNoteHistory.unshift("Level 3: independent practice mode enabled.");
+    state.coachNoteHistory = state.coachNoteHistory.slice(0, 4);
+    state.rightTab = "practice";
   }
   armScaffoldPauseTimer();
 }
 
 function setScaffoldLevel(level) {
-  const normalized = level === 2 ? 2 : 1;
+  const normalized = normalizeScaffoldLevel(level);
   state.scaffold.level = normalized;
   state.scaffold.hintsVisible = normalized === 1;
+  state.scaffold.lastScenarioAppliedId = state.selectedScenarioId;
   persistScaffoldLevel();
+  setPracticeScaffoldMenuOpen(false);
+  if (state.page === "practice") {
+    if (normalized === 2) {
+      armScaffoldPauseTimer();
+    } else {
+      clearScaffoldPauseTimer();
+    }
+  }
+}
+
+function applyScenarioScaffoldDefault(scenarioId) {
+  const scenario = state.scenarios.find((item) => item.id === scenarioId);
+  if (!scenario) {
+    return;
+  }
+  const scenarioLevel = normalizeScaffoldLevel(Number(scenario.scaffoldLevel || 1));
+  if (state.scaffold.lastScenarioAppliedId === scenario.id) {
+    return;
+  }
+  setScaffoldLevel(scenarioLevel);
 }
 
 function messageShowsStageProgress(text, stageName) {
@@ -3578,6 +3656,7 @@ async function handleSend(event) {
 
 function switchScenario(nextScenarioId) {
   state.selectedScenarioId = nextScenarioId;
+  applyScenarioScaffoldDefault(nextScenarioId);
   state.briefTab = "scenario";
   openSessionIntro();
   render();
@@ -3955,22 +4034,74 @@ toggleTipsBtn.addEventListener("click", () => {
 
 if (cycleScaffoldLevelBtn) {
   cycleScaffoldLevelBtn.addEventListener("click", () => {
-    const nextLevel = state.scaffold.level === 1 ? 2 : 1;
+    const nextLevel = state.scaffold.level === 1 ? 2 : (state.scaffold.level === 2 ? 3 : 1);
     setScaffoldLevel(nextLevel);
     renderChoiceSnapshot();
+    renderBriefingPage();
     renderPracticeStrip();
+    renderHeader();
   });
 }
 
 if (toggleStartersBtn) {
   toggleStartersBtn.addEventListener("click", () => {
-    if (state.scaffold.level === 1) {
+    if (state.scaffold.level === 1 || state.scaffold.level === 3) {
       return;
     }
     state.scaffold.hintsVisible = !state.scaffold.hintsVisible;
     renderPracticeStrip();
   });
 }
+
+if (briefScaffoldLevelGroup) {
+  briefScaffoldLevelGroup.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-brief-scaffold]");
+    if (!button) {
+      return;
+    }
+    const level = normalizeScaffoldLevel(Number(button.getAttribute("data-brief-scaffold")));
+    setScaffoldLevel(level);
+    renderChoiceSnapshot();
+    renderBriefingPage();
+    renderPracticeStrip();
+    renderHeader();
+  });
+}
+
+if (practiceScaffoldMenuBtn && practiceScaffoldMenu) {
+  practiceScaffoldMenuBtn.addEventListener("click", () => {
+    const open = practiceScaffoldMenu.classList.contains("is-hidden");
+    setPracticeScaffoldMenuOpen(open);
+  });
+
+  practiceScaffoldMenu.addEventListener("click", (event) => {
+    const option = event.target.closest("[data-practice-scaffold]");
+    if (!option) {
+      return;
+    }
+    const level = normalizeScaffoldLevel(Number(option.getAttribute("data-practice-scaffold")));
+    setScaffoldLevel(level);
+    setPracticeScaffoldMenuOpen(false);
+    renderChoiceSnapshot();
+    renderBriefingPage();
+    renderPracticeStrip();
+    renderHeader();
+  });
+}
+
+document.addEventListener("click", (event) => {
+  if (!practiceScaffoldMenuBtn || !practiceScaffoldMenu) {
+    return;
+  }
+  const target = event.target;
+  if (!(target instanceof Element)) {
+    return;
+  }
+  if (target.closest("#practiceScaffoldMenuBtn") || target.closest("#practiceScaffoldMenu")) {
+    return;
+  }
+  setPracticeScaffoldMenuOpen(false);
+});
 
 toggleIletsBtn.addEventListener("click", () => {
   state.iletsExpanded = !state.iletsExpanded;
@@ -4212,6 +4343,7 @@ scenarioPickerGrid.addEventListener("click", (event) => {
       saveUserName(typedName);
     }
     state.selectedScenarioId = scenarioId;
+    applyScenarioScaffoldDefault(scenarioId);
     renderBriefingPage();
   }
 });
@@ -4556,6 +4688,7 @@ scenarioBuilderForm.addEventListener("submit", (event) => {
   const difficulty = builderDifficulty.value;
   const context = builderContext.value.trim();
   const opening = builderOpening.value.trim();
+  const scaffoldLevel = normalizeScaffoldLevel(Number(builderScaffoldLevel?.value || 1));
   const goals = builderGoals.value
     .split("\n")
     .map((item) => item.trim())
@@ -4581,6 +4714,7 @@ scenarioBuilderForm.addEventListener("submit", (event) => {
       context,
       aiRole,
       opening,
+      scaffoldLevel,
       goals,
       practice: buildCustomPractice(goals, aiRole),
     };
@@ -4592,6 +4726,7 @@ scenarioBuilderForm.addEventListener("submit", (event) => {
       context,
       aiRole,
       opening,
+      scaffoldLevel,
       goals,
       custom: true,
       createdAt: Date.now(),
@@ -4602,6 +4737,7 @@ scenarioBuilderForm.addEventListener("submit", (event) => {
 
   persistScenarioState();
   state.selectedScenarioId = scenarioId;
+  applyScenarioScaffoldDefault(scenarioId);
   state.briefTab = "scenario";
   state.scenarioListExpanded = false;
   state.scenarioPickerExpanded = false;
@@ -4626,6 +4762,7 @@ scenarioBuilderForm.addEventListener("reset", () => {
   scenarioBuilderDialog.close();
 });
 
+applyScenarioScaffoldDefault(state.selectedScenarioId);
 openSessionIntro();
 userNameInput.value = state.userName;
 render();

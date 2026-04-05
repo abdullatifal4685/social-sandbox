@@ -2558,6 +2558,68 @@ body.hide-left.hide-right .layout {
   font-weight: 600;
 }
 
+.scaffold-level-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.4rem;
+}
+
+.scaffold-level-btn {
+  padding: 0.44rem 0.72rem;
+  font-size: 0.83rem;
+  border-radius: 999px;
+}
+
+.scaffold-level-btn.active {
+  color: #ffffff;
+  border-color: rgba(20, 97, 255, 0.46);
+  background: linear-gradient(130deg, var(--accent), #0d46b4);
+}
+
+.practice-scaffold-menu-wrap {
+  position: relative;
+  margin-top: 0.36rem;
+  width: fit-content;
+}
+
+.practice-scaffold-menu-btn {
+  padding: 0.34rem 0.62rem;
+  font-size: 0.8rem;
+  border-radius: 999px;
+}
+
+.practice-scaffold-menu {
+  position: absolute;
+  z-index: 9;
+  left: 0;
+  top: calc(100% + 0.35rem);
+  min-width: 220px;
+  border: 1px solid rgba(20, 97, 255, 0.18);
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 14px 28px rgba(18, 39, 86, 0.16);
+  padding: 0.35rem;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.practice-scaffold-option {
+  text-align: left;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: #ffffff;
+  color: var(--ink);
+  padding: 0.45rem 0.55rem;
+  font-size: 0.84rem;
+}
+
+.practice-scaffold-option:hover:not(:disabled) {
+  border-color: rgba(20, 97, 255, 0.22);
+  box-shadow: none;
+  transform: none;
+}
+
 .practice-scaffold-level {
   margin: 0.32rem 0 0;
   font-size: 0.82rem;

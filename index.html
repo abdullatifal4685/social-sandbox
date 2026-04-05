@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./styles.css?v=20260404-2" />
+  <link rel="stylesheet" href="./styles.css?v=20260422-3" />
 </head>
 <body>
   <div class="page-glow page-glow-a"></div>
@@ -476,6 +476,16 @@
             <p class="muted">High-tension trigger to help you plan your first move.</p>
             <blockquote id="briefOpening" class="briefing-quote">-</blockquote>
           </div>
+
+          <div class="briefing-section">
+            <h4 class="briefing-label">Scaffold Level</h4>
+            <p id="briefScaffoldHint" class="muted">Choose how much support you want before starting this session.</p>
+            <div class="scaffold-level-group" id="briefScaffoldLevelGroup" role="group" aria-label="Choose scaffold level">
+              <button class="ghost scaffold-level-btn" type="button" data-brief-scaffold="1">Level 1 Fully Guided</button>
+              <button class="ghost scaffold-level-btn" type="button" data-brief-scaffold="2">Level 2 Assisted</button>
+              <button class="ghost scaffold-level-btn" type="button" data-brief-scaffold="3">Level 3 Independent</button>
+            </div>
+          </div>
         </div>
 
         <div class="flow-actions flow-actions-spread">
@@ -543,7 +553,14 @@
           <p id="scenarioContext" class="muted">Your AI roleplay partner will appear here.</p>
           <p id="roleBadge" class="role-badge">Role: -</p>
           <p id="practiceIdentity" class="muted">Practicing as: Learner</p>
-          <p id="practiceScaffoldLevel" class="muted practice-scaffold-level">Scaffold: Level 1: Fully Guided</p>
+          <div class="practice-scaffold-menu-wrap">
+            <button id="practiceScaffoldMenuBtn" class="ghost practice-scaffold-menu-btn" type="button" aria-expanded="false">Scaffold: Level 1: Fully Guided</button>
+            <div id="practiceScaffoldMenu" class="practice-scaffold-menu is-hidden" role="menu" aria-label="Select scaffold level">
+              <button type="button" class="practice-scaffold-option" data-practice-scaffold="1" role="menuitem">Level 1 Fully Guided</button>
+              <button type="button" class="practice-scaffold-option" data-practice-scaffold="2" role="menuitem">Level 2 Assisted</button>
+              <button type="button" class="practice-scaffold-option" data-practice-scaffold="3" role="menuitem">Level 3 Independent</button>
+            </div>
+          </div>
         </div>
         <div class="actions-row">
           <button id="finishBtn" type="button">Finish + Feedback</button>
@@ -729,6 +746,15 @@ Agree on next step" required></textarea>
         <textarea id="builderOpening" rows="2" placeholder="I understand you wanted to speak with me. What is this about?" required></textarea>
       </label>
 
+      <label>
+        Default Scaffold Level
+        <select id="builderScaffoldLevel">
+          <option value="1" selected>Level 1: Fully Guided</option>
+          <option value="2">Level 2: Assisted</option>
+          <option value="3">Level 3: Independent</option>
+        </select>
+      </label>
+
       <menu>
         <button class="ghost" type="reset">Cancel</button>
         <button id="createScenarioBtn" type="submit">Create Scenario</button>
@@ -736,6 +762,6 @@ Agree on next step" required></textarea>
     </form>
   </dialog>
 
-  <script src="./app.js?v=20260422" defer></script>
+  <script src="./app.js?v=20260422-3" defer></script>
 </body>
 </html>
