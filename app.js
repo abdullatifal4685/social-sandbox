@@ -2517,7 +2517,7 @@ function advanceStageFromUserMessage(message) {
 function buildRoleplayPrompt() {
   const scenario = getScenario();
   return [
-    "You are a roleplay partner in Social Sandbox, a difficult conversation trainer.",
+    "You are a roleplay partner in Social Sandbox, a difficult conversations lab.",
     `Scenario: ${scenario.title}`,
     `Context: ${scenario.context}`,
     `You are speaking as: ${scenario.aiRole}`,

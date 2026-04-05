@@ -1,4 +1,4 @@
-# Social Sandbox | Difficult Conversation Trainer
+# Social Sandbox | Difficult Conversations Lab
 
 This frontend is an interactive training app based on your framework:
 - AI-mediated scaffolding
