@@ -427,6 +427,11 @@ function normalizeScaffoldLevel(value) {
   return value === 2 || value === 3 ? value : 1;
 }
 
+function getScaffoldLabel(level) {
+  const normalized = normalizeScaffoldLevel(Number(level));
+  return SCAFFOLD_LEVELS[normalized]?.label || SCAFFOLD_LEVELS[1].label;
+}
+
 function persistScaffoldLevel() {
   localStorage.setItem(SCAFFOLD_LEVEL_KEY, String(state.scaffold.level));
 }
@@ -1449,7 +1454,8 @@ function buildDashboardHistoryHtml() {
     .map((entry) => {
       const date = new Date(entry.createdAt).toLocaleDateString();
       const weak = (entry.weakStages || []).join(", ") || "-";
-      return `<li><strong>${escapeHtml(date)}</strong> - Score ${entry.scorePercent || 0}% - Focus: ${escapeHtml(weak)}</li>`;
+      const level = getScaffoldLabel(entry.scaffoldLevel || 1);
+      return `<li><strong>${escapeHtml(date)}</strong> - Score ${entry.scorePercent || 0}% - ${escapeHtml(level)} - Focus: ${escapeHtml(weak)}</li>`;
     })
     .join("")}</ul>`;
 }
@@ -3197,6 +3203,56 @@ function buildReflectionTrendHtml() {
   `;
 }
 
+function buildScaffoldComparisonHtml() {
+  const finalEntries = state.reflectionHistory.filter((entry) => entry.kind === "final");
+  if (!finalEntries.length) {
+    return "<p class=\"muted\">No scaffold comparison yet. Complete one reflected session first.</p>";
+  }
+
+  const grouped = {
+    1: [],
+    2: [],
+    3: [],
+  };
+
+  finalEntries.forEach((entry) => {
+    const level = normalizeScaffoldLevel(Number(entry.scaffoldLevel || 1));
+    grouped[level].push(entry);
+  });
+
+  const rows = [1, 2, 3]
+    .map((level) => {
+      const entries = grouped[level];
+      if (!entries.length) {
+        return null;
+      }
+      const avg = Math.round(entries.reduce((sum, item) => sum + (item.scorePercent || 0), 0) / entries.length);
+      const latest = entries[entries.length - 1]?.scorePercent || 0;
+      return {
+        level,
+        label: getScaffoldLabel(level),
+        sessions: entries.length,
+        avg,
+        latest,
+      };
+    })
+    .filter(Boolean);
+
+  const usedLevels = rows.length;
+  const note = usedLevels < 2
+    ? "Use at least two levels to compare performance trend across scaffolds."
+    : "Compare averages and latest score to decide when to fade support further.";
+
+  return `
+    <ul>
+      ${rows
+        .map((row) => `<li><strong>${escapeHtml(row.label)}</strong>: avg ${row.avg}% | latest ${row.latest}% | sessions ${row.sessions}</li>`)
+        .join("")}
+    </ul>
+    <p class="muted">${note}</p>
+  `;
+}
+
 function buildReflectionDraftHistoryHtml() {
   if (!state.reflectionDrafts.length) {
     return "<p class=\"muted\">No saved drafts yet.</p>";
@@ -3583,6 +3639,11 @@ function generateFeedback() {
       <p class="muted">Quantitative tracking of your follow-up practice attempts and completions.</p>
       <div id="improvementTrackerAnalytics">${buildImprovementTrackerHtml()}</div>
     </article>
+    <article class="analytics-card">
+      <h4>Scaffold Comparison</h4>
+      <p class="muted">Track how your outcomes change across Level 1, 2, and 3 sessions over time.</p>
+      <div>${buildScaffoldComparisonHtml()}</div>
+    </article>
   `;
 
   feedbackPanel.innerHTML = overviewHtml;
@@ -3707,6 +3768,7 @@ if (submitInMomentReflectionBtn) {
       kind: "in-moment",
       createdAt: Date.now(),
       scenarioId: getScenario().id,
+      scaffoldLevel: state.scaffold.level,
       weakStages: [prompt.stage],
       answers: [answer],
       feedback,
@@ -3880,6 +3942,7 @@ if (finalReflectionContent) {
     kind: "final",
     createdAt: Date.now(),
     scenarioId: getScenario().id,
+    scaffoldLevel: state.scaffold.level,
     weakStages,
     answers,
     feedback,
