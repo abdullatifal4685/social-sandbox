@@ -2867,9 +2867,6 @@ function renderBrief() {
     return;
   }
   const scenario = getScenario();
-  const illustration = scenario.imageUrl
-    ? `<img class="brief-inline-illustration" src="${escapeHtml(scenario.imageUrl)}" alt="Illustration for ${escapeHtml(scenario.title)}" />`
-    : "";
 
   const tabButtons = briefTabs.querySelectorAll(".brief-tab");
   tabButtons.forEach((button) => {
@@ -2880,7 +2877,6 @@ function renderBrief() {
 
   if (state.briefTab === "scenario") {
     scenarioBriefContent.innerHTML = `
-      ${illustration}
       <p><strong>${escapeHtml(scenario.title)}</strong> is designed for ${escapeHtml(scenario.difficulty.toLowerCase())} conversations.</p>
       <p class="muted">AI role partner: <strong>${escapeHtml(scenario.aiRole)}</strong></p>
     `;
@@ -2888,11 +2884,11 @@ function renderBrief() {
   }
 
   if (state.briefTab === "context") {
-    scenarioBriefContent.innerHTML = `${illustration}<p>${escapeHtml(scenario.context)}</p>`;
+    scenarioBriefContent.innerHTML = `<p>${escapeHtml(scenario.context)}</p>`;
     return;
   }
 
-  scenarioBriefContent.innerHTML = `${illustration}<ul>${scenario.goals.map((goal) => `<li>${escapeHtml(goal)}</li>`).join("")}</ul>`;
+  scenarioBriefContent.innerHTML = `<ul>${scenario.goals.map((goal) => `<li>${escapeHtml(goal)}</li>`).join("")}</ul>`;
 }
 
 function renderScenarioBriefVisibility() {

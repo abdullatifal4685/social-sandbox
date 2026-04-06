@@ -2717,16 +2717,6 @@ body.hide-left.hide-right .layout {
   padding: 0.82rem 0.9rem;
 }
 
-.brief-inline-illustration {
-  width: 100%;
-  max-height: 180px;
-  object-fit: cover;
-  border-radius: 10px;
-  border: 1px solid rgba(20, 97, 255, 0.14);
-  background: linear-gradient(180deg, #f8fbff, #eef4ff);
-  margin-bottom: 0.7rem;
-}
-
 .chat-practice-label {
   margin: 0.75rem 0 0.45rem;
   color: #3553ad;
