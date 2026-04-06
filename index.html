@@ -452,6 +452,11 @@
             <p id="briefScenarioDifficulty" class="briefing-badge">Difficulty: -</p>
           </div>
 
+          <!-- Scenario image -->
+          <div id="briefScenarioImageSection" class="briefing-section is-hidden">
+            <img id="briefScenarioImage" alt="Scenario context visualization" class="briefing-image" />
+          </div>
+
           <!-- Context -->
           <div class="briefing-section">
             <h4 class="briefing-label">Your Situation</h4>
@@ -673,8 +678,15 @@
               <button id="toggleStartersBtn" class="ghost starter-toggle-btn" type="button">Hide Hints</button>
             </div>
             <p id="stageStartersMeta" class="muted starter-meta">Hints are visible to support your current stage.</p>
-            <div id="stageStarters" class="starter-list"></div>
-          </div>
+            <div id="stageStarters" class="starter-list"></div>            
+            <!-- Assertion templates section -->
+            <div id="assertionTemplatesSection" class="assertion-templates-section is-hidden">
+              <details class="assertion-templates-toggle" open>
+                <summary class="practice-label">Respectful Assertion Templates</summary>
+                <p class="muted starter-meta">Three ways to phrase this stage: deferential (face-preserving), balanced (respectful-assertive), or direct (evidence-based).</p>
+                <div id="assertionTemplatesList" class="assertion-templates-list"></div>
+              </details>
+            </div>          </div>
           <button id="nextStageBtn" class="ghost" type="button">Mark Stage Done</button>
         </section>
       </section>

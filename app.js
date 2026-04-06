@@ -1924,6 +1924,17 @@ function renderBriefingPage() {
     editUserNameBtn.setAttribute("aria-expanded", state.nameEditorOpen ? "true" : "false");
   }
   
+  // Render scenario image if available
+  const imageSection = document.getElementById("briefScenarioImageSection");
+  const imageElement = document.getElementById("briefScenarioImage");
+  if (scenario.imageUrl && imageElement && imageSection) {
+    imageElement.src = scenario.imageUrl;
+    imageElement.alt = `Visual context for: ${scenario.title}`;
+    imageSection.classList.remove("is-hidden");
+  } else if (imageSection) {
+    imageSection.classList.add("is-hidden");
+  }
+  
   briefGoals.innerHTML = scenario.goals
     .map((goal) => `<li>${escapeHtml(goal)}</li>`)
     .join("");
@@ -2633,12 +2644,29 @@ function renderPracticeStrip() {
   }
 
   if (showHints && !hintsDisabled) {
-    stageStarters.innerHTML = guide.starters
-      .map(
-        (starter) =>
-          `<button class="starter-chip" type="button" data-starter="${escapeHtml(starter)}">${escapeHtml(starter)}</button>`
-      )
-      .join("");
+    const starters = guide.starters;
+    const hasTemplates = starters.length > 0 && typeof starters[0] === "object" && starters[0].style;
+    
+    if (hasTemplates) {
+      // Render template tabs (deferential, balanced, direct)
+      stageStarters.innerHTML = starters
+        .map(
+          (template) =>
+            `<div class="starter-template" data-template-style="${escapeHtml(template.style || "")}">
+              <span class="template-style-badge">${escapeHtml(template.style || "").charAt(0).toUpperCase() + (template.style || "").slice(1)}</span>
+              <button class="starter-chip" type="button" data-starter="${escapeHtml(template.text)}">${escapeHtml(template.text)}</button>
+            </div>`
+        )
+        .join("");
+    } else {
+      // Fallback to simple string starters
+      stageStarters.innerHTML = starters
+        .map(
+          (starter) =>
+            `<button class="starter-chip" type="button" data-starter="${escapeHtml(starter)}">${escapeHtml(starter)}</button>`
+        )
+        .join("");
+    }
   } else {
     stageStarters.innerHTML = "<p class=\"muted starter-empty\">Hints are hidden for this level.</p>";
   }
