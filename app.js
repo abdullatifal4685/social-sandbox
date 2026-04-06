@@ -2862,6 +2862,9 @@ function setPracticeScaffoldMenuOpen(open) {
 }
 
 function renderBrief() {
+  if (!briefTabs || !scenarioBriefContent) {
+    return;
+  }
   const scenario = getScenario();
 
   const tabButtons = briefTabs.querySelectorAll(".brief-tab");
@@ -2885,8 +2888,12 @@ function renderBrief() {
 }
 
 function renderScenarioBriefVisibility() {
-  scenarioBriefBody.classList.toggle("is-collapsed", !state.scenarioBriefExpanded);
-  toggleScenarioBriefBtn.textContent = state.scenarioBriefExpanded ? "Hide Details" : "Show Details";
+  if (scenarioBriefBody) {
+    scenarioBriefBody.classList.toggle("is-collapsed", !state.scenarioBriefExpanded);
+  }
+  if (toggleScenarioBriefBtn) {
+    toggleScenarioBriefBtn.textContent = state.scenarioBriefExpanded ? "Hide Details" : "Show Details";
+  }
 }
 
 function openScenarioBuilderForCreate() {
@@ -4592,10 +4599,12 @@ briefTabs.addEventListener("click", (event) => {
   renderBrief();
 });
 
-toggleScenarioBriefBtn.addEventListener("click", () => {
-  state.scenarioBriefExpanded = !state.scenarioBriefExpanded;
-  renderScenarioBriefVisibility();
-});
+if (toggleScenarioBriefBtn) {
+  toggleScenarioBriefBtn.addEventListener("click", () => {
+    state.scenarioBriefExpanded = !state.scenarioBriefExpanded;
+    renderScenarioBriefVisibility();
+  });
+}
 
 toggleScenariosBtn.addEventListener("click", () => {
   state.scenariosExpanded = !state.scenariosExpanded;
