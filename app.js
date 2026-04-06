@@ -137,53 +137,107 @@ const STAGE_GUIDE = {
 const DEFAULT_SCENARIOS = [
   {
     id: "failing-project",
-    title: "Report a Failing Project",
+    title: "Report a Failing Project to Your Manager",
+    scenarioType: "hierarchical",
+    authorityGap: 3,
     difficulty: "High authority gradient",
     context:
-      "You are a junior analyst. Your senior manager still believes the project is on track, but key milestones are missed and risks are rising.",
+      "You are a junior analyst on a 6-month IT modernization project. When the project kicked off three months ago, your senior manager was confident. But behind the scenes, technical debt is worse than expected. Two key milestones have slipped: your integration work is delayed, and the testing phase is now compressed into half the planned time. Your manager still believes the project can deliver on time and has not flagged issues to leadership yet. You have noticed stress rising in the team, and if risks are not surfaced now, delivery quality and team capacity are both at risk. You have a 10-minute sync to raise this carefully.",
+    imageUrl: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400&h=300&fit=crop",
     aiRole: "Senior Manager",
     opening:
       "You asked for this quick sync. I only have ten minutes, so tell me what you need.",
     goals: [
-      "State purpose clearly and respectfully",
-      "Surface facts before conclusions",
-      "Acknowledge pressure and maintain psychological safety",
-      "Propose an actionable recovery plan",
+      "Surface risks without sounding alarmist or blaming",
+      "Present facts (milestone slippage and impact) before conclusions",
+      "Acknowledge leadership pressure while preserving psychological safety",
+      "Propose one actionable recovery option with ownership",
     ],
+    silenceMetrics: true,
     practice: {
       Introduce: {
-        objective: "Open the conversation without sounding defensive.",
+        objective: "Open respectfully, signal shared intent, and set focus.",
         starters: [
-          "I want to discuss a risk I am seeing before it gets worse.",
-          "My aim is to keep the project on track and surface concerns early.",
+          {
+            style: "deferential",
+            text: "Thanks for the time. I want to raise one delivery risk early so we can protect your timeline and avoid escalation later.",
+          },
+          {
+            style: "balanced",
+            text: "I want to flag a project risk now while we still have options. My goal is to help us stay credible on delivery.",
+          },
+          {
+            style: "direct",
+            text: "Two milestones slipped and testing is compressed. We need a decision this week on scope, timeline, or resources.",
+          },
         ],
       },
       Listen: {
-        objective: "Understand the manager’s priorities before presenting the issue.",
+        objective: "Understand their constraints first, then position your evidence.",
         starters: [
-          "Can you share what you are seeing from your side of the project?",
-          "What trade-offs are you weighing right now?",
+          {
+            style: "deferential",
+            text: "Before I go deeper, can I ask how you are seeing risk from your side and what constraints are most critical right now?",
+          },
+          {
+            style: "balanced",
+            text: "What trade-offs are you currently prioritizing: launch date, feature scope, or defect tolerance?",
+          },
+          {
+            style: "direct",
+            text: "What is non-negotiable for you right now: timeline, scope, or quality threshold?",
+          },
         ],
       },
       Empathize: {
-        objective: "Acknowledge pressure while keeping the conversation constructive.",
+        objective: "Acknowledge pressure while keeping urgency clear.",
         starters: [
-          "I understand the deadline pressure this creates for you.",
-          "I can see why this is frustrating, and I want to solve it with you.",
+          {
+            style: "deferential",
+            text: "I understand there is pressure from leadership to keep confidence high. I want to support that while helping us avoid avoidable risk.",
+          },
+          {
+            style: "balanced",
+            text: "I can see the timeline pressure you are carrying. I am raising this now so we still have room to correct responsibly.",
+          },
+          {
+            style: "direct",
+            text: "You are under deadline pressure. If we wait another week, our options narrow and risk goes up.",
+          },
         ],
       },
       Talk: {
-        objective: "State the project risk with evidence, not emotion.",
+        objective: "State impact with concrete evidence and no blame.",
         starters: [
-          "Two milestones are missed, which raises the delivery risk.",
-          "If we continue this way, rework and client impact are likely.",
+          {
+            style: "deferential",
+            text: "Integration is 2 weeks behind, which compresses testing from 8 weeks to 4. That raises launch defect risk and increases rework exposure.",
+          },
+          {
+            style: "balanced",
+            text: "Current data: 2 missed milestones, 3 days of unplanned rework, and reduced test runway. If unchanged, quality and schedule confidence both drop.",
+          },
+          {
+            style: "direct",
+            text: "We are outside safe delivery limits. At the current pace, we will miss date or miss quality, likely both.",
+          },
         ],
       },
       Solve: {
-        objective: "Agree on a recovery plan with ownership and timing.",
+        objective: "Propose options and secure explicit next-step ownership.",
         starters: [
-          "Could we agree on one recovery action for this week and an owner?",
-          "Let us set a checkpoint on Friday to review progress together.",
+          {
+            style: "deferential",
+            text: "Could we choose one path this week: slight scope trim, timeline adjustment, or temporary support? I can draft the option summary for your approval.",
+          },
+          {
+            style: "balanced",
+            text: "I suggest we pick one trade-off today and align owners. Can we review progress at a Friday checkpoint?",
+          },
+          {
+            style: "direct",
+            text: "Decision needed this week: scope, time, or resources. I will prepare the plan and owner matrix once you choose.",
+          },
         ],
       },
     },
@@ -1905,9 +1959,10 @@ function renderModule() {
 function renderBriefingPage() {
   const scenario = getScenario();
   const scenarioScaffoldLevel = normalizeScaffoldLevel(Number(scenario.scaffoldLevel || 1));
+  const scenarioTypeLabel = scenario.scenarioType === "hierarchical" ? "Hierarchical dynamics" : "General difficult conversation";
 
   briefScenarioTitle.textContent = scenario.title;
-  briefScenarioDifficulty.textContent = `Challenge: ${scenario.difficulty}`;
+  briefScenarioDifficulty.textContent = `Challenge: ${scenario.difficulty} | Type: ${scenarioTypeLabel}`;
   briefContext.textContent = scenario.context;
   briefRole.innerHTML = `<span class="role-badge">Talking with: ${escapeHtml(scenario.aiRole)}</span>`;
   if (selectedUserName) {
@@ -3569,6 +3624,70 @@ function buildScaffoldComparisonHtml() {
   `;
 }
 
+function computeSilenceRiskMetrics(messages, scores) {
+  const userMessages = (messages || []).filter((item) => item.role === "user").map((item) => item.content || "");
+  const text = userMessages.join(" ").toLowerCase();
+  const words = text.split(/\s+/).filter(Boolean);
+  const wordCount = words.length || 1;
+
+  const countMatches = (patterns) => patterns.reduce((sum, pattern) => sum + ((text.match(pattern) || []).length), 0);
+
+  const deferenceCount = countMatches([
+    /\bwith respect\b/g,
+    /\bi understand\b/g,
+    /\bif you agree\b/g,
+    /\bif appropriate\b/g,
+    /\bwould you\b/g,
+    /\bcould we\b/g,
+  ]);
+  const softenerCount = countMatches([
+    /\bmaybe\b/g,
+    /\bperhaps\b/g,
+    /\bi think\b/g,
+    /\bi feel\b/g,
+    /\bjust\b/g,
+    /\bkind of\b/g,
+    /\bsort of\b/g,
+  ]);
+  const directCount = countMatches([
+    /\bi recommend\b/g,
+    /\bwe need\b/g,
+    /\bthe risk is\b/g,
+    /\bi noticed\b/g,
+    /\bi suggest\b/g,
+    /\blet us\b/g,
+    /\blet's\b/g,
+  ]);
+  const questionCount = (text.match(/\?/g) || []).length;
+
+  const deferenceOverload = Math.min(100, Math.round((deferenceCount / wordCount) * 900));
+  const assertivenessBalance = Math.max(0, Math.min(100, Math.round((directCount / Math.max(1, directCount + softenerCount + questionCount)) * 100)));
+  const clarityWithRespect = Math.max(
+    20,
+    Math.min(100, Math.round(((scores?.reduce((sum, item) => sum + item.score, 0) || 0) / (ILETS.length * 2)) * 70 + (100 - Math.min(45, deferenceOverload)) * 0.3))
+  );
+  const silenceToVoiceIndex = Number((directCount / Math.max(1, softenerCount + questionCount)).toFixed(2));
+  const escalationReadiness = Math.max(
+    0,
+    Math.min(
+      100,
+      Math.round(
+        ((scores?.find((item) => item.stage === "Talk")?.score || 0) * 25) +
+        ((scores?.find((item) => item.stage === "Solve")?.score || 0) * 25) +
+        assertivenessBalance * 0.5
+      )
+    )
+  );
+
+  return {
+    deferenceOverload,
+    clarityWithRespect,
+    assertivenessBalance,
+    silenceToVoiceIndex,
+    escalationReadiness,
+  };
+}
+
 function buildReflectionDraftHistoryHtml() {
   if (!state.reflectionDrafts.length) {
     return "<p class=\"muted\">No saved drafts yet.</p>";
@@ -3811,6 +3930,7 @@ function maybeQueueInMomentReflection() {
 
 function generateFeedback() {
   const scores = getStageScoresFromMessages(state.messages);
+  const scenario = getScenario();
 
   const total = scores.reduce((sum, item) => sum + item.score, 0);
   const max = ILETS.length * 2;
@@ -3919,6 +4039,26 @@ function generateFeedback() {
   `;
 
   const analytics = computeAnalytics();
+  const silenceMetrics = computeSilenceRiskMetrics(state.messages, scores);
+  const communicationCard = scenario?.silenceMetrics
+    ? `
+      <article class="analytics-card">
+        <h4>Organizational Silence Risk</h4>
+        <p class="analytics-metric">Deference Overload: ${silenceMetrics.deferenceOverload}%</p>
+        <p class="analytics-metric">Clarity with Respect: ${silenceMetrics.clarityWithRespect}%</p>
+        <p class="analytics-metric">Silence-to-Voice Index: ${silenceMetrics.silenceToVoiceIndex}</p>
+        <p class="analytics-metric">Escalation Readiness: ${silenceMetrics.escalationReadiness}%</p>
+        <p class="muted">For hierarchical scenarios, keep respect language while increasing clear, accountable statements.</p>
+      </article>
+    `
+    : `
+      <article class="analytics-card">
+        <h4>Communication Style</h4>
+        <p class="analytics-metric">Clarity with Respect: ${silenceMetrics.clarityWithRespect}%</p>
+        <p class="analytics-metric">Assertiveness Balance: ${silenceMetrics.assertivenessBalance}%</p>
+        <p class="muted">For general scenarios, prioritize clear statements and concrete next steps without over-softening.</p>
+      </article>
+    `;
   const sessionHtml = `
     <article class="analytics-card">
       <h4>Analytics Overview</h4>
@@ -3930,6 +4070,7 @@ function generateFeedback() {
       <p class="analytics-metric">Filler words: ${analytics.fillerCount} (${analytics.fillerRate}%)</p>
       <p class="muted">Most repeated opener: ${analytics.repeatedStarter}</p>
     </article>
+    ${communicationCard}
     <article class="analytics-card">
       <h4>Performance Bars</h4>
       <div class="mini-bars">

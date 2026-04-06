@@ -3140,58 +3140,6 @@ body.hide-left.hide-right .layout {
   margin: 0.7rem 0;
 }
 
-/* Assertion templates */
-.assertion-templates-section {
-  margin-top: 1.2rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(15, 31, 59, 0.12);
-}
-
-.assertion-templates-toggle {
-  cursor: pointer;
-  user-select: none;
-}
-
-.assertion-templates-toggle summary {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--ink);
-  font-weight: 600;
-  font-size: 0.95rem;
-  list-style: none;
-  padding: 0.35rem;
-  margin: -0.35rem;
-  border-radius: 6px;
-  transition: background 120ms ease;
-}
-
-.assertion-templates-toggle summary:hover {
-  background: rgba(29, 95, 229, 0.08);
-}
-
-.assertion-templates-toggle summary::-webkit-details-marker {
-  display: none;
-}
-
-.assertion-templates-toggle summary::before {
-  content: "▶";
-  display: inline-block;
-  font-size: 0.72rem;
-  transition: transform 160ms ease;
-  color: var(--accent);
-}
-
-.assertion-templates-toggle[open] summary::before {
-  transform: rotate(90deg);
-}
-
-.assertion-templates-list {
-  display: grid;
-  gap: 0.6rem;
-  margin-top: 0.8rem;
-}
-
 .starter-template {
   display: flex;
   align-items: center;
