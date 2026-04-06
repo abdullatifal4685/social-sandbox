@@ -4851,12 +4851,13 @@ scenarioPickerGrid.addEventListener("click", (event) => {
     return;
   }
 
-  const selectButton = event.target.closest(".picker-card-select");
-  if (!selectButton) {
+  const selectNode = event.target.closest(".picker-card-select, .scenario-picker-card");
+  if (!selectNode) {
     return;
   }
-  const scenarioId = selectButton.getAttribute("data-scenario-id");
+  const scenarioId = selectNode.getAttribute("data-scenario-id");
   if (scenarioId) {
+    event.preventDefault();
     const typedName = (userNameInput?.value || "").trim();
     if (typedName) {
       saveUserName(typedName);
