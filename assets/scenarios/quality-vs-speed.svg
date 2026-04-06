@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">Quality Versus Speed Illustration</title>
+  <desc id="desc">Abstract gauge and checklist representing speed and quality trade-offs.</desc>
+  <defs>
+    <linearGradient id="bg5" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#f3f9ff"/>
+      <stop offset="1" stop-color="#e2efff"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg5)"/>
+  <rect x="100" y="100" width="1000" height="600" rx="30" fill="#ffffff" stroke="#cedeFF" stroke-width="6"/>
+  <path d="M280 520a230 230 0 1 1 460 0" fill="#eaf2ff" stroke="#cfe0ff" stroke-width="8"/>
+  <path d="M510 520l150-120" stroke="#2f66f5" stroke-width="14" stroke-linecap="round"/>
+  <circle cx="510" cy="520" r="24" fill="#2f66f5"/>
+  <rect x="770" y="210" width="240" height="70" rx="14" fill="#edf4ff" stroke="#cfe0ff" stroke-width="4"/>
+  <rect x="770" y="305" width="240" height="70" rx="14" fill="#edf4ff" stroke="#cfe0ff" stroke-width="4"/>
+  <rect x="770" y="400" width="240" height="70" rx="14" fill="#edf4ff" stroke="#cfe0ff" stroke-width="4"/>
+  <rect x="770" y="495" width="240" height="70" rx="14" fill="#2f66f5"/>
+  <circle cx="810" cy="245" r="12" fill="#2f66f5"/>
+  <circle cx="810" cy="340" r="12" fill="#2f66f5"/>
+  <circle cx="810" cy="435" r="12" fill="#2f66f5"/>
+</svg>

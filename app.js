@@ -143,7 +143,7 @@ const DEFAULT_SCENARIOS = [
     difficulty: "High authority gradient",
     context:
       "You are a junior analyst on a 6-month IT modernization project. When the project kicked off three months ago, your senior manager was confident. But behind the scenes, technical debt is worse than expected. Two key milestones have slipped: your integration work is delayed, and the testing phase is now compressed into half the planned time. Your manager still believes the project can deliver on time and has not flagged issues to leadership yet. You have noticed stress rising in the team, and if risks are not surfaced now, delivery quality and team capacity are both at risk. You have a 10-minute sync to raise this carefully.",
-    imageUrl: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400&h=300&fit=crop",
+    imageUrl: "./assets/scenarios/failing-project.svg",
     aiRole: "Senior Manager",
     opening:
       "You asked for this quick sync. I only have ten minutes, so tell me what you need.",
@@ -249,7 +249,7 @@ const DEFAULT_SCENARIOS = [
     difficulty: "Time pressure and blame culture",
     context:
       "Your engineering team is racing to hit a quarterly release deadline. A teammate just committed code that bypasses a critical data validation step—a step that catches errors before they reach production. When you ask why, they say, 'We're already late. I'll add it back after launch.' You know this is risky. If bad data slips through, it will create downstream data corruption that's expensive to fix. The team is already stressed, and you don't want to trigger a blame conversation. But you also can't let this pass. You need to address it without making your teammate defensive.",
-    imageUrl: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=300&fit=crop",
+    imageUrl: "./assets/scenarios/unsafe-shortcut.svg",
     aiRole: "Teammate",
     opening:
       "We are already late. I skipped one check this time. Can we just move on?",
@@ -309,7 +309,7 @@ const DEFAULT_SCENARIOS = [
     scenarioType: "general",
     difficulty: "Cross-team sensitivity",
     context: `You work with a senior peer from another department who regularly dominates meetings. They interrupt people, jump to conclusions quickly, and shut down ideas from junior team members. In the last three meetings, you've watched your team's junior analysts stop offering input. You're not their manager, so you can't direct them. But you can talk to your senior peer. The challenge: they might get defensive, or worse, they might not even realize they're doing it. You want to name the behavior, show respect for their role, and invite them to co-own a solution without making it awkward.`,
-    imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop",
+    imageUrl: "./assets/scenarios/meeting-dominance.svg",
     aiRole: "Senior Peer",
     opening:
       "I heard you had concerns about our meeting style. What exactly is the issue?",
@@ -415,7 +415,7 @@ const DEFAULT_SCENARIOS = [
     authorityGap: 2,
     difficulty: "Competing loyalties and scope creep",
     context: `You're a project lead working across two business units. Your primary sponsor told you a month ago that delivery date was fixed. But six weeks in, a more senior leader (not your direct manager) has been requesting increasing scope—new features, reports, data integrations. The problem: each addition adds 1-2 weeks to the timeline, and your team is already stretched. Your original sponsor is now asking why feature X isn't done yet, unaware that the scope has expanded. You need to have a conversation with the senior leader about timeline vs. scope trade-offs. But they outrank you, and you don't want to seem uncooperative or like you're refusing work. How do you raise this without appearing to say no?`,
-    imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop",
+    imageUrl: "./assets/scenarios/resource-priority.svg",
     aiRole: "Senior Leader (Different Unit)",
     opening: "I've been thinking about next steps. We should add the user dashboard to this release. I know it's late in the cycle, but the stakeholder asked for it. Can you make it work?",
     goals: [
@@ -520,7 +520,7 @@ const DEFAULT_SCENARIOS = [
     authorityGap: 2,
     difficulty: "Authority and standards tension",
     context: `You're a QA lead on a product launch. Your test plan includes three rounds of testing—unit, integration, and user acceptance. Today, your product manager informed you that to hit the market window, testing needs to be compressed to one week (originally two weeks) and only cover "critical path" functionality. They're feeling pressure from executives to get to market fast. But you know that skipping integration testing has historically led to 10-15% of bugs reaching production. That's not acceptable for this product category. You need to push back—but respectfully, because your manager agrees with the compressed timeline, and you don't want to be seen as slowing the company down. How do you advocate for quality without sounding obstructionist?`,
-    imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop",
+    imageUrl: "./assets/scenarios/quality-vs-speed.svg",
     aiRole: "Product Manager",
     opening: "I know the test plan is ambitious, but we've got to cut it. The market window is closing. Can you get to MVP quality in one week instead of two?",
     goals: [
@@ -2040,6 +2040,7 @@ function renderScenarioPicker() {
     .map((scenario) => `
       <article class="scenario-picker-card ${scenario.id === state.selectedScenarioId ? "active" : ""}" data-scenario-id="${escapeHtml(scenario.id)}">
         <button class="picker-card-select" data-scenario-id="${escapeHtml(scenario.id)}" type="button">
+          ${scenario.imageUrl ? `<img class="picker-card-illustration" src="${escapeHtml(scenario.imageUrl)}" alt="Illustration for ${escapeHtml(scenario.title)}" />` : ""}
           <div class="picker-card-head">
             <strong>${escapeHtml(scenario.title)}</strong>
             <span class="picker-card-badge">${escapeHtml(scenario.difficulty)}</span>
@@ -2866,6 +2867,9 @@ function renderBrief() {
     return;
   }
   const scenario = getScenario();
+  const illustration = scenario.imageUrl
+    ? `<img class="brief-inline-illustration" src="${escapeHtml(scenario.imageUrl)}" alt="Illustration for ${escapeHtml(scenario.title)}" />`
+    : "";
 
   const tabButtons = briefTabs.querySelectorAll(".brief-tab");
   tabButtons.forEach((button) => {
@@ -2875,16 +2879,20 @@ function renderBrief() {
   });
 
   if (state.briefTab === "scenario") {
-    scenarioBriefContent.innerHTML = `<p><strong>${escapeHtml(scenario.title)}</strong> is designed for ${escapeHtml(scenario.difficulty.toLowerCase())} conversations. AI role partner: <strong>${escapeHtml(scenario.aiRole)}</strong>.</p>`;
+    scenarioBriefContent.innerHTML = `
+      ${illustration}
+      <p><strong>${escapeHtml(scenario.title)}</strong> is designed for ${escapeHtml(scenario.difficulty.toLowerCase())} conversations.</p>
+      <p class="muted">AI role partner: <strong>${escapeHtml(scenario.aiRole)}</strong></p>
+    `;
     return;
   }
 
   if (state.briefTab === "context") {
-    scenarioBriefContent.innerHTML = `<p>${escapeHtml(scenario.context)}</p>`;
+    scenarioBriefContent.innerHTML = `${illustration}<p>${escapeHtml(scenario.context)}</p>`;
     return;
   }
 
-  scenarioBriefContent.innerHTML = `<ul>${scenario.goals.map((goal) => `<li>${escapeHtml(goal)}</li>`).join("")}</ul>`;
+  scenarioBriefContent.innerHTML = `${illustration}<ul>${scenario.goals.map((goal) => `<li>${escapeHtml(goal)}</li>`).join("")}</ul>`;
 }
 
 function renderScenarioBriefVisibility() {

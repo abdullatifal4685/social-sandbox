@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">Quality and Safety Shortcut Illustration</title>
+  <desc id="desc">Abstract code panel with warning shield and verification checklist.</desc>
+  <defs>
+    <linearGradient id="bg2" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#f3f8ff"/>
+      <stop offset="1" stop-color="#e4efff"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg2)"/>
+  <rect x="110" y="95" width="980" height="610" rx="28" fill="#ffffff" stroke="#cadcff" stroke-width="6"/>
+  <rect x="170" y="170" width="560" height="430" rx="18" fill="#0f2f66"/>
+  <rect x="220" y="230" width="230" height="18" rx="9" fill="#61b0ff"/>
+  <rect x="220" y="280" width="350" height="18" rx="9" fill="#76c4ff"/>
+  <rect x="220" y="330" width="290" height="18" rx="9" fill="#61b0ff"/>
+  <rect x="220" y="380" width="400" height="18" rx="9" fill="#76c4ff"/>
+  <path d="M820 230l120 0 40 70-100 180-100-180 40-70z" fill="#ffe9a9" stroke="#f0be3b" stroke-width="8"/>
+  <rect x="790" y="520" width="240" height="48" rx="12" fill="#edf4ff" stroke="#cfe0ff" stroke-width="3"/>
+  <rect x="790" y="582" width="240" height="48" rx="12" fill="#edf4ff" stroke="#cfe0ff" stroke-width="3"/>
+  <circle cx="825" cy="544" r="12" fill="#2f66f5"/>
+  <circle cx="825" cy="606" r="12" fill="#2f66f5"/>
+</svg>

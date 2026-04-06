@@ -1392,6 +1392,16 @@ textarea {
   box-shadow: none;
 }
 
+.picker-card-illustration {
+  width: 100%;
+  height: 138px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid rgba(20, 97, 255, 0.14);
+  background: linear-gradient(180deg, #f8fbff, #eef4ff);
+  margin-bottom: 0.78rem;
+}
+
 .picker-card-select:hover:not(:disabled) {
   transform: none;
   box-shadow: none;
@@ -2705,6 +2715,16 @@ body.hide-left.hide-right .layout {
   border: 1px solid rgba(18, 26, 43, 0.12);
   border-radius: 14px;
   padding: 0.82rem 0.9rem;
+}
+
+.brief-inline-illustration {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid rgba(20, 97, 255, 0.14);
+  background: linear-gradient(180deg, #f8fbff, #eef4ff);
+  margin-bottom: 0.7rem;
 }
 
 .chat-practice-label {
