@@ -2233,7 +2233,7 @@ body.hide-left.hide-right .layout {
 
 .panel-chat {
   display: grid;
-  grid-template-rows: auto auto auto 1fr auto;
+  grid-template-rows: auto auto 1fr auto auto;
   overflow: hidden;
   background: linear-gradient(180deg, #ffffff, #f8fbff);
 }
@@ -2728,6 +2728,7 @@ body.hide-left.hide-right .layout {
 
 .messages {
   overflow-y: auto;
+  min-height: 0;
   padding: 0.9rem 0.7rem;
   display: flex;
   flex-direction: column;
