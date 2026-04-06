@@ -191,105 +191,375 @@ const DEFAULT_SCENARIOS = [
   {
     id: "unsafe-shortcut",
     title: "Challenge an Unsafe Shortcut",
+    scenarioType: "general",
     difficulty: "Time pressure and blame culture",
     context:
-      "A teammate skips a verification step to hit deadline. You worry this creates safety and quality risks.",
+      "Your engineering team is racing to hit a quarterly release deadline. A teammate just committed code that bypasses a critical data validation step—a step that catches errors before they reach production. When you ask why, they say, 'We're already late. I'll add it back after launch.' You know this is risky. If bad data slips through, it will create downstream data corruption that's expensive to fix. The team is already stressed, and you don't want to trigger a blame conversation. But you also can't let this pass. You need to address it without making your teammate defensive.",
+    imageUrl: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=300&fit=crop",
     aiRole: "Teammate",
     opening:
       "We are already late. I skipped one check this time. Can we just move on?",
     goals: [
-      "Open without accusation",
-      "Ask questions to understand constraints",
-      "Show empathy while protecting standards",
-      "Co-create a safer immediate next step",
+      "Open without blame or accusation",
+      "Understand the pressure and constraints they're under",
+      "Show empathy while protecting quality standards",
+      "Co-create a safer immediate next step (don't just say 'fix it')",
     ],
+    silenceMetrics: false,
     practice: {
       Introduce: {
-        objective: "Start in a non-blaming way and frame the concern clearly.",
+        objective: "Flag the concern clearly without sounding judgmental.",
         starters: [
-          "Can we pause for a minute? I want to talk through a concern I noticed.",
-          "I am not trying to blame anyone. I want to make sure we stay safe and accurate.",
+          { style: "deferential", text: "Can we pause for a minute? I noticed something in the commit and want to check in about it—not in blame, just to make sure we're aligned." },
+          { style: "balanced", text: "I saw the validation step was removed. I'm not trying to call you out—I want to understand the decision and make sure we're not risking the data." },
+          { style: "direct", text: "The validation bypass could create data corruption downstream. I need to understand why that happened and how we fix it." },
         ],
       },
       Listen: {
-        objective: "Ask about the pressure behind the shortcut before reacting.",
+        objective: "Ask genuinely about the pressure before arguing.",
         starters: [
-          "What pushed you to skip that check this time?",
-          "What was making the deadline feel so tight?",
+          { style: "deferential", text: "What was the biggest pressure you were facing when you made that call? What would have helped?" },
+          { style: "balanced", text: "What made you decide to remove it? Was it a time trade-off, or was there a technical reason?" },
+          { style: "direct", text: "Why did you remove the validation? What's the timeline you're working against?" },
         ],
       },
       Empathize: {
-        objective: "Acknowledge the time pressure without accepting the risk.",
+        objective: "Acknowledge pressure and timeline without dropping the issue.",
         starters: [
-          "I get that the deadline is under pressure right now.",
-          "I can see why you made the call, but we still need to protect quality.",
+          { style: "deferential", text: "I get it—the deadline is real and you're trying to move fast. I appreciate you're under a lot of pressure. And I want to make sure we don't create a bigger problem later." },
+          { style: "balanced", text: "I understand the deadline crunch. Corners feel necessary. But a data corruption fix will cost us more time than adding the validation back now." },
+          { style: "direct", text: "You're under time pressure. That's real. But data corruption will create technical debt that costs us weeks to fix. We need to solve this now." },
         ],
       },
       Talk: {
-        objective: "Explain the concrete risk created by the shortcut.",
+        objective: "Explain the concrete business impact of the risk.",
         starters: [
-          "Skipping verification could create an avoidable error downstream.",
-          "If we miss this now, the impact could be much bigger later.",
+          { style: "deferential", text: "If bad data gets through, we'll spend days debugging downstream systems instead of moving to the next feature. That's a bigger delay than adding validation now." },
+          { style: "balanced", text: "One bad record that passes through creates corruption in three downstream systems. Fixing that will take a week. The validation takes an hour now." },
+          { style: "direct", text: "Data corruption is a week-long incident response. The validation is a 1-hour fix. We're trading 1 hour today for 5 days later." },
         ],
       },
       Solve: {
-        objective: "Move quickly to a safer alternative for the next step.",
+        objective: "Agree on a safer path forward that acknowledges the timeline.",
         starters: [
-          "What is the safest way we can fix this before moving on?",
-          "Let us decide the minimum check we need before release.",
+          { style: "deferential", text: "Could we add the validation back and run the data through a quick smoke test? If we work together, I think we can finish in 2 hours instead of the full 4." },
+          { style: "balanced", text: "Let's add it back and do a quick burn-down of the blocked tests. Can we sync in 30 min and see where we stand?" },
+          { style: "direct", text: "The validation goes back in. Let's test it together right now so we move faster than debating." },
         ],
       },
     },
   },
   {
-    id: "peer-feedback",
-    title: "Give Peer Feedback Upward",
+    id: "dominance-in-meetings",
+    title: "Address Meeting Dominance Respectfully",
+    scenarioType: "general",
     difficulty: "Cross-team sensitivity",
-    context:
-      "A senior peer dominates meetings and dismisses junior ideas. Team morale and information sharing are declining.",
+    context: `You work with a senior peer from another department who regularly dominates meetings. They interrupt people, jump to conclusions quickly, and shut down ideas from junior team members. In the last three meetings, you've watched your team's junior analysts stop offering input. You're not their manager, so you can't direct them. But you can talk to your senior peer. The challenge: they might get defensive, or worse, they might not even realize they're doing it. You want to name the behavior, show respect for their role, and invite them to co-own a solution without making it awkward.`,
+    imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop",
     aiRole: "Senior Peer",
     opening:
       "I heard you had concerns about our meeting style. What exactly is the issue?",
     goals: [
-      "Name behavior and impact specifically",
-      "Avoid personal attacks",
-      "Invite perspective and shared ownership",
-      "Agree on observable behavior changes",
+      "Name the behavior specifically without character attacks",
+      "Show respect for their role and intention",
+      "Invite their perspective and shared ownership",
+      "Agree on one visible behavior change for the next meeting",
     ],
+    silenceMetrics: false,
     practice: {
       Introduce: {
-        objective: "Lead with a respectful framing, not a complaint.",
+        objective: "Lead with respect and shared purpose, not complaint.",
         starters: [
-          "I want to share an observation about how our meetings are landing.",
-          "I value your input, and I also want to raise a team concern.",
+          {
+            style: "deferential",
+            text: "I value your input a lot, and I want to bring an observation about how our meetings are landing. Would you be open to that?",
+          },
+          {
+            style: "balanced",
+            text: "I've noticed something about the meeting dynamic that I think is hurting information flow. I wanted to raise it as a peer because I respect you.",
+          },
+          {
+            style: "direct",
+            text: "The meeting format is suppressing junior input. I need to tell you directly because we're losing good ideas.",
+          },
         ],
       },
       Listen: {
-        objective: "Invite their perspective on the meeting dynamic.",
+        objective: "Invite their perspective on the meeting dynamic first.",
         starters: [
-          "How do you see the current meeting format working?",
-          "What is your intention when you move the discussion quickly?",
+          {
+            style: "deferential",
+            text: "How are you experiencing the meetings? What's your intention when you move through topics quickly?",
+          },
+          {
+            style: "balanced",
+            text: "What's your goal in running meetings the way you do? Are you trying to keep things moving, or is there something else driving the pace?",
+          },
+          {
+            style: "direct",
+            text: "Why do you interrupt people? What are you optimizing for?",
+          },
         ],
       },
       Empathize: {
-        objective: "Show respect for their role while naming the team effect.",
+        objective: "Acknowledge their perspective and role while naming the team effect.",
         starters: [
-          "I know you are trying to keep us efficient.",
-          "I understand the pressure to move quickly, and I want the team to still contribute.",
+          {
+            style: "deferential",
+            text: "I get it—you're trying to be efficient and not waste people's time. That's a strength. And I'm seeing that the pace is making juniors hesitant to speak up.",
+          },
+          {
+            style: "balanced",
+            text: "I see you're focused on keeping meetings productive. That matters. But it's also creating a dynamic where only senior voices are heard.",
+          },
+          {
+            style: "direct",
+            text: "You're trying to move fast. But you're also creating a chilling effect where junior people don't contribute.",
+          },
         ],
       },
       Talk: {
-        objective: "Name the specific behavior and its impact on the team.",
+        objective: "Name the specific behavior and team impact with evidence.",
         starters: [
-          "When ideas are cut off quickly, junior teammates stop sharing.",
-          "The current style is reducing information sharing in the room.",
+          {
+            style: "deferential",
+            text: "In the last three meetings, I noticed when the team attempts a thought, it gets cut off. That's happening about every 5-10 minutes. The result is junior people are stopping volunteering ideas.",
+          },
+          {
+            style: "balanced",
+            text: "Here's what I'm seeing: when someone starts with an idea, it gets interrupted before they finish. Three junior analysts haven't said anything in the last two meetings. That's lost information.",
+          },
+          {
+            style: "direct",
+            text: "You interrupt junior people mid-thought. That's killing their confidence. I watched three people stop contributing last week.",
+          },
         ],
       },
       Solve: {
-        objective: "Agree on a visible behavior change for the next meeting.",
+        objective: "Propose a small, visible behavior change and commit together.",
         starters: [
-          "Could we try letting each person finish one thought before responding?",
-          "Would you be open to a one-minute round before we decide?",
+          {
+            style: "deferential",
+            text: "Would you be open to trying something in the next meeting? Let's give people 30 seconds to finish their thought before responding. See if that changes what we hear?",
+          },
+          {
+            style: "balanced",
+            text: "I'd like to suggest a small change for next time: let people finish one complete thought before the discussion moves. Can we try that and see what shifts?",
+          },
+          {
+            style: "direct",
+            text: "I'm going to ask you to do one thing in the next meeting: don't interrupt. Let people finish. We'll see what happens.",
+          },
+        ],
+      },
+    },
+  },
+  {
+    id: "resource-priority-conflict",
+    title: "Resolve a Resource Priority Conflict",
+    scenarioType: "hierarchical",
+    authorityGap: 2,
+    difficulty: "Competing loyalties and scope creep",
+    context: `You're a project lead working across two business units. Your primary sponsor told you a month ago that delivery date was fixed. But six weeks in, a more senior leader (not your direct manager) has been requesting increasing scope—new features, reports, data integrations. The problem: each addition adds 1-2 weeks to the timeline, and your team is already stretched. Your original sponsor is now asking why feature X isn't done yet, unaware that the scope has expanded. You need to have a conversation with the senior leader about timeline vs. scope trade-offs. But they outrank you, and you don't want to seem uncooperative or like you're refusing work. How do you raise this without appearing to say no?`,
+    imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop",
+    aiRole: "Senior Leader (Different Unit)",
+    opening: "I've been thinking about next steps. We should add the user dashboard to this release. I know it's late in the cycle, but the stakeholder asked for it. Can you make it work?",
+    goals: [
+      "Acknowledge the senior leader's request respectfully",
+      "Surface the timeline and resource reality clearly",
+      "Ask questions about priorities (not just say no)",
+      "Propose trade-off options (expand timeline, reduce features, or more resources)",
+    ],
+    silenceMetrics: true,
+    practice: {
+      Introduce: {
+        objective: "Signal that you want to find a solution, not block.",
+        starters: [
+          {
+            style: "deferential",
+            text: "Thank you for thinking about how to expand value. I want to work with you on this. Before I commit, I need to walk you through what we're juggling.",
+          },
+          {
+            style: "balanced",
+            text: "I appreciate the feature idea—it's solid. I want to make sure we build it right. Let me show you the current capacity so we can figure out the best path.",
+          },
+          {
+            style: "direct",
+            text: "That feature is good work, but we need to talk timeline and scope because we can't do both the original plan and this addition.",
+          },
+        ],
+      },
+      Listen: {
+        objective: "Understand their priorities before pushing back.",
+        starters: [
+          {
+            style: "deferential",
+            text: "Can I ask—is the dashboard critical for the business case, or is it nice-to-have? Understanding your priority will help me figure out the best path.",
+          },
+          {
+            style: "balanced",
+            text: "What's driving the urgency on the dashboard? Is it a business requirement, or is it opportunistic?",
+          },
+          {
+            style: "direct",
+            text: "How critical is this dashboard to your success metrics? Is it a must-have or a want?",
+          },
+        ],
+      },
+      Empathize: {
+        objective: "Show you understand the business pressure while being honest.",
+        starters: [
+          {
+            style: "deferential",
+            text: "I understand you're under pressure to show value early, and I want to help you succeed. I'm going to be straight with you about what that requires.",
+          },
+          {
+            style: "balanced",
+            text: "I know your stakeholders have high expectations. My job is to help you deliver what matters most without breaking the team.",
+          },
+          {
+            style: "direct",
+            text: "You're trying to maximize value. So am I. But we need to be realistic about the constraint we're operating under.",
+          },
+        ],
+      },
+      Talk: {
+        objective: "Lay out the timeline and capacity reality clearly.",
+        starters: [
+          {
+            style: "deferential",
+            text: "Here's where we stand: we have 4 weeks left. Current scope is 3.5 weeks of work. The dashboard is 1.5 weeks. So we can deliver either the original plan on time, or the original plan plus the dashboard in 5.5 weeks.",
+          },
+          {
+            style: "balanced",
+            text: "We committed to Feature A, B, and C by week 4. We're tracking to deliver. The dashboard adds week 5 to the timeline. The team is already at capacity.",
+          },
+          {
+            style: "direct",
+            text: "You have three options: hit the date with the original scope, extend the date to include the dashboard, or pull a feature from the original scope to make room for the dashboard.",
+          },
+        ],
+      },
+      Solve: {
+        objective: "Get explicit agreement on which trade-off to make.",
+        starters: [
+          {
+            style: "deferential",
+            text: "Which of these works best for you? I can build a case for any of them—I just need to know which direction to move in.",
+          },
+          {
+            style: "balanced",
+            text: "I'd recommend talking to your stakeholder about which matters most: the date or the dashboard. Once you decide, I can adjust the plan accordingly.",
+          },
+          {
+            style: "direct",
+            text: "Decide now: timeline, scope, or resources. I'll organize the team around that decision.",
+          },
+        ],
+      },
+    },
+  },
+  {
+    id: "quality-vs-speed",
+    title: "Push Back on a Rushed Quality Review",
+    scenarioType: "hierarchical",
+    authorityGap: 2,
+    difficulty: "Authority and standards tension",
+    context: `You're a QA lead on a product launch. Your test plan includes three rounds of testing—unit, integration, and user acceptance. Today, your product manager informed you that to hit the market window, testing needs to be compressed to one week (originally two weeks) and only cover "critical path" functionality. They're feeling pressure from executives to get to market fast. But you know that skipping integration testing has historically led to 10-15% of bugs reaching production. That's not acceptable for this product category. You need to push back—but respectfully, because your manager agrees with the compressed timeline, and you don't want to be seen as slowing the company down. How do you advocate for quality without sounding obstructionist?`,
+    imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop",
+    aiRole: "Product Manager",
+    opening: "I know the test plan is ambitious, but we've got to cut it. The market window is closing. Can you get to MVP quality in one week instead of two?",
+    goals: [
+      "Acknowledge their market pressure and constraints",
+      "Surface the quality risk with historical data, not opinion",
+      "Propose a middle ground (prioritized testing, parallel work)",
+      "Get explicit agreement on acceptable risk level",
+    ],
+    silenceMetrics: true,
+    practice: {
+      Introduce: {
+        objective: "Signal partnership while setting up the conversation.",
+        starters: [
+          {
+            style: "deferential",
+            text: "I hear the market pressure. I want us to launch fast and safely. Before we cut the testing plan, let me show you the risk profile.",
+          },
+          {
+            style: "balanced",
+            text: "I understand the timeline crunch. I also need to make sure we're making an informed decision about quality trade-offs.",
+          },
+          {
+            style: "direct",
+            text: "Cutting integration testing increases bug risk to 10-15%. I need to tell you that risk before we commit.",
+          },
+        ],
+      },
+      Listen: {
+        objective: "Understand the market constraints and business drivers.",
+        starters: [
+          {
+            style: "deferential",
+            text: "Can you help me understand what's driving the week-long deadline? Is it a market window, customer commitment, or internal target?",
+          },
+          {
+            style: "balanced",
+            text: "What happens if we launch one week later than this date? Is the market opportunity lost, or just delayed?",
+          },
+          {
+            style: "direct",
+            text: "What's the financial impact if we miss this window versus if we have a bug incident at launch?",
+          },
+        ],
+      },
+      Empathize: {
+        objective: "Acknowledge their pressure while being honest about trade-offs.",
+        starters: [
+          {
+            style: "deferential",
+            text: "I know executives are putting real pressure on you. My goal is to help you launch on time and avoid a crisis that costs way more time.",
+          },
+          {
+            style: "balanced",
+            text: "I get the competitive pressure you're under. I'm not trying to slow you down—I'm trying to keep us from launching a buggy product.",
+          },
+          {
+            style: "direct",
+            text: "You're trying to capture a market moment. But a 10% bug rate will create a PR crisis that costs us months.",
+          },
+        ],
+      },
+      Talk: {
+        objective: "Present the quality data and historical patterns.",
+        starters: [
+          {
+            style: "deferential",
+            text: "In the past four launches where we compressed integration testing, we had an average of 12 production bugs. In launches where we ran full integration testing, we had 2 bugs. That's a 6x difference in customer impact.",
+          },
+          {
+            style: "balanced",
+            text: "Skipping integration testing historically increases production bugs by 10-15%. That's not a number I'm comfortable putting in production with our SLA.",
+          },
+          {
+            style: "direct",
+            text: "Our integration test catch rate is 92%. That means 8% of bugs get to production if we skip it. For this product, that's unacceptable.",
+          },
+        ],
+      },
+      Solve: {
+        objective: "Propose a middle path and get explicit agreement.",
+        starters: [
+          {
+            style: "deferential",
+            text: "What if we do this: prioritize critical path integration tests (2 days), run user acceptance testing in parallel with other features, and cut some nice-to-have tests? That gets us to a one-week timeline with acceptable risk.",
+          },
+          {
+            style: "balanced",
+            text: "I propose we focus hard on critical path integration tests and ship with known minor issues in secondary features. I think we can hit the timeline and keep risk manageable.",
+          },
+          {
+            style: "direct",
+            text: "Run integration tests on critical path only, do UAT in parallel, launch with known minor bugs. That's a one-week plan with 5% residual risk instead of 15%.",
+          },
         ],
       },
     },
