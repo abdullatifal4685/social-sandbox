@@ -4180,6 +4180,62 @@ function switchScenario(nextScenarioId) {
   render();
 }
 
+function bindScenarioPickerInteractions() {
+  if (createScenarioBriefingBtn && createScenarioBriefingBtn.dataset.bound !== "1") {
+    createScenarioBriefingBtn.addEventListener("click", () => {
+      openScenarioBuilderForCreate();
+    });
+    createScenarioBriefingBtn.dataset.bound = "1";
+  }
+
+  if (scenarioPickerGrid && scenarioPickerGrid.dataset.bound !== "1") {
+    scenarioPickerGrid.addEventListener("click", (event) => {
+      const actionButton = event.target.closest("[data-scenario-action]");
+      if (actionButton) {
+        const scenarioId = actionButton.getAttribute("data-scenario-id");
+        const action = actionButton.getAttribute("data-scenario-action");
+        if (!scenarioId || !action) {
+          return;
+        }
+        if (action === "edit") {
+          openScenarioBuilderForEdit(scenarioId);
+        }
+        if (action === "delete") {
+          deleteCustomScenario(scenarioId);
+        }
+        return;
+      }
+
+      const selectNode = event.target.closest(".picker-card-select, .scenario-picker-card");
+      if (!selectNode) {
+        return;
+      }
+      const scenarioId = selectNode.getAttribute("data-scenario-id");
+      if (scenarioId) {
+        event.preventDefault();
+        const typedName = (userNameInput?.value || "").trim();
+        if (typedName) {
+          saveUserName(typedName);
+        }
+        state.selectedScenarioId = scenarioId;
+        applyScenarioScaffoldDefault(scenarioId);
+        renderBriefingPage();
+      }
+    });
+    scenarioPickerGrid.dataset.bound = "1";
+  }
+
+  if (toggleScenarioPickerListBtn && toggleScenarioPickerListBtn.dataset.bound !== "1") {
+    toggleScenarioPickerListBtn.addEventListener("click", () => {
+      state.scenarioPickerExpanded = !state.scenarioPickerExpanded;
+      renderScenarioPicker();
+    });
+    toggleScenarioPickerListBtn.dataset.bound = "1";
+  }
+}
+
+bindScenarioPickerInteractions();
+
 scenarioList.addEventListener("click", (event) => {
   const toggleButton = event.target.closest("[data-scenario-list-toggle]");
   if (toggleButton) {
@@ -4830,43 +4886,7 @@ if (editUserNameBtn && userNameEditor && briefUserNameInput) {
   });
 }
 
-createScenarioBriefingBtn.addEventListener("click", () => {
-  openScenarioBuilderForCreate();
-});
-
-scenarioPickerGrid.addEventListener("click", (event) => {
-  const actionButton = event.target.closest("[data-scenario-action]");
-  if (actionButton) {
-    const scenarioId = actionButton.getAttribute("data-scenario-id");
-    const action = actionButton.getAttribute("data-scenario-action");
-    if (!scenarioId || !action) {
-      return;
-    }
-    if (action === "edit") {
-      openScenarioBuilderForEdit(scenarioId);
-    }
-    if (action === "delete") {
-      deleteCustomScenario(scenarioId);
-    }
-    return;
-  }
-
-  const selectNode = event.target.closest(".picker-card-select, .scenario-picker-card");
-  if (!selectNode) {
-    return;
-  }
-  const scenarioId = selectNode.getAttribute("data-scenario-id");
-  if (scenarioId) {
-    event.preventDefault();
-    const typedName = (userNameInput?.value || "").trim();
-    if (typedName) {
-      saveUserName(typedName);
-    }
-    state.selectedScenarioId = scenarioId;
-    applyScenarioScaffoldDefault(scenarioId);
-    renderBriefingPage();
-  }
-});
+bindScenarioPickerInteractions();
 
 if (choiceSaveNameBtn && choiceNameInput) {
   choiceSaveNameBtn.addEventListener("click", () => {
@@ -4893,10 +4913,7 @@ if (choiceSaveNameBtn && choiceNameInput) {
   });
 }
 
-toggleScenarioPickerListBtn.addEventListener("click", () => {
-  state.scenarioPickerExpanded = !state.scenarioPickerExpanded;
-  renderScenarioPicker();
-});
+bindScenarioPickerInteractions();
 
 modulePrevBtn.addEventListener("click", () => {
   if (state.moduleIndex > 0) {
