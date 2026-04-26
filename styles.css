@@ -1476,14 +1476,17 @@ textarea {
   border-radius: 16px;
   padding: 0.35rem;
   background: linear-gradient(180deg, #ffffff, #f7faff);
-  transition: all 220ms ease;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease, outline-color 180ms ease;
 }
 
-.scenario-picker-card:hover {
-  border-color: var(--accent);
-  box-shadow: 0 12px 32px rgba(20, 97, 255, 0.15);
-  transform: translateY(-4px);
-  background: linear-gradient(180deg, #ffffff, #f2f6ff);
+.scenario-picker-card:hover,
+.scenario-picker-card:focus-within {
+  border-color: #0f3fa8;
+  outline: 3px solid rgba(14, 76, 227, 0.45);
+  outline-offset: 2px;
+  box-shadow: 0 18px 38px rgba(8, 45, 128, 0.34), 0 0 0 3px rgba(255, 191, 71, 0.35);
+  transform: translateY(-5px) scale(1.01);
+  background: linear-gradient(180deg, #fff8df, #ffe9bf);
 }
 
 .picker-card-select {
