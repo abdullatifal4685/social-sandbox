@@ -855,6 +855,66 @@ textarea {
   background: linear-gradient(180deg, #ffffff, #edf3ff);
 }
 
+#chooseLearnBtn:hover,
+#chooseLearnBtn:focus-visible {
+  border-color: rgba(24, 88, 232, 0.78);
+  background: linear-gradient(180deg, #f3f8ff, #dfeaff);
+  box-shadow: 0 12px 30px rgba(24, 88, 232, 0.24);
+}
+
+#chooseLearnBtn:hover .path-icon-wrap,
+#chooseLearnBtn:focus-visible .path-icon-wrap {
+  background: linear-gradient(180deg, #e6f0ff, #d6e6ff);
+  border-color: rgba(24, 88, 232, 0.5);
+}
+
+#chooseLearnBtn:hover .path-icon-svg,
+#chooseLearnBtn:focus-visible .path-icon-svg,
+#chooseLearnBtn:hover strong,
+#chooseLearnBtn:focus-visible strong {
+  color: #143a86;
+}
+
+#choosePracticeBtn:hover,
+#choosePracticeBtn:focus-visible {
+  border-color: rgba(11, 147, 113, 0.78);
+  background: linear-gradient(180deg, #f1fff9, #daf5ea);
+  box-shadow: 0 12px 30px rgba(11, 147, 113, 0.24);
+}
+
+#choosePracticeBtn:hover .path-icon-wrap,
+#choosePracticeBtn:focus-visible .path-icon-wrap {
+  background: linear-gradient(180deg, #e8fbf3, #d3f2e5);
+  border-color: rgba(11, 147, 113, 0.48);
+}
+
+#choosePracticeBtn:hover .path-icon-svg,
+#choosePracticeBtn:focus-visible .path-icon-svg,
+#choosePracticeBtn:hover strong,
+#choosePracticeBtn:focus-visible strong {
+  color: #0e7158;
+}
+
+#choosePeerBtn:hover,
+#choosePeerBtn:focus-visible {
+  border-color: rgba(123, 77, 255, 0.78);
+  background: linear-gradient(180deg, #f7f3ff, #ebe2ff);
+  box-shadow: 0 12px 30px rgba(123, 77, 255, 0.24);
+}
+
+#choosePeerBtn:hover .path-icon-wrap,
+#choosePeerBtn:focus-visible .path-icon-wrap {
+  background: linear-gradient(180deg, #f0eaff, #e3d7ff);
+  border-color: rgba(123, 77, 255, 0.5);
+}
+
+#choosePeerBtn:hover .path-icon-svg,
+#choosePeerBtn:focus-visible .path-icon-svg,
+#choosePeerBtn:hover strong,
+#choosePeerBtn:focus-visible strong {
+  color: #5a34b9;
+}
+
 .path-btn strong {
   display: block;
   margin-bottom: 0.1rem;
