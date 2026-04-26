@@ -1609,8 +1609,10 @@ textarea {
 
 .picker-card-badge {
   display: inline-block;
+  max-width: 100%;
+  box-sizing: border-box;
   padding: 0.2rem 0.55rem;
-  border-radius: 999px;
+  border-radius: 12px;
   background: linear-gradient(130deg, rgba(20, 97, 255, 0.12), rgba(123, 77, 255, 0.1));
   border: 1px solid rgba(20, 97, 255, 0.16);
   color: #2648a8;
@@ -1618,7 +1620,9 @@ textarea {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.25;
 }
 
 .picker-card-text {
