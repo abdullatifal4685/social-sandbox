@@ -2523,7 +2523,9 @@ function renderPeerPracticum() {
     return;
   }
 
-  peerIdentityName.textContent = getLearnerName();
+  if (peerIdentityName) {
+    peerIdentityName.textContent = getLearnerName();
+  }
   if (peerUserNameInput && document.activeElement !== peerUserNameInput) {
     peerUserNameInput.value = state.userName;
   }

@@ -435,17 +435,6 @@
       <div id="scenarioBriefingSection" class="is-hidden">
         <h2>Scenario Briefing</h2>
         <p class="muted">Review the details below before you begin.</p>
-        <div class="name-summary-row">
-          <div>
-            <p class="flow-label">Your name</p>
-            <p id="selectedUserName" class="name-summary">Learner</p>
-          </div>
-          <button id="editUserNameBtn" class="ghost name-edit-btn" type="button">Edit</button>
-        </div>
-        <div id="userNameEditor" class="name-editor is-hidden">
-          <label class="flow-label" for="briefUserNameInput">Edit your name</label>
-          <input id="briefUserNameInput" type="text" maxlength="40" placeholder="for example: Aulia" />
-        </div>
 
         <div id="scenarioBriefingContent" class="briefing-content">
           <!-- Scenario title and difficulty -->
@@ -548,18 +537,6 @@
         <div id="iletsBody" class="meta-body">
           <ol id="stageList" class="stage-list"></ol>
           <p id="stageProgress" class="stage-progress">Progress: 1 of 5 stages</p>
-          <p id="stageHelp" class="stage-help muted">Click a stage to practice it directly.</p>
-        </div>
-      </div>
-    </aside>
-
-    <section class="panel panel-chat">
-      <header class="chat-head">
-        <div>
-          <h2 id="scenarioTitle">Select a scenario</h2>
-          <p id="scenarioContext" class="muted">Your AI roleplay partner will appear here.</p>
-          <p id="roleBadge" class="role-badge">Role: -</p>
-          <p id="practiceIdentity" class="muted">Practicing as: Learner</p>
           <div class="practice-scaffold-menu-wrap">
             <button id="practiceScaffoldMenuBtn" class="ghost practice-scaffold-menu-btn" type="button" aria-expanded="false" aria-label="Change scaffold level">
               <span class="scaffold-menu-title">Scaffold Level</span>
