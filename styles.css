@@ -824,10 +824,28 @@ textarea {
 }
 
 .path-btn:hover {
-  border-color: rgba(20, 97, 255, 0.62);
-  background: linear-gradient(180deg, #ffffff, #eef4ff);
-  box-shadow: 0 10px 28px rgba(20, 97, 255, 0.16);
+  border-color: rgba(20, 97, 255, 0.75);
+  background: linear-gradient(180deg, #f5f9ff, #e4eeff);
+  box-shadow: 0 12px 30px rgba(20, 97, 255, 0.2);
   transform: translateY(-2px);
+}
+
+.path-btn:hover .path-icon-wrap {
+  background: linear-gradient(180deg, #eaf1ff, #dfeaff);
+  border-color: rgba(20, 97, 255, 0.45);
+  box-shadow: 0 8px 18px rgba(20, 97, 255, 0.2);
+}
+
+.path-btn:hover .path-icon-svg {
+  color: #0e49c6;
+}
+
+.path-btn:hover strong {
+  color: #143a86;
+}
+
+.path-btn:hover span {
+  color: #334e7e;
 }
 
 .path-btn:focus-visible {
