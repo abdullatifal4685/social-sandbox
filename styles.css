@@ -858,8 +858,8 @@ textarea {
 #chooseLearnBtn:hover,
 #chooseLearnBtn:focus-visible {
   border-color: rgba(24, 88, 232, 0.78);
-  background: linear-gradient(180deg, #f3f8ff, #dfeaff);
-  box-shadow: 0 12px 30px rgba(24, 88, 232, 0.24);
+  background: linear-gradient(180deg, #eef5ff, #d7e6ff);
+  box-shadow: 0 12px 30px rgba(24, 88, 232, 0.24), inset 0 0 0 2px rgba(24, 88, 232, 0.16);
 }
 
 #chooseLearnBtn:hover .path-icon-wrap,
@@ -872,7 +872,12 @@ textarea {
 #chooseLearnBtn:focus-visible .path-icon-svg,
 #chooseLearnBtn:hover strong,
 #chooseLearnBtn:focus-visible strong {
-  color: #143a86;
+  color: #113987;
+}
+
+#chooseLearnBtn:hover span,
+#chooseLearnBtn:focus-visible span {
+  color: #1e4ea7;
 }
 
 #choosePracticeBtn:hover,
@@ -898,8 +903,8 @@ textarea {
 #choosePeerBtn:hover,
 #choosePeerBtn:focus-visible {
   border-color: rgba(123, 77, 255, 0.78);
-  background: linear-gradient(180deg, #f7f3ff, #ebe2ff);
-  box-shadow: 0 12px 30px rgba(123, 77, 255, 0.24);
+  background: linear-gradient(180deg, #f4efff, #e4d7ff);
+  box-shadow: 0 12px 30px rgba(123, 77, 255, 0.24), inset 0 0 0 2px rgba(123, 77, 255, 0.17);
 }
 
 #choosePeerBtn:hover .path-icon-wrap,
@@ -912,7 +917,12 @@ textarea {
 #choosePeerBtn:focus-visible .path-icon-svg,
 #choosePeerBtn:hover strong,
 #choosePeerBtn:focus-visible strong {
-  color: #5a34b9;
+  color: #5729bf;
+}
+
+#choosePeerBtn:hover span,
+#choosePeerBtn:focus-visible span {
+  color: #6a35c4;
 }
 
 .path-btn strong {
