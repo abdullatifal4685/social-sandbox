@@ -1466,7 +1466,7 @@ textarea {
   margin-top: 1rem;
   max-height: 520px;
   overflow-y: auto;
-  padding-right: 0.25rem;
+  padding: 0.38rem 0.5rem 0.72rem;
   scrollbar-gutter: stable;
 }
 
