@@ -902,27 +902,27 @@ textarea {
 
 #choosePeerBtn:hover,
 #choosePeerBtn:focus-visible {
-  border-color: rgba(123, 77, 255, 0.78);
-  background: linear-gradient(180deg, #f4efff, #e4d7ff);
-  box-shadow: 0 12px 30px rgba(123, 77, 255, 0.24), inset 0 0 0 2px rgba(123, 77, 255, 0.17);
+  border-color: rgba(214, 128, 14, 0.82);
+  background: linear-gradient(180deg, #fff7e8, #ffe7bf);
+  box-shadow: 0 12px 30px rgba(214, 128, 14, 0.24), inset 0 0 0 2px rgba(214, 128, 14, 0.2);
 }
 
 #choosePeerBtn:hover .path-icon-wrap,
 #choosePeerBtn:focus-visible .path-icon-wrap {
-  background: linear-gradient(180deg, #f0eaff, #e3d7ff);
-  border-color: rgba(123, 77, 255, 0.5);
+  background: linear-gradient(180deg, #fff1d9, #ffe1b0);
+  border-color: rgba(214, 128, 14, 0.54);
 }
 
 #choosePeerBtn:hover .path-icon-svg,
 #choosePeerBtn:focus-visible .path-icon-svg,
 #choosePeerBtn:hover strong,
 #choosePeerBtn:focus-visible strong {
-  color: #5729bf;
+  color: #955500;
 }
 
 #choosePeerBtn:hover span,
 #choosePeerBtn:focus-visible span {
-  color: #6a35c4;
+  color: #9a5f10;
 }
 
 .path-btn strong {
