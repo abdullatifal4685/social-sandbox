@@ -40,36 +40,7 @@
           <input id="choiceNameInput" type="text" maxlength="40" placeholder="for example: Abdul" />
           <button id="choiceSaveNameBtn" class="ghost" type="button">Save Name</button>
         </div>
-        <p id="choiceNameStatus" class="muted">This name is used for AI practice and peer practicum.</p>
-      </section>
-
-      <section id="choiceSnapshot" class="choice-snapshot">
-        <div class="choice-snapshot-head">
-          <h3>Your Focus Snapshot</h3>
-          <p class="muted">Quick check before you practice: what to focus on right now.</p>
-        </div>
-        <div class="choice-snapshot-grid">
-          <article class="choice-snapshot-card">
-            <p id="choiceStageLabel" class="choice-snapshot-label">Most frequent weak stage</p>
-            <strong id="choiceWeakStage">No data yet</strong>
-          </article>
-          <article class="choice-snapshot-card">
-            <p class="choice-snapshot-label">Avg reflection score (last 5)</p>
-            <strong id="choiceRecentScore">-</strong>
-          </article>
-          <article class="choice-snapshot-card">
-            <p class="choice-snapshot-label">Improvement completion rate</p>
-            <strong id="choiceCompletionRate">-</strong>
-          </article>
-          <article class="choice-snapshot-card">
-            <p class="choice-snapshot-label">Scaffold level</p>
-            <strong id="choiceScaffoldLevel">Level 1: Fully Guided</strong>
-          </article>
-        </div>
-        <div class="choice-snapshot-actions">
-          <button id="cycleScaffoldLevelBtn" class="ghost" type="button">Switch to Level 2</button>
-          <button id="openDashboardBtn" class="ghost" type="button">Open Practice Hub</button>
-        </div>
+        <p id="choiceNameStatus" class="muted">This name is used for AI practice and peer practice.</p>
       </section>
 
       <div class="path-grid">
@@ -102,10 +73,39 @@
               <path d="M7.8 9.3 10.2 14M16.2 9.3 13.8 14M8.2 8h7.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
             </svg>
           </span>
-          <strong>Peer Practicum</strong>
+          <strong>Peer Practice</strong>
           <span>Join a peer practice space with separate community, session, and reflection pages.</span>
         </button>
       </div>
+
+      <section id="choiceSnapshot" class="choice-snapshot">
+        <div class="choice-snapshot-head">
+          <h3>Your Focus Snapshot</h3>
+          <p class="muted">Quick check before you practice: what to focus on right now.</p>
+        </div>
+        <div class="choice-snapshot-grid">
+          <article class="choice-snapshot-card">
+            <p id="choiceStageLabel" class="choice-snapshot-label">Most frequent weak stage</p>
+            <strong id="choiceWeakStage">No data yet</strong>
+          </article>
+          <article class="choice-snapshot-card">
+            <p class="choice-snapshot-label">Avg reflection score (last 5)</p>
+            <strong id="choiceRecentScore">-</strong>
+          </article>
+          <article class="choice-snapshot-card">
+            <p class="choice-snapshot-label">Improvement completion rate</p>
+            <strong id="choiceCompletionRate">-</strong>
+          </article>
+          <article class="choice-snapshot-card">
+            <p class="choice-snapshot-label">Scaffold level</p>
+            <strong id="choiceScaffoldLevel">Level 1: Fully Guided</strong>
+          </article>
+        </div>
+        <div class="choice-snapshot-actions">
+          <button id="cycleScaffoldLevelBtn" class="ghost" type="button">Switch to Level 2</button>
+          <button id="openDashboardBtn" class="ghost" type="button">Open Practice Hub</button>
+        </div>
+      </section>
     </div>
   </section>
 
@@ -249,7 +249,7 @@
     <div class="flow-card peer-card">
       <div class="peer-page-head">
         <div>
-          <h2>Peer Practicum</h2>
+          <h2>Peer Practice</h2>
           <p class="muted">Practice difficult conversations with real peers, then exchange advice and feedback after each session.</p>
           <p class="dashboard-help muted">Analytics is the after-practice view. It shows what happened in the session, what your patterns look like, and how your improvement tracker is moving.</p>
         </div>
@@ -267,7 +267,7 @@
         </div>
       </div>
 
-      <div class="peer-view-tabs" role="tablist" aria-label="Peer practicum sections">
+      <div class="peer-view-tabs" role="tablist" aria-label="Peer practice sections">
         <button id="peerTabCommunity" class="peer-view-tab active" type="button" data-peer-view="community">Community</button>
         <button id="peerTabSession" class="peer-view-tab" type="button" data-peer-view="session">Live Session</button>
         <button id="peerTabReflection" class="peer-view-tab" type="button" data-peer-view="reflection">Reflection</button>

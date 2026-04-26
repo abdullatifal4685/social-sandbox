@@ -1635,9 +1635,9 @@ function renderChoiceIdentity() {
   }
 
   if (learner) {
-    choiceNameStatus.textContent = "Name saved. This identity is used in AI practice and peer practicum.";
+    choiceNameStatus.textContent = "Name saved. This identity is used in AI practice and peer practice.";
   } else {
-    choiceNameStatus.textContent = "This name is used for AI practice and peer practicum.";
+    choiceNameStatus.textContent = "This name is used for AI practice and peer practice.";
   }
 }
 
