@@ -1592,6 +1592,17 @@ textarea {
   transform: translateY(-2px);
 }
 
+.scenario-picker-card.active:hover,
+.scenario-picker-card.active:focus-within {
+  border-color: #0f3fa8;
+  outline: 3px solid rgba(14, 76, 227, 0.45);
+  outline-offset: 2px;
+  box-shadow: 0 18px 38px rgba(8, 45, 128, 0.34), 0 0 0 3px rgba(255, 191, 71, 0.35);
+  transform: translateY(-4px) scale(1.005);
+  z-index: 4;
+  background: linear-gradient(180deg, #fff8df, #ffe9bf);
+}
+
 .scenario-picker-card.active .picker-card-badge {
   background: linear-gradient(130deg, rgba(20, 97, 255, 0.16), rgba(14, 163, 122, 0.12));
   border-color: rgba(20, 97, 255, 0.22);
