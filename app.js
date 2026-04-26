@@ -3023,6 +3023,7 @@ function setPending(isPending) {
 function openSessionIntro() {
   const scenario = getScenario();
   state.scaffold.hintsVisible = state.scaffold.level === 1;
+  state.rightTab = "practice";
   state.messages = [
     {
       role: "assistant",
@@ -3046,11 +3047,9 @@ function openSessionIntro() {
   if (state.scaffold.level === 2) {
     state.coachNote = "Level 2 active: start independently. If you pause for 10 seconds, support hints will appear.";
     pushCoachNoteHistory("Level 2: independent start enabled.");
-    state.rightTab = "practice";
   } else if (state.scaffold.level === 3) {
     state.coachNote = "Level 3 active: independent mode. Apply ILETS without sentence starters.";
     pushCoachNoteHistory("Level 3: independent practice mode enabled.");
-    state.rightTab = "practice";
   }
   armScaffoldPauseTimer();
 }
