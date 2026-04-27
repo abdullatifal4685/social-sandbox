@@ -904,6 +904,9 @@ const state = {
   userCustomGoals: JSON.parse(localStorage.getItem("sandbox.userCustomGoals") || "[]"),
   customTailoredModules: JSON.parse(localStorage.getItem("sandbox.customTailoredModules") || "[]"),
   customTailoredScenarios: JSON.parse(localStorage.getItem("sandbox.customTailoredScenarios") || "[]"),
+  goalScenarioGenerationKey: null,
+  goalScenarioLoading: false,
+  dynamicHintGenerationKey: null,
   nameEditorOpen: false,
   messages: [],
   stageIndex: 0,
@@ -2082,9 +2085,9 @@ window.__ssNavigate = (targetPage) => {
 
 function renderModule() {
   // Combine custom tailored modules with standard modules
-  const allModules = [...state.customTailoredModules, ...MODULE_SECTIONS];
+  const allModules = getLearningModules();
   const total = allModules.length;
-  const index = state.moduleIndex;
+  const index = Math.min(state.moduleIndex, Math.max(total - 1, 0));
   const section = allModules[index];
   const progress = Math.round(((index + 1) / total) * 100);
 
@@ -2204,6 +2207,10 @@ function renderModule() {
   moduleQuiz.classList.toggle("is-hidden", index !== total - 1);
   startPracticeBtn.disabled = false;
   startPracticeBtn.textContent = "Start Conversation Practice";
+}
+
+function getLearningModules() {
+  return [...state.customTailoredModules, ...MODULE_SECTIONS];
 }
 
 async function generateContextualHintsForScenario(scenario) {
@@ -2355,6 +2362,7 @@ function renderBriefingPage() {
 
 function renderScenarioPicker() {
   state.nameEditorOpen = false;
+  void ensureGoalTailoredScenario();
   const previewCount = 6;
   const orderedScenarios = getOrderedScenarios();
   const visibleScenarios = state.scenarioPickerExpanded
@@ -2389,13 +2397,13 @@ function renderScenarioPicker() {
       
       const goalContextHtml = `
         <div style="background: rgba(14, 95, 229, 0.05); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; border-left: 4px solid var(--accent);">
-          <h3 style="margin-top: 0; font-size: 1rem; color: var(--ink-dark);">📚 Recommended Scenarios for Your Goals</h3>
+          <h3 style="margin-top: 0; font-size: 1rem; color: var(--ink-dark);">📚 Personalized Scenarios for Your Goals</h3>
           <p style="margin: 0.75rem 0 0 0; font-size: 0.9rem; color: var(--ink-dark);">
-            Based on your learning goals:
+            Based on your learning goals, the picker is prioritizing generated scenarios for:
             <strong>${allGoals.map((g) => `"${escapeHtml(g)}"`).join(", ")}</strong>
           </p>
           <p style="margin: 0.75rem 0 0 0; font-size: 0.85rem; color: var(--ink);">
-            These scenarios will help you practice the skills you want to develop. Start with a comfortable difficulty level and build up over time.
+            These scenarios are created to match what you selected, so you can practice the exact situations you care about.
           </p>
         </div>
       `;
@@ -2404,6 +2412,19 @@ function renderScenarioPicker() {
     } else {
       goalsHeading.classList.add("is-hidden");
     }
+  }
+
+  if (scenarioPickerGrid && state.goalScenarioLoading) {
+    scenarioPickerGrid.innerHTML = `
+      <article class="scenario-picker-card active" style="grid-column: 1 / -1; text-align: left;">
+        <div class="recommended-badge" style="background: rgba(14, 163, 122, 0.9);">Building your personalized scenario</div>
+        <div style="padding: 0.75rem 0 0;">
+          <strong style="display:block; margin-bottom: 0.5rem;">Creating a scenario from your goals</strong>
+          <p class="muted" style="margin: 0;">AI is generating a practice situation based on the learning goals you selected. This usually takes a few seconds.</p>
+        </div>
+      </article>
+    `;
+    return;
   }
 
   scenarioPickerGrid.innerHTML = visibleScenarios
@@ -3070,18 +3091,17 @@ function renderIletsVisibility() {
 function renderPracticeStrip() {
   const currentStage = ILETS[state.stageIndex];
   const scenario = getScenario();
-  
-  // Use contextual hints from scenario if available, otherwise use default guide
+  const liveStarters = buildConversationGuidedHints(currentStage, scenario, state.messages.slice(-6));
+
+  // Use contextual hints from scenario if available, otherwise use the live conversation hints or the default guide.
   let guide = scenario.practice?.[currentStage] || STAGE_GUIDE[currentStage];
-  
-  // Use AI-generated contextual hints if available
-  if (scenario.contextualHints && scenario.contextualHints[currentStage]) {
-    const contextualStarters = scenario.contextualHints[currentStage];
-    guide = {
-      ...guide,
-      starters: contextualStarters && contextualStarters.length > 0 ? contextualStarters : (guide.starters || []),
-    };
-  }
+  const contextualStarters = scenario.contextualHints && scenario.contextualHints[currentStage];
+  guide = {
+    ...guide,
+    starters: liveStarters.length > 0
+      ? liveStarters
+      : (contextualStarters && contextualStarters.length > 0 ? contextualStarters : (guide.starters || [])),
+  };
   
   const scaffold = getScaffoldLevelConfig();
   const hintsAlwaysVisible = state.scaffold.level === 1;
@@ -3147,6 +3167,191 @@ function renderPracticeStrip() {
   nextStageBtn.disabled = state.stageIndex === ILETS.length - 1;
   nextStageBtn.textContent =
     state.stageIndex === ILETS.length - 1 ? "Final Stage Reached" : "Mark Stage Done";
+}
+
+function normalizeGoalLabel(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function getActiveGoalLabels() {
+  return [
+    ...state.userLearningGoals.map((id) => {
+      const goal = LEARNING_GOALS.find((item) => item.id === id);
+      return goal?.title || id;
+    }),
+    ...state.userCustomGoals,
+  ].filter(Boolean);
+}
+
+function getGoalScenarioSignature(goalLabels) {
+  return goalLabels.map(normalizeGoalLabel).sort().join(" | ");
+}
+
+function getConversationSnippet(messages, role) {
+  const match = [...messages].reverse().find((message) => message.role === role)?.content || "";
+  return match.trim().replace(/\s+/g, " ").slice(0, 90);
+}
+
+function buildConversationGuidedHints(stage, scenario, messages) {
+  if (!messages || messages.length === 0) {
+    return [];
+  }
+
+  const assistantSnippet = getConversationSnippet(messages, "assistant");
+  const userSnippet = getConversationSnippet(messages, "user");
+  const focusSnippet = assistantSnippet || userSnippet || scenario?.context || scenario?.title || "this conversation";
+  const cleanFocus = focusSnippet.replace(/["'`]/g, "");
+
+  switch (stage) {
+    case "Introduce":
+      return [
+        { style: "direct", text: `Open by naming the point the AI just raised: ${cleanFocus}.` },
+        { style: "balanced", text: `State your goal clearly and connect it to what was just discussed.` },
+        { style: "empathetic", text: `Acknowledge their last concern before you move into your point.` },
+      ];
+    case "Listen":
+      return [
+        { style: "direct", text: `Ask what they mean by ${cleanFocus}.` },
+        { style: "balanced", text: `Invite them to explain their side before you respond again.` },
+        { style: "empathetic", text: `Reflect back the pressure or frustration in their last reply.` },
+      ];
+    case "Empathize":
+      return [
+        { style: "direct", text: `Name the valid point in their last message before adding your view.` },
+        { style: "balanced", text: `Show you understand why ${cleanFocus} feels difficult for them.` },
+        { style: "empathetic", text: `Use one sentence to validate the emotion behind their reply.` },
+      ];
+    case "Talk":
+      return [
+        { style: "direct", text: `Bring the conversation back to ${cleanFocus} with one concrete example.` },
+        { style: "balanced", text: `Explain the impact of what was just said and why it matters.` },
+        { style: "empathetic", text: `Keep the point firm but respectful, then state what you need next.` },
+      ];
+    case "Solve":
+      return [
+        { style: "direct", text: `Turn the last exchange into one specific next step.` },
+        { style: "balanced", text: `Suggest an action, an owner, and a check-in tied to this conversation.` },
+        { style: "empathetic", text: `Close by aligning on a solution that answers the concern they just voiced.` },
+      ];
+    default:
+      return [];
+  }
+}
+
+async function generateDynamicHintsFromConversation(scenario, stage, messages) {
+  const userGoals = getActiveGoalLabels();
+  const transcript = messages
+    .map((message, index) => `${index + 1}. ${message.role.toUpperCase()}: ${message.content}`)
+    .join("\n");
+
+  const prompt = {
+    role: "system",
+    content: `You are a conversation coach. Generate 3 short sentence starters for the ${stage} stage.
+
+Use the recent conversation to make them feel immediate and specific.
+Scenario title: ${scenario?.title || "Unknown"}
+Scenario context: ${scenario?.context || "Unknown"}
+User goals: ${userGoals.length > 0 ? userGoals.join(", ") : "general communication"}
+
+Recent conversation:
+${transcript || "No conversation yet."}
+
+Return ONLY JSON in this format:
+{
+  "starters": [
+    {"text": "...", "style": "direct"},
+    {"text": "...", "style": "balanced"},
+    {"text": "...", "style": "empathetic"}
+  ]
+}`,
+  };
+
+  try {
+    const response = state.settings.mode === "proxy"
+      ? await callProxyAPI({ model: state.settings.model, messages: [prompt] })
+      : await callOpenAI([prompt], "gpt-4");
+    const parsed = JSON.parse(response);
+    return Array.isArray(parsed?.starters) ? parsed.starters.filter((item) => item && item.text) : [];
+  } catch (error) {
+    console.warn("Failed to generate live hints:", error);
+    return buildConversationGuidedHints(stage, scenario, messages);
+  }
+}
+
+async function refreshDynamicPracticeHints() {
+  const scenario = getScenario();
+  if (!scenario) {
+    return;
+  }
+
+  const stage = ILETS[state.stageIndex];
+  const signature = `${scenario.id}:${stage}:${state.messages.slice(-6).map((message) => `${message.role}:${message.content}`).join("|")}`;
+  if (state.dynamicHintGenerationKey === signature) {
+    return;
+  }
+
+  state.dynamicHintGenerationKey = signature;
+  try {
+    const hints = await generateDynamicHintsFromConversation(scenario, stage, state.messages.slice(-6));
+    scenario.contextualHints = scenario.contextualHints || {};
+    scenario.contextualHints[stage] = hints;
+  } finally {
+    state.dynamicHintGenerationKey = null;
+    if (state.page === "practice") {
+      renderPracticeStrip();
+    }
+  }
+}
+
+async function ensureGoalTailoredScenario() {
+  const goalLabels = getActiveGoalLabels();
+  if (!goalLabels.length) {
+    return;
+  }
+
+  const signature = getGoalScenarioSignature(goalLabels);
+  if (state.goalScenarioGenerationKey === signature) {
+    return;
+  }
+
+  const existingScenario = state.scenarios.find((scenario) => {
+    const scenarioSignature = getGoalScenarioSignature([scenario.customGoal || scenario.title || ""]);
+    return scenario.goalSignature === signature || scenario.customGoalSignature === signature || scenarioSignature === signature;
+  });
+
+  if (existingScenario) {
+    return;
+  }
+
+  state.goalScenarioGenerationKey = signature;
+  state.goalScenarioLoading = true;
+  if (state.page === "choice") {
+    renderScenarioPicker();
+  }
+  try {
+    const tailoredScenario = await generateTailoredPracticeScenario(goalLabels.join(", "));
+    tailoredScenario.goalSignature = signature;
+    tailoredScenario.customGoalSignature = signature;
+    tailoredScenario.customGoal = goalLabels.join(", ");
+    tailoredScenario.isCustom = true;
+    tailoredScenario.custom = true;
+    tailoredScenario.createdAt = Date.now();
+    state.scenarios.unshift(tailoredScenario);
+    state.customTailoredScenarios.unshift(tailoredScenario);
+    state.selectedScenarioId = tailoredScenario.id;
+    persistCustomScenarios();
+    if (state.page === "choice") {
+      renderScenarioPicker();
+    }
+  } catch (error) {
+    console.error("Failed to generate goal-tailored scenario:", error);
+  } finally {
+    state.goalScenarioGenerationKey = null;
+    state.goalScenarioLoading = false;
+    if (state.page === "choice") {
+      renderScenarioPicker();
+    }
+  }
 }
 
 function renderCoachNote() {
@@ -5085,6 +5290,7 @@ async function handleSend(event) {
     addCoachNote(userText, parsed);
     assistantReply = personalizeReply(parsed.message);
     state.messages.push({ role: "assistant", content: assistantReply });
+    void refreshDynamicPracticeHints();
   } catch (error) {
     void error;
     const fallback = localFallbackReply(userText);
@@ -5095,6 +5301,7 @@ async function handleSend(event) {
       role: "assistant",
       content: assistantReply,
     });
+    void refreshDynamicPracticeHints();
   } finally {
     setPending(false);
     render();
@@ -5869,7 +6076,7 @@ modulePrevBtn.addEventListener("click", () => {
 });
 
 moduleNextBtn.addEventListener("click", () => {
-  if (state.moduleIndex < MODULE_SECTIONS.length - 1) {
+  if (state.moduleIndex < getLearningModules().length - 1) {
     state.moduleIndex += 1;
     renderModule();
   }
@@ -6282,11 +6489,13 @@ addCustomGoalBtn.addEventListener("click", async () => {
         
         // Store tailored module
         state.customTailoredModules.push(tailoredModule);
+        state.moduleIndex = 0;
         localStorage.setItem("sandbox.customTailoredModules", JSON.stringify(state.customTailoredModules));
         
         // Add tailored scenario to scenarios list
         state.scenarios.push(tailoredScenario);
         state.customTailoredScenarios.push(tailoredScenario);
+        state.selectedScenarioId = tailoredScenario.id;
         localStorage.setItem("sandbox.customTailoredScenarios", JSON.stringify(state.customTailoredScenarios));
         persistCustomScenarios();
       } catch (error) {
