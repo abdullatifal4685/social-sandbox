@@ -890,10 +890,10 @@ const state = {
   finalReflectionSubmitting: false,
   finalReflectionFeedback: "",
   settings: {
-    mode: localStorage.getItem("sandbox.mode") || "openai",
-    proxyUrl: localStorage.getItem("sandbox.proxyUrl") || "http://localhost:8787/api/chat",
+    mode: localStorage.getItem("sandbox.mode") || "proxy",
+    proxyUrl: localStorage.getItem("sandbox.proxyUrl") || "https://social-sandbox-api-proxy.onrender.com/api/chat",
     apiKey: localStorage.getItem("sandbox.apiKey") || "",
-    model: localStorage.getItem("sandbox.model") || "gpt-4.1-mini",
+    model: localStorage.getItem("sandbox.model") || "gpt-4",
   },
   scaffold: {
     level: loadScaffoldLevel(),
@@ -5143,7 +5143,7 @@ openSettingsBtn.addEventListener("click", () => {
 
 settingsForm.addEventListener("submit", () => {
   state.settings.mode = modeSelect.value;
-  state.settings.proxyUrl = proxyUrlInput.value.trim() || "http://localhost:8787/api/chat";
+  state.settings.proxyUrl = proxyUrlInput.value.trim() || "https://social-sandbox-api-proxy.onrender.com/api/chat";
   state.settings.apiKey = apiKeyInput.value.trim();
   saveSettings();
   renderHeader();
