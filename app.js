@@ -6887,6 +6887,15 @@ addCustomGoalBtn.addEventListener("click", async () => {
       
       renderCustomGoalsList();
       updateGoalsPageState();
+      
+      // Hide custom goal input section when max goals reached
+      const newTotal = state.userLearningGoals.length + state.userCustomGoals.length;
+      if (newTotal >= 3) {
+        const customGoalsSection = document.getElementById("customGoalsSection");
+        if (customGoalsSection) {
+          customGoalsSection.classList.add("is-hidden");
+        }
+      }
     }
   }
 });
