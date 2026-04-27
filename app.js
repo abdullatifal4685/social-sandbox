@@ -3626,7 +3626,7 @@ function renderGoalsPage() {
     goalCheckbox.setAttribute("data-goal-id", goal.id);
     
     goalCheckbox.innerHTML = `
-      <input type="checkbox" value="${goal.id}" ${isChecked ? "checked" : ""} />
+      <input type="radio" name="learningGoal" value="${goal.id}" ${isChecked ? "checked" : ""} />
       <div class="goal-checkbox-content">
         <strong>${escapeHtml(goal.title)}</strong>
         <p class="muted">${escapeHtml(goal.description)}</p>
@@ -3675,7 +3675,7 @@ function recoverGoalsGridIfMissing() {
     goalCheckbox.setAttribute("data-goal-id", goal.id);
 
     goalCheckbox.innerHTML = `
-      <input type="checkbox" value="${goal.id}" ${isChecked ? "checked" : ""} />
+      <input type="radio" name="learningGoal" value="${goal.id}" ${isChecked ? "checked" : ""} />
       <div class="goal-checkbox-content">
         <strong>${escapeHtml(goal.title)}</strong>
         <p class="muted">${escapeHtml(goal.description)}</p>
@@ -3686,11 +3686,9 @@ function recoverGoalsGridIfMissing() {
     checkbox.addEventListener("change", (event) => {
       const checked = Boolean(event.target?.checked);
       if (checked) {
-        if (!state.userLearningGoals.includes(goal.id)) {
-          state.userLearningGoals.push(goal.id);
-        }
+        state.userLearningGoals = [goal.id];
       } else {
-        state.userLearningGoals = state.userLearningGoals.filter((id) => id !== goal.id);
+        state.userLearningGoals = [];
       }
       localStorage.setItem("sandbox.userLearningGoals", JSON.stringify(state.userLearningGoals));
       updateGoalsPageState();
@@ -4151,6 +4149,150 @@ ${userMessages.map((m, i) => `Message ${i + 1}: ${m}`).join("\n\n")}`,
     console.warn("Analytics generation failed:", error);
     return "Clarity Score: 75\nFiller Words: 3\nRepeated Opener: [analyzing...]\nOverview: Good conversation flow.";
   }
+}
+
+// Build a deterministic, local tailored learning path as a fallback (6 modules)
+function buildLocalTailoredLearningPath(goalDescription) {
+  const goal = goalDescription || "your goal";
+  // Ensure we generate exactly 6 modules by extending MODULE_SECTIONS if needed
+  const baseModules = MODULE_SECTIONS.slice(0, 6);
+  const padCount = 6 - baseModules.length;
+  
+  const generated = baseModules.map((section, idx) => {
+    const title = `${section.title} — Focus: ${goal}`;
+    const summary = `${section.summary} This module is tailored to: ${goal}.`;
+    const points = section.points.map((p) => {
+      return `${p} (applies to: ${goal})`;
+    });
+    const example = `${section.example} Example tied to goal: ${goal}.`;
+    return {
+      id: `module-${idx + 1}`,
+      title,
+      summary,
+      points,
+      example,
+      tailoredTo: goal,
+    };
+  });
+
+  // If MODULE_SECTIONS has fewer than 6 items, pad with generated modules
+  if (padCount > 0) {
+    for (let i = baseModules.length; i < 6; i++) {
+      generated.push({
+        id: `module-${i + 1}`,
+        title: `Module ${i + 1}: Advanced ${goal}`,
+        summary: `Deepen your ${goal} skills for complex situations`,
+        points: [
+          `Recognize when ${goal} becomes challenging`,
+          `Apply ${goal} in high-stakes scenarios`,
+          `Reflect and adjust your ${goal} approach`,
+        ],
+        example: `When facing difficult resistance, ${goal} becomes even more critical. Use these advanced strategies.`,
+        tailoredTo: goal,
+      });
+    }
+  }
+
+  return generated;
+}
+
+function validateTailoredPath(modules, goalDescription) {
+  if (!Array.isArray(modules) || modules.length !== MODULE_SECTIONS.length) return false;
+  const goal = (goalDescription || "").toLowerCase();
+  for (const mod of modules) {
+    const combined = `${mod.title} ${mod.summary} ${mod.points?.join(" ")} ${mod.example}`.toLowerCase();
+    if (!combined.includes(goal)) return false;
+  }
+  return true;
+}
+
+// Try AI first, validate, then fallback to local generator and persist
+async function getTailoredLearningPath(goalDescription) {
+  const storageKey = "sandbox.customTailoredModules";
+  // If API key present, try callOpenAI with strict schema
+  if (state.settings && state.settings.apiKey) {
+    const systemPrompt = {
+      role: "system",
+      content: `You are an expert instructional designer creating STRICTLY TAILORED learning modules.
+
+CRITICAL REQUIREMENTS:
+1. Return ONLY a valid JSON array of exactly 6 objects. No markdown, no prose before or after.
+2. Each object MUST have this exact structure:
+   {
+     "id": "module-N",
+     "title": "Module N: [Specific to the goal, not generic]",
+     "summary": "One-sentence benefit specific to '${goalDescription}'",
+     "points": ["Point 1 referencing the goal", "Point 2 referencing the goal", "Point 3 referencing the goal"],
+     "example": "Realistic example showing how '${goalDescription}' is applied",
+     "tailoredTo": "${goalDescription}"
+   }
+3. EVERY field must explicitly mention or reference the learner's goal. Zero generic content.
+4. The goal is: "${goalDescription}"
+
+REJECTION RULES - DO NOT DO:
+- Do NOT write generic module titles like "1. Notice What Makes Conversation Hard" - instead write "1. Notice What Makes [the goal] Hard"
+- Do NOT include points that could apply to ANY goal - must be specific to ${goalDescription}
+- Do NOT include examples about OTHER goals or scenarios
+- Do NOT return more or fewer than 6 modules
+- Do NOT return incomplete JSON or JSON with extra text
+
+EXAMPLE FORMAT (for goal "Improve Listening & Empathy"):
+[
+  {
+    "id": "module-1",
+    "title": "Module 1: Prepare for Listening & Empathy - Self-Awareness & Planning",
+    "summary": "Understand how your default patterns affect your ability to listen and show empathy",
+    "points": [
+      "Recognize how you typically listen (or don't listen) when you need to show empathy",
+      "Identify what emotions make empathy harder for you in difficult conversations",
+      "Plan how you'll slow down to truly listen before reacting"
+    ],
+    "example": "You're in a meeting and someone shares a struggle. Instead of jumping to advice, pause and listen to understand what they really need. That's listening & empathy in action.",
+    "tailoredTo": "Improve Listening & Empathy"
+  },
+  ... 5 more modules following same pattern ...
+]`
+    };
+    
+    const userPrompt = {
+      role: "user",
+      content: `Create 6 STRICTLY TAILORED learning modules for this goal: "${goalDescription}"
+
+Each module must:
+- Reference "${goalDescription}" in title, summary, points, and example
+- Be specific to this goal, not generic
+- Be actionable and practical
+- Build on each other sequentially
+
+Return ONLY the JSON array, no other text.`
+    };
+
+    try {
+      const responseText = await callOpenAI([systemPrompt, userPrompt], state.settings.model || "gpt-4");
+      let parsed;
+      try {
+        // Clean response in case AI added markdown code fence
+        const cleaned = responseText.replace(/^```json\s*/, "").replace(/\s*```$/, "").trim();
+        parsed = JSON.parse(cleaned);
+      } catch (e) {
+        parsed = null;
+      }
+      if (parsed && validateTailoredPath(parsed, goalDescription)) {
+        localStorage.setItem(storageKey, JSON.stringify(parsed));
+        console.log(`✓ AI generated tailored modules for: ${goalDescription}`);
+        return parsed;
+      }
+      console.warn("AI returned invalid tailored path, using local fallback.");
+    } catch (err) {
+      console.warn("AI generation failed:", err);
+    }
+  }
+
+  // No API key or AI failed/invalid -> local fallback
+  const local = buildLocalTailoredLearningPath(goalDescription);
+  localStorage.setItem(storageKey, JSON.stringify(local));
+  console.log(`✓ Using local fallback for: ${goalDescription}`);
+  return local;
 }
 
 async function generateTailoredLearningModule(customGoal) {
@@ -5134,6 +5276,37 @@ function saveReflectionEntry(entry) {
   }
   persistReflectionHistory();
 }
+
+// Ensure Goals Continue button triggers tailored path generation and navigation
+(function bindGoalsNext() {
+  const btn = document.getElementById("goalsNextBtn");
+  if (!btn) return;
+
+  btn.addEventListener("click", async () => {
+    // Determine the single active goal (preset id or custom string)
+    const selectedPresetId = state.userLearningGoals && state.userLearningGoals[0];
+    const selectedCustom = state.userCustomGoals && state.userCustomGoals[0];
+    const goalText = (LEARNING_GOALS.find((g) => g.id === selectedPresetId)?.title) || selectedCustom || selectedPresetId || "your goal";
+
+    try {
+      btn.disabled = true;
+      btn.textContent = "Building learning path...";
+
+      const modules = await getTailoredLearningPath(goalText);
+      state.customTailoredModules = Array.isArray(modules) ? modules : [];
+      localStorage.setItem("sandbox.customTailoredModules", JSON.stringify(state.customTailoredModules));
+
+      // Navigate to next page in flow
+      goToPage("choice");
+    } catch (err) {
+      console.error("Failed to generate tailored learning path on Continue:", err);
+      goToPage("choice");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = state.userLearningGoals.length + state.userCustomGoals.length === 1 ? "Continue" : "Select one goal";
+    }
+  });
+})();
 
 function buildReflectionTrendHtml() {
   const finalEntries = state.reflectionHistory.filter((entry) => entry.kind === "final");
