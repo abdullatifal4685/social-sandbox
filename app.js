@@ -939,10 +939,10 @@ const state = {
   finalReflectionSubmitting: false,
   finalReflectionFeedback: "",
   settings: {
-    mode: localStorage.getItem("sandbox.mode") || (window.SANDBOX_MODE || "openai"),
-    proxyUrl: localStorage.getItem("sandbox.proxyUrl") || (window.SANDBOX_PROXY_URL || "https://social-sandbox-api-proxy.onrender.com/api/chat"),
-    apiKey: localStorage.getItem("sandbox.apiKey") || (window.SANDBOX_API_KEY || ""),
-    model: localStorage.getItem("sandbox.model") || (window.SANDBOX_MODEL || "gpt-4"),
+    mode: localStorage.getItem("sandbox.mode") || "proxy",
+    proxyUrl: localStorage.getItem("sandbox.proxyUrl") || "https://social-sandbox-api-proxy.onrender.com/api/chat",
+    apiKey: localStorage.getItem("sandbox.apiKey") || "",
+    model: localStorage.getItem("sandbox.model") || "gpt-4",
   },
   scaffold: {
     level: loadScaffoldLevel(),
