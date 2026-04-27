@@ -2098,7 +2098,7 @@ function renderModule() {
   // Check if this module is custom or recommended for user's goals
   const allUserGoals = [...state.userLearningGoals, ...state.userCustomGoals];
   const isCustom = section.isCustom;
-  const isRecommendedForGoals = allUserGoals.length > 0 && !isCustom;
+  const isRecommendedForGoals = allUserGoals.length > 0 && !isCustom && state.customTailoredModules.length === 0;
   
   let titleHtml = section.title;
   if (isCustom) {
@@ -2158,11 +2158,15 @@ function renderModule() {
     
     // Framework
     if (section.framework) {
+      const steps = String(section.framework || "").split(' | ').map((step) => {
+        // Remove leading "Step X:" if present to avoid duplication like "Step 1: Step 1: ..."
+        return step.replace(/^\s*Step\s*\d+\s*:\s*/i, '').trim();
+      });
       contentHtml += `
       <section style="margin-bottom: 2rem;">
         <h4 style="font-size: 0.95rem; color: var(--ink-dark); margin-bottom: 0.75rem;">Framework to Follow</h4>
         <div style="padding: 1rem; background: rgba(14, 163, 122, 0.05); border-left: 3px solid #0fa37a; border-radius: 4px;">
-          <p style="margin: 0; line-height: 1.8; font-size: 0.95rem;">${escapeHtml(section.framework).split(' | ').map((step, i) => `<strong>Step ${i + 1}:</strong> ${step}`).join('<br>')}</p>
+          <p style="margin: 0; line-height: 1.8; font-size: 0.95rem;">${steps.map((s, i) => `<strong>Step ${i + 1}:</strong> ${escapeHtml(s)}`).join('<br>')}</p>
         </div>
       </section>
       `;
