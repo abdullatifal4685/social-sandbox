@@ -2650,8 +2650,12 @@ function renderStages() {
     Talk: "Talk: State behavior, impact, and risk with concrete examples.",
     Solve: "Solve: End with action, owner, and follow-up time.",
   };
-  stageHelp.textContent = helpText[ILETS[state.stageIndex]];
-  stageProgress.textContent = `Progress: ${state.stageIndex + 1} of ${ILETS.length} stages`;
+  if (stageHelp) {
+    stageHelp.textContent = helpText[ILETS[state.stageIndex]];
+  }
+  if (stageProgress) {
+    stageProgress.textContent = `Progress: ${state.stageIndex + 1} of ${ILETS.length} stages`;
+  }
 }
 
 function renderScenariosVisibility() {
