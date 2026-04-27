@@ -1088,6 +1088,7 @@ const briefScaffoldLevelGroup = document.getElementById("briefScaffoldLevelGroup
 const cancelBriefingBtn = document.getElementById("cancelBriefingBtn");
 const backFromBriefingBtn = document.getElementById("backFromBriefingBtn");
 const beginPracticeBtn = document.getElementById("beginPracticeBtn");
+const editScenarioBriefingBtn = document.getElementById("editScenarioBriefingBtn");
 const pickerActions = document.getElementById("pickerActions");
 const goToChoiceBtn = document.getElementById("goToChoiceBtn");
 const choiceBackBtn = document.getElementById("choiceBackBtn");
@@ -5712,6 +5713,15 @@ cancelBriefingBtn.addEventListener("click", () => {
 backFromBriefingBtn.addEventListener("click", () => {
   renderScenarioPicker();
 });
+
+if (editScenarioBriefingBtn) {
+  editScenarioBriefingBtn.addEventListener("click", () => {
+    const scenario = getScenario();
+    if (scenario) {
+      openScenarioBuilderForEdit(scenario.id);
+    }
+  });
+}
 
 if (editUserNameBtn && userNameEditor && briefUserNameInput) {
   editUserNameBtn.addEventListener("click", () => {
