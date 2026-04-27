@@ -2833,10 +2833,8 @@ function renderChat() {
 function renderHeader() {
   const scenario = getScenario();
   const scaffold = getScaffoldLevelConfig();
-  const currentStage = ILETS[state.stageIndex];
-  const stageGuide = scenario.practice?.[currentStage] || STAGE_GUIDE[currentStage];
   scenarioTitle.textContent = scenario.title;
-  scenarioContext.textContent = `${scenario.difficulty}. Focus now: ${stageGuide.objective}`;
+  scenarioContext.textContent = scenario.context;
   roleBadge.textContent = `AI Role: ${scenario.aiRole}`;
   practiceIdentity.textContent = `Practicing as: ${getLearnerName()}`;
   if (practiceScaffoldMenuBtn) {
@@ -2871,32 +2869,17 @@ function setPracticeScaffoldMenuOpen(open) {
 }
 
 function renderBrief() {
-  if (!briefTabs || !scenarioBriefContent) {
+  if (!scenarioBriefContent) {
     return;
   }
   const scenario = getScenario();
 
-  const tabButtons = briefTabs.querySelectorAll(".brief-tab");
-  tabButtons.forEach((button) => {
-    const isActive = button.getAttribute("data-tab") === state.briefTab;
-    button.classList.toggle("active", isActive);
-    button.setAttribute("aria-selected", isActive ? "true" : "false");
-  });
-
-  if (state.briefTab === "scenario") {
-    scenarioBriefContent.innerHTML = `
-      <p><strong>Session cue:</strong> ${escapeHtml(scenario.opening)}</p>
-      <p class="muted">AI role partner: <strong>${escapeHtml(scenario.aiRole)}</strong></p>
-    `;
-    return;
-  }
-
-  if (state.briefTab === "context") {
-    scenarioBriefContent.innerHTML = `<p>${escapeHtml(scenario.context)}</p>`;
-    return;
-  }
-
-  scenarioBriefContent.innerHTML = `<ul>${scenario.goals.map((goal) => `<li>${escapeHtml(goal)}</li>`).join("")}</ul>`;
+  scenarioBriefContent.innerHTML = `
+    <p>${escapeHtml(scenario.context)}</p>
+    <p><strong>Session cue:</strong> ${escapeHtml(scenario.opening)}</p>
+    <p><strong>Goal focus:</strong></p>
+    <ul>${scenario.goals.map((goal) => `<li>${escapeHtml(goal)}</li>`).join("")}</ul>
+  `;
 }
 
 function renderScenarioBriefVisibility() {

@@ -2887,6 +2887,14 @@ body.hide-left.hide-right .layout {
   background: linear-gradient(130deg, var(--accent), #0d46b4);
 }
 
+.brief-static-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #3553ad;
+}
+
 .brief-content {
   margin-top: 0.75rem;
   background: linear-gradient(180deg, #ffffff, #f7f9fe);
