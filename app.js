@@ -4931,7 +4931,7 @@ settingsForm.addEventListener("reset", () => {
 });
 
 goToChoiceBtn.addEventListener("click", () => {
-  goToPage("choice");
+  window.__ssNavigate("goals");
 });
 
 chooseLearnBtn.addEventListener("click", () => {
