@@ -4165,18 +4165,26 @@ async function generateTailoredLearningPath(goalDescription) {
   try {
     const modules = [];
     
+    // Helper to ensure prompts have actual goal text
+    const fillGoal = (text) => text.replace(/\$\{goalDescription\}/g, goalDescription);
+    
     // Module 1: Foundation & Preparation
     const module1Prompt = {
       role: "system",
-      content: `You are an expert communication coach. Create Module 1 (Foundation) for someone learning: "${goalDescription}"
+      content: fillGoal(`You are an expert communication coach specializing in helping people achieve: "${goalDescription}"
 
-This module is about PREPARATION - self-awareness, planning, and mindset before attempting the goal.
+CRITICAL: You are generating a module SPECIFICALLY about ${goalDescription}. NOT generic "Foundation" or "Self-Awareness" content.
+EVERY sentence, framework step, example, and tip must reference ${goalDescription} explicitly.
+If you write something that could apply to ANY goal, DELETE IT and rewrite it for ${goalDescription}.
 
-Focus on:
-- Identifying personal triggers and patterns when facing this goal
-- Preparing mentally and strategically
-- Setting clear intention specific to "${goalDescription}"
-- Recognizing why this goal matters
+Example of BAD content (too generic): "Set clear intention. Identify your triggers."
+Example of GOOD content (specific): "Before ${goalDescription}, identify what specifically makes you defensive - is it being told you're wrong? Being questioned? Use that insight to prepare."
+
+This module is about PREPARATION specific to ${goalDescription}:
+- What triggers arise specifically when facing ${goalDescription}?
+- How do you typically react when you need to ${goalDescription}?
+- What's the hardest mental block about ${goalDescription}?
+- How should you prepare your mindset specifically for ${goalDescription}?
 
 Return ONLY this JSON:
 {
@@ -4206,15 +4214,20 @@ Return ONLY this JSON:
     // Module 2: Introduce Stage
     const module2Prompt = {
       role: "system",
-      content: `You are an expert communication coach. Create Module 2 (Introduce Stage) for someone learning: "${goalDescription}"
+      content: fillGoal(`You are an expert communication coach specializing in helping people achieve: "${goalDescription}"
 
-This module teaches the INTRODUCE stage - how to OPEN the conversation around this goal without triggering defensiveness.
+CRITICAL: This module is SPECIFICALLY about the INTRODUCE stage FOR ${goalDescription}.
+NOT generic "Introduce" content. NOT "how to open any conversation."
+EVERY framework step, example, and tip must be specifically about OPENING FOR ${goalDescription}.
 
-Focus on:
-- Opening with shared purpose, not blame
-- Setting tone that makes ${goalDescription} easier to hear
-- Specific phrases for opening about this goal
-- How to avoid common openers that backfire
+DO NOT write generic openers like "Hi, I want to discuss X."
+DO write specific guidance like "When ${goalDescription}, you need to open by [specific phrase for this goal]."
+
+This module teaches HOW TO OPEN when ${goalDescription}:
+- What specific language works when introducing ${goalDescription}?
+- What mistakes do people make when opening about ${goalDescription}?
+- How do you avoid defensiveness specifically when ${goalDescription}?
+- What's unique about opening for ${goalDescription} vs other conversations?
 
 Return ONLY this JSON:
 {
@@ -4244,15 +4257,20 @@ Return ONLY this JSON:
     // Module 3: Listen Stage
     const module3Prompt = {
       role: "system",
-      content: `You are an expert communication coach. Create Module 3 (Listen Stage) for someone learning: "${goalDescription}"
+      content: fillGoal(`You are an expert communication coach specializing in helping people achieve: "${goalDescription}"
 
-This module teaches the LISTEN stage - asking genuine questions and understanding their perspective on this goal.
+CRITICAL: This module is SPECIFICALLY about LISTENING when ${goalDescription}.
+NOT generic "Listening" content. NOT "how to ask questions in any conversation."
+EVERY question, mistake, and tip must be specifically about listening when ${goalDescription}.
 
-Focus on:
-- What to ask when discussing ${goalDescription}
-- How to listen without planning your rebuttal
-- What their perspective reveals
-- Questions that get beneath surface answers
+DO NOT write generic questions like "What's your perspective?"
+DO write specific guidance like "When ${goalDescription}, ask specifically about [their concern regarding goalDescription]."
+
+This module teaches WHAT TO ASK and HOW TO LISTEN when ${goalDescription}:
+- What specific questions uncover their real concern about ${goalDescription}?
+- How do you listen without dismissing them when ${goalDescription}?
+- What do they need to feel heard about regarding ${goalDescription}?
+- How does understanding their view specifically change your approach to ${goalDescription}?
 
 Return ONLY this JSON:
 {
@@ -4282,15 +4300,20 @@ Return ONLY this JSON:
     // Module 4: Empathize Stage
     const module4Prompt = {
       role: "system",
-      content: `You are an expert communication coach. Create Module 4 (Empathize Stage) for someone learning: "${goalDescription}"
+      content: fillGoal(`You are an expert communication coach specializing in helping people achieve: "${goalDescription}"
 
-This module teaches the EMPATHIZE stage - showing genuine understanding of their position on this goal.
+CRITICAL: This module is SPECIFICALLY about EMPATHIZING when ${goalDescription}.
+NOT generic "Empathy" content. NOT "how to show understanding in any conversation."
+EVERY principle, mistake, and example must be specifically about showing empathy while ${goalDescription}.
 
-Focus on:
-- Finding what's valid in their perspective about ${goalDescription}
-- Acknowledging their constraints or concerns
-- Building connection while pursuing the goal
-- What to do when you disagree about ${goalDescription}
+DO NOT write "Show you understand their concern."
+DO write "When they resist ${goalDescription}, show you understand that ${goalDescription} specifically feels [risky/hard/threatening] to them because [specific reason]."
+
+This module teaches HOW TO SHOW UNDERSTANDING when ${goalDescription}:
+- What specifically do they fear about ${goalDescription}?
+- What's valid in their resistance to ${goalDescription}?
+- How do you acknowledge their concern while still pursuing ${goalDescription}?
+- What does empathy look like specifically in the context of ${goalDescription}?
 
 Return ONLY this JSON:
 {
@@ -4320,15 +4343,20 @@ Return ONLY this JSON:
     // Module 5: Talk Stage
     const module5Prompt = {
       role: "system",
-      content: `You are an expert communication coach. Create Module 5 (Talk Stage) for someone learning: "${goalDescription}"
+      content: fillGoal(`You are an expert communication coach specializing in helping people achieve: "${goalDescription}"
 
-This module teaches the TALK stage - sharing your perspective on this goal clearly and persuasively.
+CRITICAL: This module is SPECIFICALLY about ADVOCATING for ${goalDescription}.
+NOT generic "Talk" or "Share perspective" content. NOT "how to state your view in any conversation."
+EVERY principle, framework step, and example must be specifically about making the case FOR ${goalDescription}.
 
-Focus on:
-- How to present your view on ${goalDescription} after listening
-- Using evidence, not emotion
-- Addressing their specific concerns about ${goalDescription}
-- Being clear about why this goal matters
+DO NOT write "Present evidence for your position."
+DO write "When advocating for ${goalDescription}, present evidence that specifically addresses why ${goalDescription} is necessary, what happens if you don't ${goalDescription}, and how ${goalDescription} solves their specific concern."
+
+This module teaches HOW TO ADVOCATE when ${goalDescription}:
+- What specific evidence makes the case for ${goalDescription}?
+- How do you address their specific objection to ${goalDescription}?
+- What happens if you DON'T ${goalDescription}? (the consequence)
+- How do you connect ${goalDescription} to what they care about?
 
 Return ONLY this JSON:
 {
@@ -4358,15 +4386,20 @@ Return ONLY this JSON:
     // Module 6: Solve Stage
     const module6Prompt = {
       role: "system",
-      content: `You are an expert communication coach. Create Module 6 (Solve Stage) for someone learning: "${goalDescription}"
+      content: fillGoal(`You are an expert communication coach specializing in helping people achieve: "${goalDescription}"
 
-This module teaches the SOLVE stage - finding concrete agreement on how to actually ${goalDescription}.
+CRITICAL: This module is SPECIFICALLY about SOLVING HOW TO ${goalDescription}.
+NOT generic "Solve" or "Move to action" content. NOT "how to create next steps in any conversation."
+EVERY framework step, mistake, and example must be specifically about defining HOW you'll ${goalDescription}.
 
-Focus on:
-- Moving from agreement to action on ${goalDescription}
-- Handling remaining objections about ${goalDescription}
-- Creating specific next steps for ${goalDescription}
-- Holding commitment on ${goalDescription}
+DO NOT write "Define specific actions and timeline."
+DO write "For ${goalDescription} specifically, you need to define: WHO will ${goalDescription}, WHEN they'll ${goalDescription}, HOW they'll ${goalDescription}, and WHAT SUCCESS looks like for ${goalDescription}."
+
+This module teaches HOW TO MOVE TO ACTION on ${goalDescription}:
+- What specific method will you use to ${goalDescription}?
+- Who owns what when ${goalDescription} happens?
+- How do you measure success at ${goalDescription}?
+- What's the first concrete step toward ${goalDescription}?
 
 Return ONLY this JSON:
 {
@@ -4396,15 +4429,20 @@ Return ONLY this JSON:
     // Module 7: Mastery
     const module7Prompt = {
       role: "system",
-      content: `You are an expert communication coach. Create Module 7 (Mastery) for someone learning: "${goalDescription}"
+      content: fillGoal(`You are an expert communication coach specializing in helping people achieve: "${goalDescription}"
 
-This module teaches advanced patterns - what to do when ${goalDescription} gets complicated, resisted, or happens repeatedly.
+CRITICAL: This module is SPECIFICALLY about MASTERING ${goalDescription} when it gets hard, resisted, or needs to happen repeatedly.
+NOT generic "Mastery" or "Handling resistance" content. NOT "what to do when any conversation gets difficult."
+EVERY principle, framework, and example must be specifically about ${goalDescription} resistance, patterns, and complexity.
 
-Focus on:
-- Handling resistance or pushback on ${goalDescription}
-- Recognizing patterns in how you approach ${goalDescription}
-- Advanced strategies for recurring ${goalDescription}
-- Knowing when to escalate beyond ${goalDescription}
+DO NOT write "When they push back, get curious."
+DO write "When they push back on ${goalDescription}, the real concern is often [specific fear about goalDescription]. Here's how to identify and address that fear."
+
+This module teaches ADVANCED ${goalDescription} strategies:
+- What specifically makes ${goalDescription} hard the second, third, or fourth time?
+- What patterns do you see in how you approach ${goalDescription}? (too soft? too pushy? avoiding?)
+- When should you escalate ${goalDescription} to someone with authority?
+- How do you handle someone who keeps resisting ${goalDescription}?
 
 Return ONLY this JSON:
 {
