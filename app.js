@@ -4069,10 +4069,11 @@ function generateFeedback() {
   const analytics = computeAnalytics();
   const communicationCard = `
     <article class="analytics-card">
-      <h4>Communication Style</h4>
-      <p class="analytics-metric">Clarity: ${Math.max(20, 100 - analytics.fillerRate)}%</p>
-      <p class="analytics-metric">Directness: ${Math.round((total / max) * 100)}%</p>
-      <p class="muted">Focus on clear, direct statements with concrete next steps.</p>
+      <h4>Communication & Clarity</h4>
+      <p class="analytics-metric">Clarity Score: ${Math.max(20, 100 - analytics.fillerRate)}%</p>
+      <p class="analytics-metric">Directness Score: ${Math.round((total / max) * 100)}%</p>
+      <p class="analytics-metric">Filler Words: ${analytics.fillerCount} (${analytics.fillerRate}%)</p>
+      <p class="muted">Focus on clear, direct statements with concrete next steps. Reduce filler language.</p>
     </article>
   `;
   const sessionHtml = `
@@ -4080,11 +4081,6 @@ function generateFeedback() {
       <h4>Analytics Overview</h4>
       <p class="analytics-metric">Turns: ${analytics.totalTurns} | Avg words/turn: ${analytics.avgWords}</p>
       <p class="muted">Stage coverage: ${analytics.stageCoverage}%</p>
-    </article>
-    <article class="analytics-card">
-      <h4>Speech Clarity</h4>
-      <p class="analytics-metric">Filler words: ${analytics.fillerCount} (${analytics.fillerRate}%)</p>
-      <p class="muted">Most repeated opener: ${analytics.repeatedStarter}</p>
     </article>
     ${communicationCard}
     <article class="analytics-card">
