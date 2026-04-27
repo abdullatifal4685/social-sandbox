@@ -2206,6 +2206,61 @@ function renderModule() {
   startPracticeBtn.textContent = "Start Conversation Practice";
 }
 
+async function generateContextualHintsForScenario(scenario) {
+  if (!scenario) return {};
+  
+  const userGoals = [...state.userLearningGoals.map((id) => {
+    const goal = LEARNING_GOALS.find((g) => g.id === id);
+    return goal?.title || id;
+  }), ...state.userCustomGoals];
+  
+  const hintsCache = {};
+  
+  // Generate hints for each stage
+  for (const stage of ILETS) {
+    try {
+      const prompt = {
+        role: "system",
+        content: `You are a conversation coach helping someone practice the "${stage}" stage in this role-play scenario.
+
+Scenario:
+- Title: ${scenario.title}
+- Situation: ${scenario.context}
+- AI will play: ${scenario.aiRole}
+- User's learning goals: ${userGoals.length > 0 ? userGoals.join(", ") : "general communication"}
+- User's role: ${scenario.aiRole ? "Colleague/peer in conversation with " + scenario.aiRole : "Someone in a difficult conversation"}
+
+At the "${stage}" stage, the user should:
+${stage === "Introduce" ? "Open clearly with intent and purpose, setting a respectful tone" : stage === "Listen" ? "Ask genuine questions to understand the other person's perspective" : stage === "Empathize" ? "Show understanding and acknowledge what's valid in their viewpoint" : stage === "Talk" ? "Share their perspective clearly and explain why it matters" : "Propose concrete next steps and reach agreement"}
+
+Generate 3 specific conversation starters for this exact scenario. They should:
+- Be realistic things someone would naturally say
+- Reference specific details from the situation
+- Fit the user's learning goals
+- Not be generic or vague
+
+Return ONLY JSON:
+{
+  "starters": [
+    {"text": "First specific opening for this scenario", "style": "direct"},
+    {"text": "Second specific opening for this scenario", "style": "balanced"},
+    {"text": "Third specific opening for this scenario", "style": "empathetic"}
+  ]
+}`,
+      };
+
+      const response = await callOpenAI([prompt], "gpt-4");
+      const parsed = JSON.parse(response);
+      hintsCache[stage] = parsed.starters || [];
+    } catch (error) {
+      console.warn(`Failed to generate hints for ${stage}:`, error);
+      hintsCache[stage] = [];
+    }
+  }
+  
+  return hintsCache;
+}
+
 function renderBriefingPage() {
   const scenario = getScenario();
   const scenarioScaffoldLevel = normalizeScaffoldLevel(Number(scenario.scaffoldLevel || 1));
@@ -2284,6 +2339,18 @@ function renderBriefingPage() {
   scenarioPickerSection.classList.add("is-hidden");
   scenarioBriefingSection.classList.remove("is-hidden");
   pickerActions.classList.add("is-hidden");
+  
+  // Generate contextual hints for this scenario asynchronously
+  if (scenario && !scenario.contextualHints) {
+    generateContextualHintsForScenario(scenario).then((hints) => {
+      // Store in scenario object so we can use later during practice
+      if (scenario) {
+        scenario.contextualHints = hints;
+      }
+    }).catch((err) => {
+      console.warn("Failed to generate contextual hints:", err);
+    });
+  }
 }
 
 function renderScenarioPicker() {
@@ -3003,7 +3070,19 @@ function renderIletsVisibility() {
 function renderPracticeStrip() {
   const currentStage = ILETS[state.stageIndex];
   const scenario = getScenario();
-  const guide = scenario.practice?.[currentStage] || STAGE_GUIDE[currentStage];
+  
+  // Use contextual hints from scenario if available, otherwise use default guide
+  let guide = scenario.practice?.[currentStage] || STAGE_GUIDE[currentStage];
+  
+  // Use AI-generated contextual hints if available
+  if (scenario.contextualHints && scenario.contextualHints[currentStage]) {
+    const contextualStarters = scenario.contextualHints[currentStage];
+    guide = {
+      ...guide,
+      starters: contextualStarters && contextualStarters.length > 0 ? contextualStarters : (guide.starters || []),
+    };
+  }
+  
   const scaffold = getScaffoldLevelConfig();
   const hintsAlwaysVisible = state.scaffold.level === 1;
   const hintsDisabled = state.scaffold.level === 3;
