@@ -4167,44 +4167,65 @@ async function generateTailoredLearningPath(goalDescription) {
       role: "system",
       content: `You are an expert in workplace communication and the ILETS framework (Introduce, Listen, Empathize, Talk, Solve).
 
-Create a COMPLETE 7-MODULE LEARNING PATH tailored to help someone improve: "${goalDescription}"
+Your task: Create a COMPLETE 7-MODULE LEARNING PATH that is DEEPLY AND SPECIFICALLY TAILORED to: "${goalDescription}"
 
-Each module should:
-- Be specific to the learner's goal (not generic)
-- Build progressively (module 1 → module 7)
-- Include ILETS-aligned frameworks and techniques
-- Be practical, actionable, and workplace-relevant
-- Include real examples and specific phrases they can use
+CRITICAL: Every single module must:
+- Have a title that references the user's specific goal (not generic titles like "Listening Skills")
+- Include frameworks, examples, and tips that are SPECIFIC to "${goalDescription}"
+- Use real workplace language and scenarios relevant to "${goalDescription}"
+- Build on the previous module to create a coherent learning journey
+- Reference "${goalDescription}" explicitly in the framework and examples
 
-Return a JSON array with 7 objects. EACH module must have this exact structure:
+EXAMPLE: If goal is "Surface Risks & Bad News", modules should be:
+1. "Prepare to Surface Risks: Self-Awareness for Difficult News"
+2. "Opening with Risk: Introducing Bad News Without Defensiveness"
+3. "Understanding Their Concern: Listening Before Defending"
+4. "Showing You Get It: Empathy When Delivering Bad News"
+5. "Being Clear on Risk: Talking About Consequences and Impact"
+6. "Moving Forward: Solving Beyond the Bad News"
+7. "Mastering Risk Conversations: Advanced Patterns for Repeated Difficult Discussions"
+
+Each module should explicitly reference the goal. For example, in frameworks use:
+- "Step 1: Prepare your risk message by..."
+- "Step 2: Surface the risk by opening with..."
+- NOT generic "Step 1: Open the conversation by..."
+
+Return a JSON array with 7 objects. EACH module must have this EXACT structure:
 {
-  "title": "Module title (5-8 words) specific to the goal",
-  "summary": "1-2 sentence summary of what this module teaches",
-  "objective": "One sentence: what learner can do after this module",
-  "overview": "2-3 sentences explaining the module and why it matters",
+  "title": "Module title (8-12 words) that includes the goal",
+  "summary": "1-2 sentences specific to achieving this goal",
+  "objective": "One sentence: what learner can do to accomplish the goal after this module",
+  "overview": "2-3 sentences explaining how this module helps achieve the goal",
   "keyPrinciples": [
-    {"name": "Principle", "description": "Specific explanation"},
-    {"name": "Principle", "description": "Specific explanation"},
-    {"name": "Principle", "description": "Specific explanation"}
+    {"name": "Principle", "description": "Specific explanation for achieving the goal"},
+    {"name": "Principle", "description": "Specific explanation for achieving the goal"},
+    {"name": "Principle", "description": "Specific explanation for achieving the goal"}
   ],
   "commonMistakes": [
-    {"mistake": "What people do", "why": "Why it backfires", "better": "What to do instead"},
-    {"mistake": "Common error", "why": "Why it fails", "better": "Better approach"}
+    {"mistake": "What people do that prevents achieving the goal", "why": "Why it fails for this goal", "better": "How to succeed at this goal"},
+    {"mistake": "Common error when working on this goal", "why": "Why it backfires", "better": "Better approach for this goal"}
   ],
-  "framework": "Step-by-step technique aligned with ILETS when relevant | Use pipe-separated steps",
-  "concreteExample": "3+ sentence detailed workplace scenario with dialogue showing the skill",
-  "tips": ["Tip 1", "Tip 2", "Tip 3"]
+  "framework": "Step-by-step technique directly applying to the goal | Use pipe-separated steps",
+  "concreteExample": "3+ sentence detailed workplace scenario with dialogue showing how to achieve the goal",
+  "tips": ["Specific tip for this goal", "Specific tip for this goal", "Specific tip for this goal"]
 }
 
-PROGRESSION EXAMPLE:
-- Module 1: Foundation (prepare, self-awareness)
-- Module 2-3: Early stages (Introduce, Listen skills)
-- Module 4-5: Middle stages (Empathize, Talk skills)
-- Module 6-7: Advanced (Solve, handling resistance, long-term success)
+CRITICAL REQUIREMENTS:
+1. Every module title MUST mention the goal
+2. Every framework step MUST reference how to apply it to the goal
+3. Every example MUST show someone doing this exact goal
+4. Every tip MUST be actionable for this specific goal
 
-Be specific, practical, and avoid generic placeholders. Reference specific phrases and techniques.
+PROGRESSION FOR MODULES 1-7:
+1. Foundation: Prepare & self-awareness specific to the goal
+2. Introduce stage: How to open conversations around this goal
+3. Listen stage: How to listen when this goal is at stake
+4. Empathize stage: How to show empathy while pursuing this goal
+5. Talk stage: How to communicate your perspective on this goal
+6. Solve stage: How to find solutions that achieve this goal
+7. Mastery: Handling edge cases, resistance, and complexity for this goal
 
-Return as a valid JSON array ONLY, no extra text.`,
+Return ONLY a valid JSON array, no extra text.`,
     };
 
     const response = await callOpenAI([systemPrompt], "gpt-4");
@@ -4224,36 +4245,34 @@ Return as a valid JSON array ONLY, no extra text.`,
     }));
   } catch (error) {
     console.error("Failed to generate tailored learning path:", error);
-    // Return default fallback path
-    return [
-      {
-        id: `fallback-module-${Date.now()}-0`,
-        title: `1. Prepare for ${goalDescription}`,
-        summary: "Foundation and self-awareness",
-        objective: `Understand how to approach ${goalDescription} effectively`,
-        overview: `This module helps you prepare mentally and strategically for ${goalDescription}. You'll set a clear intention and understand the stakes.`,
-        keyPrinciples: [
-          { name: "Intention Setting", description: "Be clear about what you want to accomplish" },
-          { name: "Self-Awareness", description: "Understand your triggers and default reactions" },
-          { name: "Strategic Planning", description: "Prepare key messages and questions in advance" },
-        ],
-        commonMistakes: [
-          { mistake: "Going in unprepared", why: "Leads to reactive, defensive responses", better: "Take 5-10 minutes to plan your opening and intent" },
-          { mistake: "Focusing only on your point", why: "Misses the other person's needs", better: "Plan what you want to understand about their perspective" },
-        ],
-        framework: "Step 1: Set one clear intention | Step 2: List 2-3 key points | Step 3: Prepare one open question | Step 4: Identify your emotional triggers | Step 5: Commit to one behavior",
-        concreteExample: `You need to raise a concern about a colleague's work. Instead of rushing in frustrated, pause and think: "I want to understand what they're facing AND help them improve. I'll open by asking what's driving their approach, then share my concern. I'll stay calm even if they get defensive."`,
-        tips: [
-          "Write down your intention in one sentence",
-          "Plan your opening sentence before the conversation",
-          "Identify one thing you want to learn from them",
-        ],
-        customGoal: goalDescription,
-        isCustom: true,
-        isTailored: true,
-        moduleSequenceIndex: 0,
-      },
-    ];
+    // Return a basic fallback that's still tailored to the goal
+    return Array.from({ length: 7 }, (_, i) => ({
+      id: `fallback-module-${Date.now()}-${i}`,
+      title: `${i + 1}. ${goalDescription} - Stage ${i + 1}`,
+      summary: `Step ${i + 1} in mastering ${goalDescription}`,
+      objective: `Apply the techniques of stage ${i + 1} to successfully ${goalDescription}`,
+      overview: `This module teaches you how to use ${ILETS[Math.min(i, ILETS.length - 1)]} stage principles when ${goalDescription}.`,
+      keyPrinciples: [
+        { name: "Intention", description: `Be clear about your goal when ${goalDescription}.` },
+        { name: "Authenticity", description: `Be genuine when attempting to ${goalDescription}.` },
+        { name: "Respect", description: `Honor the other person while ${goalDescription}.` },
+      ],
+      commonMistakes: [
+        { mistake: `Not preparing before ${goalDescription}`, why: "Leads to reactive and ineffective communication", better: `Take time to prepare how you'll ${goalDescription}` },
+        { mistake: `Only focusing on your needs when ${goalDescription}`, why: "Ignores the other person's perspective", better: `Balance your goal with understanding their viewpoint` },
+      ],
+      framework: `Step 1: Prepare for ${goalDescription} | Step 2: Open clearly about ${goalDescription} | Step 3: Listen to their view | Step 4: Show you understand | Step 5: Share your perspective on ${goalDescription} | Step 6: Find solutions that work`,
+      concreteExample: `Imagine you need to ${goalDescription}. Start by preparing what you'll say and why it matters. Open with shared purpose: "I want us to..." Then listen to their perspective before making your case. Acknowledge what's valid, share your view clearly, and finish with specific next steps.`,
+      tips: [
+        `Start with intention: why does ${goalDescription} matter?`,
+        `Ask genuine questions to understand before advocating`,
+        `Close with one clear action and timeline for ${goalDescription}`,
+      ],
+      customGoal: goalDescription,
+      isCustom: true,
+      isTailored: true,
+      moduleSequenceIndex: i,
+    }));
   }
 }
 
