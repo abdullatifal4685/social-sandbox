@@ -3131,6 +3131,21 @@ function buildRoleplayPrompt() {
   ].join("\n");
 }
 
+function withTimeout(promise, timeoutMs) {
+  let timeoutId;
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutId = window.setTimeout(() => {
+      reject(new Error("Timed out waiting for AI reply."));
+    }, timeoutMs);
+  });
+
+  return Promise.race([promise, timeoutPromise]).finally(() => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+  });
+}
+
 function personalizeReply(message) {
   const learner = getLearnerName();
   if (learner === "Learner") {
@@ -4161,7 +4176,7 @@ async function handleSend(event) {
   let assistantReply = "";
 
   try {
-    const reply = await generateRoleplayReply();
+    const reply = await withTimeout(generateRoleplayReply(), 15000);
     const parsed = parseAssistantOutput(reply);
     addHint(parsed.hint);
     addCoachNote(userText, parsed);
