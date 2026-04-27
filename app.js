@@ -2887,10 +2887,6 @@ function renderBrief() {
       <h4 class="briefing-label">What You're Aiming For</h4>
       <ul class="briefing-goals">${scenario.goals.map((goal) => `<li>${escapeHtml(goal)}</li>`).join("")}</ul>
     </section>
-    <section class="briefing-section">
-      <h4 class="briefing-label">Scenario Catalyst</h4>
-      <blockquote class="briefing-quote">${escapeHtml(scenario.opening)}</blockquote>
-    </section>
   `;
 }
 
