@@ -49,6 +49,8 @@ const PEER_ROOM_PREFIX = "sandbox.peer.room.";
 const PEER_USER_ID_KEY = "sandbox.peer.userId";
 const PEER_REQUESTS_KEY = "sandbox.peer.requests.v1";
 const PEER_SESSION_HISTORY_KEY = "sandbox.peer.sessionHistory.v1";
+const PRACTICE_SESSIONS_KEY = "sandbox.practiceSessions.v1";
+const CURRENT_SESSION_ANALYSIS_KEY = "sandbox.currentSessionAnalysis.v1";
 
 const SCAFFOLD_LEVELS = {
   1: {
@@ -828,6 +830,50 @@ function persistScaffoldLevel() {
   localStorage.setItem(SCAFFOLD_LEVEL_KEY, String(state.scaffold.level));
 }
 
+function loadPracticeSessions() {
+  try {
+    const raw = localStorage.getItem(PRACTICE_SESSIONS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (err) {
+    console.warn("Failed to load practice sessions:", err);
+    return [];
+  }
+}
+
+function savePracticeSessions(sessions) {
+  localStorage.setItem(PRACTICE_SESSIONS_KEY, JSON.stringify(sessions));
+}
+
+function savePracticeSessionResult(result) {
+  const sessions = loadPracticeSessions();
+  sessions.push({
+    ...result,
+    timestamp: new Date().toISOString(),
+    id: `session-${Date.now()}`,
+  });
+  savePracticeSessions(sessions);
+  return sessions;
+}
+
+function getPreviousSessions(limit = 5) {
+  const sessions = loadPracticeSessions();
+  return sessions.slice(-limit).reverse();
+}
+
+function getSessionAnalysisData(sessionId) {
+  try {
+    const raw = localStorage.getItem(CURRENT_SESSION_ANALYSIS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (err) {
+    console.warn("Failed to load session analysis:", err);
+    return {};
+  }
+}
+
+function saveSessionAnalysis(analysis) {
+  localStorage.setItem(CURRENT_SESSION_ANALYSIS_KEY, JSON.stringify(analysis));
+}
+
 function buildInitialScenarios() {
   const overrides = loadScenarioOverrides();
   const hiddenIds = new Set(loadHiddenScenarioIds());
@@ -855,6 +901,12 @@ const state = {
   moduleQuizPassed: false,
   userName: localStorage.getItem(USER_NAME_KEY) || "",
   userLearningGoals: JSON.parse(localStorage.getItem("sandbox.userLearningGoals") || "[]"),
+  userCustomGoals: JSON.parse(localStorage.getItem("sandbox.userCustomGoals") || "[]"),
+  customTailoredModules: JSON.parse(localStorage.getItem("sandbox.customTailoredModules") || "[]"),
+  customTailoredScenarios: JSON.parse(localStorage.getItem("sandbox.customTailoredScenarios") || "[]"),
+  goalScenarioGenerationKey: null,
+  goalScenarioLoading: false,
+  dynamicHintGenerationKey: null,
   nameEditorOpen: false,
   messages: [],
   stageIndex: 0,
@@ -887,10 +939,10 @@ const state = {
   finalReflectionSubmitting: false,
   finalReflectionFeedback: "",
   settings: {
-    mode: localStorage.getItem("sandbox.mode") || "openai",
-    proxyUrl: localStorage.getItem("sandbox.proxyUrl") || "http://localhost:8787/api/chat",
+    mode: localStorage.getItem("sandbox.mode") || "proxy",
+    proxyUrl: localStorage.getItem("sandbox.proxyUrl") || "https://social-sandbox-api-proxy.onrender.com/api/chat",
     apiKey: localStorage.getItem("sandbox.apiKey") || "",
-    model: localStorage.getItem("sandbox.model") || "gpt-4.1-mini",
+    model: localStorage.getItem("sandbox.model") || "gpt-4",
   },
   scaffold: {
     level: loadScaffoldLevel(),
@@ -917,6 +969,15 @@ const state = {
     feedbackDraft: "",
     feedbackSent: false,
     feedbackNotes: [],
+  },
+  currentSessionAnalysis: {
+    transcript: [], // {role: 'user'|'ai', content: string, stage: string}
+    userQuotes: [], // [{quote: string, context: string, stage: string}]
+    stagePerformance: {}, // {Introduce: score, Listen: score, ...}
+    strengths: [], // [{behavior: string, evidence: string}]
+    growthAreas: [], // [{area: string, suggestion: string}]
+    previousSessionComparison: null, // comparison to last session
+    isAnalyzing: false,
   },
 };
 
@@ -1004,6 +1065,9 @@ const practiceShell = document.getElementById("practiceShell");
 const goalsGrid = document.getElementById("goalsGrid");
 const goalsBackBtn = document.getElementById("goalsBackBtn");
 const goalsNextBtn = document.getElementById("goalsNextBtn");
+const customGoalInput = document.getElementById("customGoalInput");
+const addCustomGoalBtn = document.getElementById("addCustomGoalBtn");
+const customGoalsList = document.getElementById("customGoalsList");
 
 const briefingTitle = document.getElementById("briefingTitle");
 const briefingSubtitle = document.getElementById("briefingSubtitle");
@@ -1027,8 +1091,10 @@ const briefScaffoldLevelGroup = document.getElementById("briefScaffoldLevelGroup
 const cancelBriefingBtn = document.getElementById("cancelBriefingBtn");
 const backFromBriefingBtn = document.getElementById("backFromBriefingBtn");
 const beginPracticeBtn = document.getElementById("beginPracticeBtn");
+const editScenarioBriefingBtn = document.getElementById("editScenarioBriefingBtn");
 const pickerActions = document.getElementById("pickerActions");
 const goToChoiceBtn = document.getElementById("goToChoiceBtn");
+const choiceBackBtn = document.getElementById("choiceBackBtn");
 const userNameInput = document.getElementById("userNameInput");
 const scenarioNameSetup = document.getElementById("scenarioNameSetup");
 const chooseLearnBtn = document.getElementById("chooseLearnBtn");
@@ -2018,26 +2084,188 @@ window.__ssNavigate = (targetPage) => {
 };
 
 function renderModule() {
-  const total = MODULE_SECTIONS.length;
-  const index = state.moduleIndex;
-  const section = MODULE_SECTIONS[index];
+  // Combine custom tailored modules with standard modules
+  const allModules = getLearningModules();
+  const total = allModules.length;
+  const index = Math.min(state.moduleIndex, Math.max(total - 1, 0));
+  const section = allModules[index];
   const progress = Math.round(((index + 1) / total) * 100);
 
   moduleProgressLabel.textContent = `Module ${index + 1}/${total}`;
   moduleProgressPercent.textContent = `${progress}%`;
   moduleProgressBar.style.width = `${progress}%`;
-  moduleTitle.textContent = section.title;
-  moduleSummary.textContent = section.summary;
-  moduleSectionCard.innerHTML = `
-    <p>${section.example}</p>
-    <ul>${section.points.map((point) => `<li>${point}</li>`).join("")}</ul>
-  `;
+  
+  // Check if this module is custom or recommended for user's goals
+  const allUserGoals = [...state.userLearningGoals, ...state.userCustomGoals];
+  const isCustom = section.isCustom;
+  const isRecommendedForGoals = allUserGoals.length > 0 && !isCustom;
+  
+  let titleHtml = section.title;
+  if (isCustom) {
+    titleHtml = `${section.title} <span style="display: inline-block; background: rgba(14, 163, 122, 0.2); color: var(--ink-dark); padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; margin-left: 0.6rem;">Tailored for you</span>`;
+  } else if (isRecommendedForGoals) {
+    titleHtml = `${section.title} <span style="display: inline-block; background: rgba(29, 95, 229, 0.15); color: var(--accent); padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; margin-left: 0.6rem;">Recommended for your goals</span>`;
+  }
+  
+  moduleTitle.innerHTML = titleHtml;
+  
+  // Handle both old and new module formats
+  if (section.objective) {
+    // NEW FORMAT: Detailed custom modules
+    moduleSummary.textContent = section.objective;
+    
+    let contentHtml = `
+      <section style="margin-bottom: 2rem;">
+        <h4 style="font-size: 0.95rem; color: var(--ink-dark); margin-bottom: 0.75rem;">Overview</h4>
+        <p style="margin: 0; line-height: 1.6;">${escapeHtml(section.overview)}</p>
+      </section>
+    `;
+    
+    // Key principles
+    if (section.keyPrinciples && section.keyPrinciples.length > 0) {
+      contentHtml += `
+      <section style="margin-bottom: 2rem;">
+        <h4 style="font-size: 0.95rem; color: var(--ink-dark); margin-bottom: 0.75rem;">Key Principles</h4>
+        <div style="display: grid; gap: 0.75rem;">
+          ${section.keyPrinciples.map((p) => `
+          <div style="padding: 1rem; background: rgba(29, 95, 229, 0.05); border-left: 3px solid var(--accent); border-radius: 4px;">
+            <strong style="display: block; margin-bottom: 0.3rem;">${escapeHtml(p.name)}</strong>
+            <p style="margin: 0; font-size: 0.9rem;">${escapeHtml(p.description)}</p>
+          </div>
+          `).join('')}
+        </div>
+      </section>
+      `;
+    }
+    
+    // Common mistakes
+    if (section.commonMistakes && section.commonMistakes.length > 0) {
+      contentHtml += `
+      <section style="margin-bottom: 2rem;">
+        <h4 style="font-size: 0.95rem; color: var(--ink-dark); margin-bottom: 0.75rem;">Common Mistakes to Avoid</h4>
+        <div style="display: grid; gap: 0.75rem;">
+          ${section.commonMistakes.map((m) => `
+          <div style="padding: 1rem; background: rgba(217, 117, 30, 0.05); border-left: 3px solid #d9751e; border-radius: 4px;">
+            <strong style="display: block; color: #d9751e; margin-bottom: 0.3rem;">❌ ${escapeHtml(m.mistake)}</strong>
+            <p style="margin: 0.3rem 0; font-size: 0.9rem;"><em>Why it doesn't work:</em> ${escapeHtml(m.why)}</p>
+            <p style="margin: 0; font-size: 0.9rem;"><strong>✓ Instead:</strong> ${escapeHtml(m.better)}</p>
+          </div>
+          `).join('')}
+        </div>
+      </section>
+      `;
+    }
+    
+    // Framework
+    if (section.framework) {
+      contentHtml += `
+      <section style="margin-bottom: 2rem;">
+        <h4 style="font-size: 0.95rem; color: var(--ink-dark); margin-bottom: 0.75rem;">Framework to Follow</h4>
+        <div style="padding: 1rem; background: rgba(14, 163, 122, 0.05); border-left: 3px solid #0fa37a; border-radius: 4px;">
+          <p style="margin: 0; line-height: 1.8; font-size: 0.95rem;">${escapeHtml(section.framework).split(' | ').map((step, i) => `<strong>Step ${i + 1}:</strong> ${step}`).join('<br>')}</p>
+        </div>
+      </section>
+      `;
+    }
+    
+    // Concrete example
+    if (section.concreteExample) {
+      contentHtml += `
+      <section style="margin-bottom: 2rem;">
+        <h4 style="font-size: 0.95rem; color: var(--ink-dark); margin-bottom: 0.75rem;">Concrete Example</h4>
+        <div style="padding: 1rem; background: rgba(100, 100, 100, 0.04); border-left: 3px solid #666; border-radius: 4px; font-size: 0.9rem; line-height: 1.6;">
+          <p style="margin: 0; font-style: italic;">${escapeHtml(section.concreteExample)}</p>
+        </div>
+      </section>
+      `;
+    }
+    
+    // Tips
+    if (section.tips && section.tips.length > 0) {
+      contentHtml += `
+      <section style="margin-bottom: 1rem;">
+        <h4 style="font-size: 0.95rem; color: var(--ink-dark); margin-bottom: 0.75rem;">Actionable Tips</h4>
+        <ul style="margin: 0; padding-left: 1.5rem;">
+          ${section.tips.map((tip) => `<li style="margin-bottom: 0.5rem;">${escapeHtml(tip)}</li>`).join('')}
+        </ul>
+      </section>
+      `;
+    }
+    
+    moduleSectionCard.innerHTML = contentHtml;
+  } else {
+    // OLD FORMAT: Standard modules
+    moduleSummary.textContent = section.summary;
+    moduleSectionCard.innerHTML = `
+      <p>${escapeHtml(section.example)}</p>
+      <ul>${section.points.map((point) => `<li>${escapeHtml(point)}</li>`).join("")}</ul>
+    `;
+  }
 
   modulePrevBtn.disabled = index === 0;
   moduleNextBtn.disabled = index === total - 1;
   moduleQuiz.classList.toggle("is-hidden", index !== total - 1);
   startPracticeBtn.disabled = false;
   startPracticeBtn.textContent = "Start Conversation Practice";
+}
+
+function getLearningModules() {
+  return [...state.customTailoredModules, ...MODULE_SECTIONS];
+}
+
+async function generateContextualHintsForScenario(scenario) {
+  if (!scenario) return {};
+  
+  const userGoals = [...state.userLearningGoals.map((id) => {
+    const goal = LEARNING_GOALS.find((g) => g.id === id);
+    return goal?.title || id;
+  }), ...state.userCustomGoals];
+  
+  const hintsCache = {};
+  
+  // Generate hints for each stage
+  for (const stage of ILETS) {
+    try {
+      const prompt = {
+        role: "system",
+        content: `You are a conversation coach helping someone practice the "${stage}" stage in this role-play scenario.
+
+Scenario:
+- Title: ${scenario.title}
+- Situation: ${scenario.context}
+- AI will play: ${scenario.aiRole}
+- User's learning goals: ${userGoals.length > 0 ? userGoals.join(", ") : "general communication"}
+- User's role: ${scenario.aiRole ? "Colleague/peer in conversation with " + scenario.aiRole : "Someone in a difficult conversation"}
+
+At the "${stage}" stage, the user should:
+${stage === "Introduce" ? "Open clearly with intent and purpose, setting a respectful tone" : stage === "Listen" ? "Ask genuine questions to understand the other person's perspective" : stage === "Empathize" ? "Show understanding and acknowledge what's valid in their viewpoint" : stage === "Talk" ? "Share their perspective clearly and explain why it matters" : "Propose concrete next steps and reach agreement"}
+
+Generate 3 specific conversation starters for this exact scenario. They should:
+- Be realistic things someone would naturally say
+- Reference specific details from the situation
+- Fit the user's learning goals
+- Not be generic or vague
+
+Return ONLY JSON:
+{
+  "starters": [
+    {"text": "First specific opening for this scenario", "style": "direct"},
+    {"text": "Second specific opening for this scenario", "style": "balanced"},
+    {"text": "Third specific opening for this scenario", "style": "empathetic"}
+  ]
+}`,
+      };
+
+      const response = await callOpenAI([prompt], "gpt-4");
+      const parsed = JSON.parse(response);
+      hintsCache[stage] = parsed.starters || [];
+    } catch (error) {
+      console.warn(`Failed to generate hints for ${stage}:`, error);
+      hintsCache[stage] = [];
+    }
+  }
+  
+  return hintsCache;
 }
 
 function renderBriefingPage() {
@@ -2082,14 +2310,18 @@ function renderBriefingPage() {
   const userLearningGoalsList = document.getElementById("userLearningGoalsList");
   const userLearningGoalsSection = document.getElementById("userLearningGoalsSection");
   if (userLearningGoalsList && userLearningGoalsSection) {
-    if (state.userLearningGoals && state.userLearningGoals.length > 0) {
+    const allUserGoals = [...state.userLearningGoals, ...state.userCustomGoals];
+    if (allUserGoals && allUserGoals.length > 0) {
       const goalsHtml = state.userLearningGoals
         .map((goalId) => {
           const goal = LEARNING_GOALS.find((g) => g.id === goalId);
           return goal ? `<div class="user-goal-badge">${escapeHtml(goal.title)}</div>` : "";
         })
-        .join("");
-      userLearningGoalsList.innerHTML = goalsHtml;
+        .join("") + 
+        state.userCustomGoals
+          .map((customGoal) => `<div class="user-goal-badge" style="background: rgba(14, 163, 122, 0.2); color: var(--ink);">${escapeHtml(customGoal)}</div>`)
+          .join("");
+      userLearningGoalsList.innerHTML = goalsHtml || "No goals selected yet.";
       userLearningGoalsSection.classList.remove("is-hidden");
     } else {
       userLearningGoalsSection.classList.add("is-hidden");
@@ -2114,10 +2346,23 @@ function renderBriefingPage() {
   scenarioPickerSection.classList.add("is-hidden");
   scenarioBriefingSection.classList.remove("is-hidden");
   pickerActions.classList.add("is-hidden");
+  
+  // Generate contextual hints for this scenario asynchronously
+  if (scenario && !scenario.contextualHints) {
+    generateContextualHintsForScenario(scenario).then((hints) => {
+      // Store in scenario object so we can use later during practice
+      if (scenario) {
+        scenario.contextualHints = hints;
+      }
+    }).catch((err) => {
+      console.warn("Failed to generate contextual hints:", err);
+    });
+  }
 }
 
 function renderScenarioPicker() {
   state.nameEditorOpen = false;
+  void ensureGoalTailoredScenario();
   const previewCount = 6;
   const orderedScenarios = getOrderedScenarios();
   const visibleScenarios = state.scenarioPickerExpanded
@@ -2138,6 +2383,50 @@ function renderScenarioPicker() {
       : "Set your name once, then choose or create a scenario below.";
   }
 
+  // Add goal-context header if goals are selected
+  const goalsHeading = document.getElementById("scenarioPickerGoalsHeading");
+  if (goalsHeading) {
+    if (state.userLearningGoals.length > 0 || state.userCustomGoals.length > 0) {
+      const allGoals = [
+        ...state.userLearningGoals.map((id) => {
+          const goal = LEARNING_GOALS.find((g) => g.id === id);
+          return goal?.title || id;
+        }),
+        ...state.userCustomGoals,
+      ];
+      
+      const goalContextHtml = `
+        <div style="background: rgba(14, 95, 229, 0.05); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; border-left: 4px solid var(--accent);">
+          <h3 style="margin-top: 0; font-size: 1rem; color: var(--ink-dark);">📚 Personalized Scenarios for Your Goals</h3>
+          <p style="margin: 0.75rem 0 0 0; font-size: 0.9rem; color: var(--ink-dark);">
+            Based on your learning goals, the picker is prioritizing generated scenarios for:
+            <strong>${allGoals.map((g) => `"${escapeHtml(g)}"`).join(", ")}</strong>
+          </p>
+          <p style="margin: 0.75rem 0 0 0; font-size: 0.85rem; color: var(--ink);">
+            These scenarios are created to match what you selected, so you can practice the exact situations you care about.
+          </p>
+        </div>
+      `;
+      goalsHeading.innerHTML = goalContextHtml;
+      goalsHeading.classList.remove("is-hidden");
+    } else {
+      goalsHeading.classList.add("is-hidden");
+    }
+  }
+
+  if (scenarioPickerGrid && state.goalScenarioLoading) {
+    scenarioPickerGrid.innerHTML = `
+      <article class="scenario-picker-card active" style="grid-column: 1 / -1; text-align: left;">
+        <div class="recommended-badge" style="background: rgba(14, 163, 122, 0.9);">Building your personalized scenario</div>
+        <div style="padding: 0.75rem 0 0;">
+          <strong style="display:block; margin-bottom: 0.5rem;">Creating a scenario from your goals</strong>
+          <p class="muted" style="margin: 0;">AI is generating a practice situation based on the learning goals you selected. This usually takes a few seconds.</p>
+        </div>
+      </article>
+    `;
+    return;
+  }
+
   scenarioPickerGrid.innerHTML = visibleScenarios
     .map((scenario) => {
       const scenarioGoals = getScenarioGoalMatch(scenario.id);
@@ -2148,10 +2437,12 @@ function renderScenarioPicker() {
         })
         .join("");
       const isRecommended = state.userLearningGoals.length > 0 && scenarioGoals.some((id) => state.userLearningGoals.includes(id));
+      const isTailored = scenario.isCustom || scenario.customGoal;
 
       return `
-      <article class="scenario-picker-card ${scenario.id === state.selectedScenarioId ? "active" : ""} ${isRecommended ? "is-recommended" : ""}" data-scenario-id="${escapeHtml(scenario.id)}">
-        ${isRecommended ? '<div class="recommended-badge">Recommended for your goals</div>' : ""}
+      <article class="scenario-picker-card ${scenario.id === state.selectedScenarioId ? "active" : ""} ${isRecommended ? "is-recommended" : ""} ${isTailored ? "is-tailored" : ""}" data-scenario-id="${escapeHtml(scenario.id)}">
+        ${isTailored ? '<div class="recommended-badge" style="background: rgba(14, 163, 122, 0.9);">Tailored for you: ' + escapeHtml(scenario.customGoal || scenario.title) + '</div>' : ""}
+        ${isRecommended && !isTailored ? '<div class="recommended-badge">Recommended for your goals</div>' : ""}
         <button class="picker-card-select" data-scenario-id="${escapeHtml(scenario.id)}" type="button">
           ${scenario.imageUrl ? `<img class="picker-card-illustration" src="${escapeHtml(scenario.imageUrl)}" alt="Illustration for ${escapeHtml(scenario.title)}" />` : ""}
           <div class="picker-card-head">
@@ -2200,7 +2491,12 @@ function renderScenarioPicker() {
 }
 
 function getOrderedScenarios() {
-  const baseScenarios = state.scenarios
+  // Separate custom tailored scenarios from base scenarios
+  const tailoredScenarios = state.scenarios.filter((s) => s.isCustom || s.customGoal);
+  const baseScenarios = state.scenarios.filter((s) => !s.isCustom && !s.customGoal);
+
+  // Sort base scenarios
+  const sortedBase = baseScenarios
     .map((scenario, index) => ({ scenario, index }))
     .sort((a, b) => {
       if (a.scenario.custom !== b.scenario.custom) {
@@ -2213,12 +2509,14 @@ function getOrderedScenarios() {
     })
     .map((entry) => entry.scenario);
 
-  // If user has selected learning goals, reorder scenarios by goal relevance
+  // If user has selected learning goals, reorder by goal relevance
+  let reordered = sortedBase;
   if (state.userLearningGoals && state.userLearningGoals.length > 0) {
-    return getRecommendedScenariosForGoals(state.userLearningGoals);
+    reordered = getRecommendedScenariosForGoals(state.userLearningGoals);
   }
 
-  return baseScenarios;
+  // Prioritize custom tailored scenarios first
+  return [...tailoredScenarios, ...reordered];
 }
 
 const PEER_DIRECTORY = [
@@ -2793,7 +3091,18 @@ function renderIletsVisibility() {
 function renderPracticeStrip() {
   const currentStage = ILETS[state.stageIndex];
   const scenario = getScenario();
-  const guide = scenario.practice?.[currentStage] || STAGE_GUIDE[currentStage];
+  const liveStarters = buildConversationGuidedHints(currentStage, scenario, state.messages.slice(-6));
+
+  // Use contextual hints from scenario if available, otherwise use the live conversation hints or the default guide.
+  let guide = scenario.practice?.[currentStage] || STAGE_GUIDE[currentStage];
+  const contextualStarters = scenario.contextualHints && scenario.contextualHints[currentStage];
+  guide = {
+    ...guide,
+    starters: liveStarters.length > 0
+      ? liveStarters
+      : (contextualStarters && contextualStarters.length > 0 ? contextualStarters : (guide.starters || [])),
+  };
+  
   const scaffold = getScaffoldLevelConfig();
   const hintsAlwaysVisible = state.scaffold.level === 1;
   const hintsDisabled = state.scaffold.level === 3;
@@ -2858,6 +3167,191 @@ function renderPracticeStrip() {
   nextStageBtn.disabled = state.stageIndex === ILETS.length - 1;
   nextStageBtn.textContent =
     state.stageIndex === ILETS.length - 1 ? "Final Stage Reached" : "Mark Stage Done";
+}
+
+function normalizeGoalLabel(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function getActiveGoalLabels() {
+  return [
+    ...state.userLearningGoals.map((id) => {
+      const goal = LEARNING_GOALS.find((item) => item.id === id);
+      return goal?.title || id;
+    }),
+    ...state.userCustomGoals,
+  ].filter(Boolean);
+}
+
+function getGoalScenarioSignature(goalLabels) {
+  return goalLabels.map(normalizeGoalLabel).sort().join(" | ");
+}
+
+function getConversationSnippet(messages, role) {
+  const match = [...messages].reverse().find((message) => message.role === role)?.content || "";
+  return match.trim().replace(/\s+/g, " ").slice(0, 90);
+}
+
+function buildConversationGuidedHints(stage, scenario, messages) {
+  if (!messages || messages.length === 0) {
+    return [];
+  }
+
+  const assistantSnippet = getConversationSnippet(messages, "assistant");
+  const userSnippet = getConversationSnippet(messages, "user");
+  const focusSnippet = assistantSnippet || userSnippet || scenario?.context || scenario?.title || "this conversation";
+  const cleanFocus = focusSnippet.replace(/["'`]/g, "");
+
+  switch (stage) {
+    case "Introduce":
+      return [
+        { style: "direct", text: `Open by naming the point the AI just raised: ${cleanFocus}.` },
+        { style: "balanced", text: `State your goal clearly and connect it to what was just discussed.` },
+        { style: "empathetic", text: `Acknowledge their last concern before you move into your point.` },
+      ];
+    case "Listen":
+      return [
+        { style: "direct", text: `Ask what they mean by ${cleanFocus}.` },
+        { style: "balanced", text: `Invite them to explain their side before you respond again.` },
+        { style: "empathetic", text: `Reflect back the pressure or frustration in their last reply.` },
+      ];
+    case "Empathize":
+      return [
+        { style: "direct", text: `Name the valid point in their last message before adding your view.` },
+        { style: "balanced", text: `Show you understand why ${cleanFocus} feels difficult for them.` },
+        { style: "empathetic", text: `Use one sentence to validate the emotion behind their reply.` },
+      ];
+    case "Talk":
+      return [
+        { style: "direct", text: `Bring the conversation back to ${cleanFocus} with one concrete example.` },
+        { style: "balanced", text: `Explain the impact of what was just said and why it matters.` },
+        { style: "empathetic", text: `Keep the point firm but respectful, then state what you need next.` },
+      ];
+    case "Solve":
+      return [
+        { style: "direct", text: `Turn the last exchange into one specific next step.` },
+        { style: "balanced", text: `Suggest an action, an owner, and a check-in tied to this conversation.` },
+        { style: "empathetic", text: `Close by aligning on a solution that answers the concern they just voiced.` },
+      ];
+    default:
+      return [];
+  }
+}
+
+async function generateDynamicHintsFromConversation(scenario, stage, messages) {
+  const userGoals = getActiveGoalLabels();
+  const transcript = messages
+    .map((message, index) => `${index + 1}. ${message.role.toUpperCase()}: ${message.content}`)
+    .join("\n");
+
+  const prompt = {
+    role: "system",
+    content: `You are a conversation coach. Generate 3 short sentence starters for the ${stage} stage.
+
+Use the recent conversation to make them feel immediate and specific.
+Scenario title: ${scenario?.title || "Unknown"}
+Scenario context: ${scenario?.context || "Unknown"}
+User goals: ${userGoals.length > 0 ? userGoals.join(", ") : "general communication"}
+
+Recent conversation:
+${transcript || "No conversation yet."}
+
+Return ONLY JSON in this format:
+{
+  "starters": [
+    {"text": "...", "style": "direct"},
+    {"text": "...", "style": "balanced"},
+    {"text": "...", "style": "empathetic"}
+  ]
+}`,
+  };
+
+  try {
+    const response = state.settings.mode === "proxy"
+      ? await callProxyAPI({ model: state.settings.model, messages: [prompt] })
+      : await callOpenAI([prompt], "gpt-4");
+    const parsed = JSON.parse(response);
+    return Array.isArray(parsed?.starters) ? parsed.starters.filter((item) => item && item.text) : [];
+  } catch (error) {
+    console.warn("Failed to generate live hints:", error);
+    return buildConversationGuidedHints(stage, scenario, messages);
+  }
+}
+
+async function refreshDynamicPracticeHints() {
+  const scenario = getScenario();
+  if (!scenario) {
+    return;
+  }
+
+  const stage = ILETS[state.stageIndex];
+  const signature = `${scenario.id}:${stage}:${state.messages.slice(-6).map((message) => `${message.role}:${message.content}`).join("|")}`;
+  if (state.dynamicHintGenerationKey === signature) {
+    return;
+  }
+
+  state.dynamicHintGenerationKey = signature;
+  try {
+    const hints = await generateDynamicHintsFromConversation(scenario, stage, state.messages.slice(-6));
+    scenario.contextualHints = scenario.contextualHints || {};
+    scenario.contextualHints[stage] = hints;
+  } finally {
+    state.dynamicHintGenerationKey = null;
+    if (state.page === "practice") {
+      renderPracticeStrip();
+    }
+  }
+}
+
+async function ensureGoalTailoredScenario() {
+  const goalLabels = getActiveGoalLabels();
+  if (!goalLabels.length) {
+    return;
+  }
+
+  const signature = getGoalScenarioSignature(goalLabels);
+  if (state.goalScenarioGenerationKey === signature) {
+    return;
+  }
+
+  const existingScenario = state.scenarios.find((scenario) => {
+    const scenarioSignature = getGoalScenarioSignature([scenario.customGoal || scenario.title || ""]);
+    return scenario.goalSignature === signature || scenario.customGoalSignature === signature || scenarioSignature === signature;
+  });
+
+  if (existingScenario) {
+    return;
+  }
+
+  state.goalScenarioGenerationKey = signature;
+  state.goalScenarioLoading = true;
+  if (state.page === "choice") {
+    renderScenarioPicker();
+  }
+  try {
+    const tailoredScenario = await generateTailoredPracticeScenario(goalLabels.join(", "));
+    tailoredScenario.goalSignature = signature;
+    tailoredScenario.customGoalSignature = signature;
+    tailoredScenario.customGoal = goalLabels.join(", ");
+    tailoredScenario.isCustom = true;
+    tailoredScenario.custom = true;
+    tailoredScenario.createdAt = Date.now();
+    state.scenarios.unshift(tailoredScenario);
+    state.customTailoredScenarios.unshift(tailoredScenario);
+    state.selectedScenarioId = tailoredScenario.id;
+    persistCustomScenarios();
+    if (state.page === "choice") {
+      renderScenarioPicker();
+    }
+  } catch (error) {
+    console.error("Failed to generate goal-tailored scenario:", error);
+  } finally {
+    state.goalScenarioGenerationKey = null;
+    state.goalScenarioLoading = false;
+    if (state.page === "choice") {
+      renderScenarioPicker();
+    }
+  }
 }
 
 function renderCoachNote() {
@@ -3112,6 +3606,7 @@ function renderTips() {
 function renderGoalsPage() {
   // Clear previous state
   goalsGrid.innerHTML = "";
+  customGoalInput.value = "";
   
   // Create checkboxes for each learning goal
   LEARNING_GOALS.forEach((goal) => {
@@ -3143,20 +3638,63 @@ function renderGoalsPage() {
     
     goalsGrid.appendChild(goalCheckbox);
   });
-  
+
+  // Render custom goals
+  renderCustomGoalsList();
   updateGoalsPageState();
 }
 
+function renderCustomGoalsList() {
+  customGoalsList.innerHTML = "";
+  state.userCustomGoals.forEach((customGoal, index) => {
+    const goalBadge = document.createElement("div");
+    goalBadge.className = "custom-goal-badge";
+    goalBadge.style.cssText = `
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      background: rgba(29, 95, 229, 0.12);
+      border: 1px solid rgba(29, 95, 229, 0.3);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      color: var(--ink);
+    `;
+    goalBadge.innerHTML = `
+      <span>${escapeHtml(customGoal)}</span>
+      <button type="button" aria-label="Remove goal" style="
+        background: none;
+        border: none;
+        color: var(--ink-soft);
+        cursor: pointer;
+        padding: 0;
+        font-size: 1.1rem;
+        line-height: 1;
+      ">×</button>
+    `;
+    
+    const removeBtn = goalBadge.querySelector("button");
+    removeBtn.addEventListener("click", () => {
+      state.userCustomGoals.splice(index, 1);
+      localStorage.setItem("sandbox.userCustomGoals", JSON.stringify(state.userCustomGoals));
+      renderCustomGoalsList();
+      updateGoalsPageState();
+    });
+    
+    customGoalsList.appendChild(goalBadge);
+  });
+}
+
 function updateGoalsPageState() {
-  // Enable "Continue" button only if 1-3 goals are selected
-  const goalsSelected = state.userLearningGoals.length;
-  goalsNextBtn.disabled = goalsSelected === 0 || goalsSelected > 3;
+  // Enable "Continue" button if 1-3 total goals are selected (preset + custom)
+  const totalGoals = state.userLearningGoals.length + state.userCustomGoals.length;
+  goalsNextBtn.disabled = totalGoals === 0 || totalGoals > 3;
   
-  if (goalsSelected === 1) {
+  if (totalGoals === 1) {
     goalsNextBtn.textContent = "Continue";
-  } else if (goalsSelected === 2 || goalsSelected === 3) {
-    goalsNextBtn.textContent = `Continue (${goalsSelected} goals)`;
-  } else if (goalsSelected === 0) {
+  } else if (totalGoals === 2 || totalGoals === 3) {
+    goalsNextBtn.textContent = `Continue (${totalGoals} goals)`;
+  } else if (totalGoals === 0) {
     goalsNextBtn.textContent = "Select at least 1 goal";
   } else {
     goalsNextBtn.textContent = "Select up to 3 goals";
@@ -3390,10 +3928,19 @@ async function callProxyAPI(payload) {
     throw new Error(`Proxy error ${res.status}: ${text || "Unknown error"}`);
   }
   const data = await res.json();
-  if (!data.reply) {
-    throw new Error("Proxy response missing reply field");
+  
+  // Handle OpenAI format response from proxy
+  const content = data.choices?.[0]?.message?.content;
+  if (content && typeof content === "string" && content.trim()) {
+    return content.trim();
   }
-  return data.reply;
+  
+  // Fallback for legacy reply format
+  if (data.reply && typeof data.reply === "string" && data.reply.trim()) {
+    return data.reply.trim();
+  }
+  
+  throw new Error("No text output found in proxy response");
 }
 
 async function callOpenAI(messages, model = null) {
@@ -3527,6 +4074,313 @@ ${userMessages.map((m, i) => `Message ${i + 1}: ${m}`).join("\n\n")}`,
   } catch (error) {
     console.warn("Analytics generation failed:", error);
     return "Clarity Score: 75\nFiller Words: 3\nRepeated Opener: [analyzing...]\nOverview: Good conversation flow.";
+  }
+}
+
+async function generateTailoredLearningModule(customGoal) {
+  try {
+    const systemPrompt = {
+      role: "system",
+      content: `You are an expert in workplace communication and difficult conversations. Create a comprehensive, practical learning module for someone who wants to improve: "${customGoal}"
+
+IMPORTANT: Generate DETAILED, SPECIFIC learning content - not generic placeholders. Think of a framework, techniques, and real examples.
+
+Return a JSON object with this EXACT structure:
+{
+  "title": "Specific title (5-8 words) exactly matching the goal",
+  "objective": "One sentence: what the learner will be able to do after this module",
+  "overview": "2-3 sentences explaining what this skill is and why it matters in difficult conversations",
+  "keyPrinciples": [
+    {"name": "Principle 1", "description": "Specific explanation of this principle"},
+    {"name": "Principle 2", "description": "Specific explanation of this principle"},
+    {"name": "Principle 3", "description": "Specific explanation of this principle"}
+  ],
+  "commonMistakes": [
+    {"mistake": "What people often do wrong", "why": "Why this backfires", "better": "What to do instead"},
+    {"mistake": "Another common error", "why": "Why this doesn't work", "better": "Better approach"}
+  ],
+  "framework": "A simple 3-5 step framework or technique with step names and brief descriptions",
+  "concreteExample": "A detailed workplace scenario showing the skill in action - at least 3 sentences with dialogue",
+  "tips": ["Actionable tip 1", "Actionable tip 2", "Actionable tip 3"]
+}
+
+Be specific, practical, and actionable. Avoid generic advice. Reference specific phrases and techniques.`,
+    };
+
+    const response = await callOpenAI([systemPrompt], "gpt-4");
+    const parsed = JSON.parse(response);
+    
+    return {
+      id: `custom-module-${Date.now()}`,
+      customGoal: customGoal,
+      title: parsed.title || customGoal,
+      objective: parsed.objective,
+      overview: parsed.overview,
+      keyPrinciples: parsed.keyPrinciples || [],
+      commonMistakes: parsed.commonMistakes || [],
+      framework: parsed.framework,
+      concreteExample: parsed.concreteExample,
+      tips: parsed.tips || [],
+      isCustom: true,
+    };
+  } catch (error) {
+    console.error("Failed to generate tailored module:", error);
+    return {
+      id: `custom-module-${Date.now()}`,
+      customGoal: customGoal,
+      title: customGoal,
+      objective: `Master the skill of ${customGoal}`,
+      overview: `This module will help you develop the key skills needed to ${customGoal} effectively in workplace conversations.`,
+      keyPrinciples: [
+        { name: "Authenticity", description: "Be genuine in your approach - people respond better to sincerity." },
+        { name: "Clarity", description: "Be clear about your intent and what you're trying to communicate." },
+        { name: "Respect", description: "Honor the other person's perspective even when you disagree." },
+      ],
+      commonMistakes: [
+        { mistake: "Being too vague", why: "The other person won't understand what you're trying to accomplish", better: "State your purpose clearly upfront" },
+        { mistake: "Getting defensive", why: "This shuts down productive dialogue", better: "Listen first, then respond thoughtfully" },
+      ],
+      framework: "Step 1: Prepare and set intent | Step 2: Open clearly | Step 3: Listen actively | Step 4: Share your perspective | Step 5: Find agreement",
+      concreteExample: `Imagine you made a mistake on a project. Instead of saying "I didn't mess up that badly," try: "I realize my approach on this didn't work out as planned. I want to understand what went wrong from your perspective, and then I'd like to discuss how we can move forward together."`,
+      tips: [
+        "Start with what you're trying to accomplish, not what you're avoiding",
+        "Ask genuine questions before making your case",
+        "Acknowledge the other person's valid points",
+      ],
+      isCustom: true,
+    };
+  }
+}
+
+async function generateTailoredPracticeScenario(customGoal) {
+  try {
+    const systemPrompt = {
+      role: "system",
+      content: `You are an expert in creating practice scenarios for difficult conversations. Create a realistic practice scenario for someone who wants to improve: "${customGoal}"
+      
+Return a JSON object with this exact structure:
+{
+  "title": "Scenario title (5-8 words) related to the custom goal",
+  "context": "2-3 sentence realistic scenario setup explaining the situation and why it's difficult",
+  "aiRole": "The role the AI will play (e.g., Manager, Colleague, Client)",
+  "opening": "The opening line the AI will say to start the scenario",
+  "goals": ["Practice goal 1", "Practice goal 2", "Practice goal 3"],
+  "difficulty": "Challenge type (e.g., Time pressure, Emotional tension, Power imbalance)"
+}
+
+Make the scenario realistic, relevant to the stated goal, and actionable.`,
+    };
+
+    const response = await callOpenAI([systemPrompt], "gpt-4");
+    const parsed = JSON.parse(response);
+    
+    return {
+      id: `custom-scenario-${Date.now()}`,
+      title: parsed.title,
+      context: parsed.context,
+      aiRole: parsed.aiRole,
+      opening: parsed.opening,
+      goals: parsed.goals,
+      difficulty: parsed.difficulty,
+      customGoal: customGoal,
+      custom: true,
+      scenarioType: "custom",
+      silenceMetrics: false,
+      practice: {
+        Introduce: {
+          objective: "Open the conversation in a way that applies to your goal.",
+          starters: [
+            { style: "direct", text: "Start with your main point related to: " + customGoal },
+          ],
+        },
+        Listen: {
+          objective: "Ask questions to understand the other person's perspective.",
+          starters: [
+            { style: "balanced", text: "Ask what they think about the situation." },
+          ],
+        },
+        Empathize: {
+          objective: "Acknowledge their perspective.",
+          starters: [
+            { style: "balanced", text: "Acknowledge their position or constraints." },
+          ],
+        },
+        Talk: {
+          objective: "Share your perspective clearly.",
+          starters: [
+            { style: "balanced", text: "Share your view and why it matters." },
+          ],
+        },
+        Solve: {
+          objective: "Agree on next steps.",
+          starters: [
+            { style: "balanced", text: "Propose a way forward that addresses both perspectives." },
+          ],
+        },
+      },
+    };
+  } catch (error) {
+    console.error("Failed to generate tailored scenario:", error);
+    return {
+      id: `custom-scenario-${Date.now()}`,
+      title: `Practice: ${customGoal}`,
+      context: `Practice the skill "${customGoal}" in a realistic workplace conversation.`,
+      aiRole: "Colleague",
+      opening: "I wanted to talk with you about something important. What's on your mind?",
+      goals: ["Apply your learning goal", "Stay composed", "Find a solution"],
+      difficulty: "Custom scenario",
+      customGoal: customGoal,
+      custom: true,
+      scenarioType: "custom",
+      silenceMetrics: false,
+      practice: {
+        Introduce: { objective: "Open the conversation.", starters: [{ style: "direct", text: "Begin your conversation." }] },
+        Listen: { objective: "Listen.", starters: [{ style: "direct", text: "Ask a question." }] },
+        Empathize: { objective: "Empathize.", starters: [{ style: "direct", text: "Acknowledge." }] },
+        Talk: { objective: "Talk.", starters: [{ style: "direct", text: "Share your view." }] },
+        Solve: { objective: "Solve.", starters: [{ style: "direct", text: "Propose next steps." }] },
+      },
+    };
+  }
+}
+
+async function analyzeSessionTranscript(transcript, scenarioTitle, userGoals) {
+  if (transcript.length < 2) {
+    return { userQuotes: [], stagePerformance: {}, strengths: [], growthAreas: [] };
+  }
+
+  try {
+    const userMessages = transcript.filter((m) => m.role === "user").map((m) => m.content);
+    const analysis = {
+      role: "system",
+      content: `You are an expert conversation coach analyzing a practice session transcript.
+
+User's learning goals: ${userGoals.join(", ")}
+Scenario: ${scenarioTitle}
+
+USER'S MESSAGES:
+${userMessages.map((msg, i) => `${i + 1}. "${msg}"`).join("\n")}
+
+Analyze the user's performance and return a JSON object:
+{
+  "userQuotes": [
+    {"quote": "exact word from user", "context": "what stage this happened in", "stage": "Introduce|Listen|Empathize|Talk|Solve", "analysis": "why this quote matters"}
+  ],
+  "strengths": [
+    {"behavior": "what they did well", "evidence": "quote or example from transcript"}
+  ],
+  "growthAreas": [
+    {"area": "skill to improve", "suggestion": "specific actionable suggestion", "exampleStage": "which stage to practice"}
+  ],
+  "stagePerformance": {
+    "Introduce": 0-100,
+    "Listen": 0-100,
+    "Empathize": 0-100,
+    "Talk": 0-100,
+    "Solve": 0-100
+  }
+}
+
+Be specific and reference actual quotes from their messages.`,
+    };
+
+    const response = await callOpenAI([analysis], "gpt-4");
+    const parsed = JSON.parse(response);
+    
+    state.currentSessionAnalysis.userQuotes = parsed.userQuotes || [];
+    state.currentSessionAnalysis.strengths = parsed.strengths || [];
+    state.currentSessionAnalysis.growthAreas = parsed.growthAreas || [];
+    state.currentSessionAnalysis.stagePerformance = parsed.stagePerformance || {};
+    
+    // Compare to previous session if exists
+    const previousSessions = getPreviousSessions(1);
+    if (previousSessions.length > 0) {
+      const lastSession = previousSessions[0];
+      state.currentSessionAnalysis.previousSessionComparison = {
+        previousDate: lastSession.timestamp,
+        previousScores: lastSession.stagePerformance,
+        improvements: Object.keys(parsed.stagePerformance || {}).map((stage) => ({
+          stage,
+          current: parsed.stagePerformance[stage],
+          previous: lastSession.stagePerformance?.[stage] || 0,
+          improved: (parsed.stagePerformance[stage] || 0) > (lastSession.stagePerformance?.[stage] || 0),
+        })),
+      };
+    }
+
+    saveSessionAnalysis(state.currentSessionAnalysis);
+    return state.currentSessionAnalysis;
+  } catch (error) {
+    console.error("Failed to analyze session:", error);
+    return { userQuotes: [], stagePerformance: {}, strengths: [], growthAreas: [] };
+  }
+}
+
+async function generateAdaptiveCoachFeedback(analysis, scenarioTitle) {
+  if (!analysis.userQuotes || analysis.userQuotes.length === 0) {
+    return "Great practice session! Continue building on your foundation.";
+  }
+
+  try {
+    const feedback = {
+      role: "system",
+      content: `You are a supportive conversation coach providing personalized feedback.
+
+Based on this analysis of their practice session:
+Strengths: ${analysis.strengths.map((s) => s.behavior).join("; ")}
+Growth areas: ${analysis.growthAreas.map((a) => a.area).join("; ")}
+
+User quotes from the conversation:
+${analysis.userQuotes.map((q) => `- "${q.quote}" (during ${q.stage}): ${q.analysis}`).join("\n")}
+
+Generate 3-4 sentences of coaching feedback that:
+1. Specifically references their actual quotes
+2. Acknowledges one strength
+3. Offers ONE concrete next-step improvement
+4. Is encouraging and actionable
+
+Keep it warm, specific, and focused on their learning goals.`,
+    };
+
+    return await callOpenAI([feedback], "gpt-4");
+  } catch (error) {
+    console.error("Failed to generate adaptive feedback:", error);
+    return "Good effort in your practice! Keep building these skills with each scenario.";
+  }
+}
+
+async function generateScenarioRecommendations(userGoals) {
+  if (!userGoals || userGoals.length === 0) {
+    return [];
+  }
+
+  try {
+    const recommendations = {
+      role: "system",
+      content: `You are an expert in creating practice scenarios for skill development.
+
+User's learning goals: ${userGoals.join(", ")}
+
+Generate 3 different scenario variations that would help practice these goals.
+Return a JSON array:
+[
+  {
+    "title": "Scenario title",
+    "context": "Why this scenario practices their goal",
+    "difficulty": "easy|medium|hard",
+    "whyItMatters": "How this connects to their goals"
+  }
+]
+
+Make each scenario realistic, progressively challenging, and directly tied to their goals.`,
+    };
+
+    const response = await callOpenAI([recommendations], "gpt-4");
+    const parsed = JSON.parse(response);
+    return parsed || [];
+  } catch (error) {
+    console.error("Failed to generate scenario recommendations:", error);
+    return [];
   }
 }
 
@@ -4184,24 +5038,61 @@ async function generateFeedback() {
     "transfer-plan": "Transfer Plan",
   };
 
-  // Get AI-powered coaching feedback
+  // Get AI-powered analysis of actual chat transcript
   let coachingFeedback = "";
+  let analysisData = null;
   try {
-    coachingFeedback = await generateCoachingFeedback(state.messages);
+    const userGoals = [...state.userLearningGoals.map((id) => {
+      const goal = LEARNING_GOALS.find((g) => g.id === id);
+      return goal?.title || id;
+    }), ...state.userCustomGoals];
+    
+    state.currentSessionAnalysis.isAnalyzing = true;
+    analysisData = await analyzeSessionTranscript(
+      state.messages,
+      scenario.title,
+      userGoals
+    );
+    state.currentSessionAnalysis.isAnalyzing = false;
+
+    // Generate coaching feedback based on actual analysis
+    coachingFeedback = await generateAdaptiveCoachFeedback(analysisData, scenario.title);
+    
+    // Save this session result for future comparison
+    savePracticeSessionResult({
+      scenarioId: scenario.id,
+      scenarioTitle: scenario.title,
+      userGoals: state.userLearningGoals,
+      customGoals: state.userCustomGoals,
+      messageCount: state.messages.length,
+      stagePerformance: analysisData.stagePerformance,
+      strengths: analysisData.strengths,
+      growthAreas: analysisData.growthAreas,
+      userQuotes: analysisData.userQuotes,
+    });
   } catch (error) {
     console.warn("Failed to generate coaching feedback:", error);
     coachingFeedback = `Strong areas: ${strong.length ? strong.join(", ") : "overall engagement"}. Growth areas: ${weak.length ? weak.join(", ") : "precision and clarity"}.`;
+    analysisData = { userQuotes: [], strengths: [], growthAreas: [] };
   }
 
   const overviewHtml = `
     <article class="analytics-card">
       <h4>Strength</h4>
-      <p class="analytics-metric">${escapeHtml(coachingFeedback.split("GROWTH")[0].replace(/STRENGTH:|strength:/i, "").trim())}</p>
+      <p class="analytics-metric">${
+        analysisData?.strengths?.[0]
+          ? `${escapeHtml(analysisData.strengths[0].behavior)}<br><span class="strength-evidence" style="display:block; font-size:0.85em; color:#666; margin-top:0.5rem; font-style:italic; border-left:3px solid #0fa37a; padding-left:0.75rem;">"${escapeHtml(analysisData.strengths[0].evidence)}"</span>`
+          : escapeHtml(coachingFeedback.split("GROWTH")[0].replace(/STRENGTH:|strength:/i, "").trim())
+      }</p>
       <p class="muted">Keep this behavior consistent while you focus your next practice on one weaker stage.</p>
     </article>
     <article class="analytics-card">
       <h4>Growth Area</h4>
-      <p class="analytics-metric">${escapeHtml(coachingFeedback.split("GROWTH")[1]?.replace(/AREA:|area:/i, "").trim() || "Focus on your weaker ILETS stages.")}</p>
+      <p class="analytics-metric">${
+        analysisData?.growthAreas?.[0]
+          ? `${escapeHtml(analysisData.growthAreas[0].area)}<br><span class="growth-suggestion" style="display:block; font-size:0.85em; color:#666; margin-top:0.5rem; border-left:3px solid #d9751e; padding-left:0.75rem;">${escapeHtml(analysisData.growthAreas[0].suggestion)}</span>`
+          : escapeHtml(coachingFeedback.split("GROWTH")[1]?.replace(/AREA:|area:/i, "").trim() || "Focus on your weaker ILETS stages.")
+      }</p>
       <p class="muted">Practice this area in your next session for meaningful improvement.</p>
     </article>
   `;
@@ -4252,22 +5143,33 @@ async function generateFeedback() {
   `;
 
   const analytics = computeAnalytics();
-  const communicationCard = `
+  
+  // Build stage performance bars from actual chat analysis
+  let stagePerformanceBarsHtml = '';
+  if (analysisData?.stagePerformance && Object.keys(analysisData.stagePerformance).length > 0) {
+    const ILETS_STAGES = ['Introduce', 'Listen', 'Empathize', 'Talk', 'Solve'];
+    stagePerformanceBarsHtml = `
     <article class="analytics-card">
-      <h4>Communication & Clarity</h4>
-      <p class="analytics-metric">Clarity Score: ${Math.max(20, 100 - analytics.fillerRate)}%</p>
-      <p class="analytics-metric">Directness Score: ${Math.round((total / max) * 100)}%</p>
-      <p class="analytics-metric">Filler Words: ${analytics.fillerCount} (${analytics.fillerRate}%)</p>
-      <p class="muted">Focus on clear, direct statements with concrete next steps. Reduce filler language.</p>
+      <h4>ILETS Stage Performance (Based on Your Chat)</h4>
+      <div class="mini-bars">
+        ${ILETS_STAGES.map((stage) => {
+          const score = analysisData.stagePerformance[stage] || 0;
+          const barWidth = Math.min(100, score);
+          return `
+        <div class="mini-bar-row">
+          <span>${stage}</span>
+          <div class="mini-track"><div class="mini-fill" style="width:${barWidth}%"></div></div>
+          <strong>${score}%</strong>
+        </div>
+          `;
+        }).join('')}
+      </div>
+      <p class="muted">Based on your actual performance in this session. Compare to your previous sessions below.</p>
     </article>
-  `;
-  const sessionHtml = `
-    <article class="analytics-card">
-      <h4>Analytics Overview</h4>
-      <p class="analytics-metric">Turns: ${analytics.totalTurns} | Avg words/turn: ${analytics.avgWords}</p>
-      <p class="muted">Stage coverage: ${analytics.stageCoverage}%</p>
-    </article>
-    ${communicationCard}
+    `;
+  } else {
+    // Fallback to generic metrics
+    stagePerformanceBarsHtml = `
     <article class="analytics-card">
       <h4>Performance Bars</h4>
       <div class="mini-bars">
@@ -4288,6 +5190,57 @@ async function generateFeedback() {
         </div>
       </div>
     </article>
+    `;
+  }
+
+  // Build comparison to previous session if available
+  let comparisonHtml = '';
+  if (analysisData?.previousSessionComparison) {
+    const { improvements } = analysisData.previousSessionComparison;
+    const improved = improvements.filter((i) => i.improved).length;
+    const total = improvements.length;
+    
+    comparisonHtml = `
+    <article class="analytics-card">
+      <h4>Progress vs. Last Session</h4>
+      <p style="margin: 0.5rem 0; font-size: 0.9rem;">
+        ${improved > 0 ? `✨ <strong>${improved} stage${improved === 1 ? '' : 's'} improved</strong> since your last practice!` : "Keep practicing to improve from your last session!"}
+      </p>
+      <div style="display: grid; gap: 0.5rem; margin-top: 0.75rem;">
+        ${improvements.map((imp) => {
+          const change = imp.current - imp.previous;
+          const changeSymbol = change > 0 ? '📈' : change < 0 ? '📉' : '→';
+          const changeText = change > 0 ? `+${change}%` : `${change}%`;
+          return `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: rgba(0,0,0,0.02); border-radius: 4px;">
+            <span>${imp.stage}</span>
+            <span style="font-size: 0.85rem;"><strong>${imp.current}%</strong> <span style="color:#888;">(${changeSymbol} ${changeText})</span></span>
+          </div>
+          `;
+        }).join('')}
+      </div>
+    </article>
+    `;
+  }
+  
+  const communicationCard = `
+    <article class="analytics-card">
+      <h4>Communication & Clarity</h4>
+      <p class="analytics-metric">Clarity Score: ${Math.max(20, 100 - analytics.fillerRate)}%</p>
+      <p class="analytics-metric">Directness Score: ${Math.round((total / max) * 100)}%</p>
+      <p class="analytics-metric">Filler Words: ${analytics.fillerCount} (${analytics.fillerRate}%)</p>
+      <p class="muted">Focus on clear, direct statements with concrete next steps. Reduce filler language.</p>
+    </article>
+  `;
+  const sessionHtml = `
+    <article class="analytics-card">
+      <h4>Analytics Overview</h4>
+      <p class="analytics-metric">Turns: ${analytics.totalTurns} | Avg words/turn: ${analytics.avgWords}</p>
+      <p class="muted">Stage coverage: ${analytics.stageCoverage}%</p>
+    </article>
+    ${stagePerformanceBarsHtml}
+    ${comparisonHtml}
+    ${communicationCard}
   `;
 
   feedbackPanel.innerHTML = overviewHtml;
@@ -4337,6 +5290,7 @@ async function handleSend(event) {
     addCoachNote(userText, parsed);
     assistantReply = personalizeReply(parsed.message);
     state.messages.push({ role: "assistant", content: assistantReply });
+    void refreshDynamicPracticeHints();
   } catch (error) {
     void error;
     const fallback = localFallbackReply(userText);
@@ -4347,6 +5301,7 @@ async function handleSend(event) {
       role: "assistant",
       content: assistantReply,
     });
+    void refreshDynamicPracticeHints();
   } finally {
     setPending(false);
     render();
@@ -4920,7 +5875,7 @@ openSettingsBtn.addEventListener("click", () => {
 
 settingsForm.addEventListener("submit", () => {
   state.settings.mode = modeSelect.value;
-  state.settings.proxyUrl = proxyUrlInput.value.trim() || "http://localhost:8787/api/chat";
+  state.settings.proxyUrl = proxyUrlInput.value.trim() || "https://social-sandbox-api-proxy.onrender.com/api/chat";
   state.settings.apiKey = apiKeyInput.value.trim();
   saveSettings();
   renderHeader();
@@ -4931,7 +5886,7 @@ settingsForm.addEventListener("reset", () => {
 });
 
 goToChoiceBtn.addEventListener("click", () => {
-  goToPage("choice");
+  window.__ssNavigate("goals");
 });
 
 chooseLearnBtn.addEventListener("click", () => {
@@ -5045,6 +6000,15 @@ backFromBriefingBtn.addEventListener("click", () => {
   renderScenarioPicker();
 });
 
+if (editScenarioBriefingBtn) {
+  editScenarioBriefingBtn.addEventListener("click", () => {
+    const scenario = getScenario();
+    if (scenario) {
+      openScenarioBuilderForEdit(scenario.id);
+    }
+  });
+}
+
 if (editUserNameBtn && userNameEditor && briefUserNameInput) {
   editUserNameBtn.addEventListener("click", () => {
     state.nameEditorOpen = !state.nameEditorOpen;
@@ -5112,7 +6076,7 @@ modulePrevBtn.addEventListener("click", () => {
 });
 
 moduleNextBtn.addEventListener("click", () => {
-  if (state.moduleIndex < MODULE_SECTIONS.length - 1) {
+  if (state.moduleIndex < getLearningModules().length - 1) {
     state.moduleIndex += 1;
     renderModule();
   }
@@ -5494,8 +6458,64 @@ goalsBackBtn.addEventListener("click", () => {
 });
 
 goalsNextBtn.addEventListener("click", () => {
-  if (state.userLearningGoals.length > 0 && state.userLearningGoals.length <= 3) {
+  const totalGoals = state.userLearningGoals.length + state.userCustomGoals.length;
+  if (totalGoals > 0 && totalGoals <= 3) {
     goToPage("choice");
+  }
+});
+
+choiceBackBtn.addEventListener("click", () => {
+  goToPage("goals");
+});
+
+addCustomGoalBtn.addEventListener("click", async () => {
+  const customGoalText = customGoalInput.value.trim();
+  if (customGoalText && !state.userCustomGoals.includes(customGoalText)) {
+    const totalGoals = state.userLearningGoals.length + state.userCustomGoals.length;
+    if (totalGoals < 3) {
+      // Show loading state
+      addCustomGoalBtn.disabled = true;
+      const originalText = addCustomGoalBtn.textContent;
+      addCustomGoalBtn.textContent = "Generating tailored content...";
+      
+      state.userCustomGoals.push(customGoalText);
+      localStorage.setItem("sandbox.userCustomGoals", JSON.stringify(state.userCustomGoals));
+      customGoalInput.value = "";
+      
+      // Generate AI-tailored content
+      try {
+        const tailoredModule = await generateTailoredLearningModule(customGoalText);
+        const tailoredScenario = await generateTailoredPracticeScenario(customGoalText);
+        
+        // Store tailored module
+        state.customTailoredModules.push(tailoredModule);
+        state.moduleIndex = 0;
+        localStorage.setItem("sandbox.customTailoredModules", JSON.stringify(state.customTailoredModules));
+        
+        // Add tailored scenario to scenarios list
+        state.scenarios.push(tailoredScenario);
+        state.customTailoredScenarios.push(tailoredScenario);
+        state.selectedScenarioId = tailoredScenario.id;
+        localStorage.setItem("sandbox.customTailoredScenarios", JSON.stringify(state.customTailoredScenarios));
+        persistCustomScenarios();
+      } catch (error) {
+        console.error("Error generating tailored content:", error);
+        alert("Could not generate personalized content. Check your API key in Settings.");
+      } finally {
+        addCustomGoalBtn.disabled = false;
+        addCustomGoalBtn.textContent = originalText;
+      }
+      
+      renderCustomGoalsList();
+      updateGoalsPageState();
+    }
+  }
+});
+
+customGoalInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    addCustomGoalBtn.click();
   }
 });
 
@@ -5506,5 +6526,3 @@ render();
 renderModule();
 renderPage();
 renderVoiceUi();
-
-// Cache bust: 20260427-030002
