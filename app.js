@@ -3469,10 +3469,19 @@ async function callProxyAPI(payload) {
     throw new Error(`Proxy error ${res.status}: ${text || "Unknown error"}`);
   }
   const data = await res.json();
-  if (!data.reply) {
-    throw new Error("Proxy response missing reply field");
+  
+  // Handle OpenAI format response from proxy
+  const content = data.choices?.[0]?.message?.content;
+  if (content && typeof content === "string" && content.trim()) {
+    return content.trim();
   }
-  return data.reply;
+  
+  // Fallback for legacy reply format
+  if (data.reply && typeof data.reply === "string" && data.reply.trim()) {
+    return data.reply.trim();
+  }
+  
+  throw new Error("No text output found in proxy response");
 }
 
 async function callOpenAI(messages, model = null) {
