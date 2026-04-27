@@ -2355,11 +2355,13 @@ body.hide-left.hide-right .layout {
 .panel-scenarios {
   background: linear-gradient(180deg, #f4f8ff, #edf3ff);
   border-color: rgba(20, 97, 255, 0.2);
+  display: flex;
+  flex-direction: column;
 }
 
 .panel-chat {
   display: grid;
-  grid-template-rows: auto auto 1fr auto auto;
+  grid-template-rows: auto 1fr auto auto;
   overflow: hidden;
   background: linear-gradient(180deg, #ffffff, #f8fbff);
 }
@@ -2382,6 +2384,11 @@ body.hide-left.hide-right .layout {
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
+}
+
+.actions-row {
+  margin-top: auto;
+  padding-top: 0.6rem;
 }
 
 .feedback-head h2,
@@ -2452,6 +2459,8 @@ body.hide-left.hide-right .layout {
 .meta-body {
   max-height: 420px;
   margin-top: 0.55rem;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .brief-body {
@@ -2472,7 +2481,14 @@ body.hide-left.hide-right .layout {
   margin-top: 0;
 }
 
-.meta-card,
+.meta-card {
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.8rem;
+  border-top: 1px solid rgba(19, 30, 21, 0.12);
+  padding-top: 0.8rem;
+}
+
 .scenario-brief,
 .live-notes,
 .tips-card,
@@ -2841,6 +2857,19 @@ body.hide-left.hide-right .layout {
   border: 1px solid rgba(18, 26, 43, 0.12);
   border-radius: 14px;
   padding: 0.82rem 0.9rem;
+}
+
+.brief-inline-figure {
+  margin: 0 0 0.68rem;
+}
+
+.brief-inline-image {
+  display: block;
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid rgba(20, 97, 255, 0.14);
 }
 
 .chat-practice-label {

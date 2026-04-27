@@ -2878,7 +2878,11 @@ function renderBrief() {
   });
 
   if (state.briefTab === "scenario") {
+    const imageHtml = scenario.imageUrl
+      ? `<figure class="brief-inline-figure"><img src="${escapeHtml(scenario.imageUrl)}" alt="Illustration for ${escapeHtml(scenario.title)}" class="brief-inline-image" /></figure>`
+      : "";
     scenarioBriefContent.innerHTML = `
+      ${imageHtml}
       <p><strong>${escapeHtml(scenario.title)}</strong> is designed for ${escapeHtml(scenario.difficulty.toLowerCase())} conversations.</p>
       <p class="muted">AI role partner: <strong>${escapeHtml(scenario.aiRole)}</strong></p>
     `;
@@ -3024,6 +3028,7 @@ function openSessionIntro() {
   const scenario = getScenario();
   state.scaffold.hintsVisible = state.scaffold.level === 1;
   state.rightTab = "practice";
+  state.briefTab = "scenario";
   state.messages = [
     {
       role: "assistant",
