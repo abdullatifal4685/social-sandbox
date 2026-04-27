@@ -3636,13 +3636,16 @@ function renderGoalsPage() {
     const checkbox = goalCheckbox.querySelector("input");
     checkbox.addEventListener("change", (e) => {
       if (e.target.checked) {
-        if (!state.userLearningGoals.includes(goal.id)) {
-          state.userLearningGoals.push(goal.id);
-        }
+        // Single-goal mode: picking a preset goal replaces any previous preset/custom goal.
+        state.userLearningGoals = [goal.id];
+        state.userCustomGoals = [];
+        localStorage.setItem("sandbox.userCustomGoals", JSON.stringify(state.userCustomGoals));
       } else {
-        state.userLearningGoals = state.userLearningGoals.filter((id) => id !== goal.id);
+        state.userLearningGoals = [];
       }
       localStorage.setItem("sandbox.userLearningGoals", JSON.stringify(state.userLearningGoals));
+      renderCustomGoalsList();
+      renderGoalsPage();
       updateGoalsPageState();
     });
     
@@ -3767,19 +3770,11 @@ function renderCustomGoalsList() {
 }
 
 function updateGoalsPageState() {
-  // Enable "Continue" button if 1-3 total goals are selected (preset + custom)
+  // Single-goal mode: exactly one total goal (preset or custom) is required.
   const totalGoals = state.userLearningGoals.length + state.userCustomGoals.length;
-  goalsNextBtn.disabled = totalGoals === 0 || totalGoals > 3;
+  goalsNextBtn.disabled = totalGoals !== 1;
   
-  if (totalGoals === 1) {
-    goalsNextBtn.textContent = "Continue";
-  } else if (totalGoals === 2 || totalGoals === 3) {
-    goalsNextBtn.textContent = `Continue (${totalGoals} goals)`;
-  } else if (totalGoals === 0) {
-    goalsNextBtn.textContent = "Select at least 1 goal";
-  } else {
-    goalsNextBtn.textContent = "Select up to 3 goals";
-  }
+  goalsNextBtn.textContent = totalGoals === 1 ? "Continue" : "Select one goal";
 }
 
 function getScenarioGoalMatch(scenarioId) {
@@ -6874,11 +6869,11 @@ goalsBackBtn.addEventListener("click", () => {
 });
 
 goalsNextBtn.addEventListener("click", async () => {
-  // Read checked built-in goals from the goals grid (in case UI hasn't synced state)
+  // Read checked built-in goal from the goals grid (in case UI hasn't synced state)
   try {
     const checked = Array.from(document.querySelectorAll('#goalsGrid input[type="checkbox"]:checked')).map((el) => el.value);
     if (checked && checked.length >= 0) {
-      state.userLearningGoals = checked.slice(0, 3);
+      state.userLearningGoals = checked.slice(0, 1);
       localStorage.setItem('sandbox.userLearningGoals', JSON.stringify(state.userLearningGoals));
     }
   } catch (err) {
@@ -6886,27 +6881,37 @@ goalsNextBtn.addEventListener("click", async () => {
   }
 
   const totalGoals = state.userLearningGoals.length + state.userCustomGoals.length;
-  if (totalGoals > 0 && totalGoals <= 3) {
-    // Generate full tailored learning path (7 modules) and scenario based on selected goals
+  if (totalGoals === 1) {
+    // Generate full tailored learning path (7 modules) and scenario based on the single active goal.
     try {
-      // Get goal labels for path generation
-      const allGoalLabels = [];
-      state.userLearningGoals.forEach((goalId) => {
-        const goal = LEARNING_GOALS.find((g) => g.id === goalId);
-        if (goal) allGoalLabels.push(goal.title);
-      });
-      
-      // If there are built-in goals selected, generate a full tailored path (7 modules)
-      if (allGoalLabels.length > 0) {
-        const goalDescription = allGoalLabels.join(" + ");
-        const tailoredPath = await generateTailoredLearningPath(goalDescription);
+      const builtInGoalId = state.userLearningGoals[0];
+      const builtInGoalTitle = builtInGoalId
+        ? (LEARNING_GOALS.find((g) => g.id === builtInGoalId)?.title || builtInGoalId)
+        : "";
+      const customGoalTitle = state.userCustomGoals[0] || "";
+      const goalDescription = customGoalTitle || builtInGoalTitle;
+
+      if (goalDescription) {
+        const currentGoal = state.customTailoredModules?.[0]?.customGoal || "";
+        const hasCompletePath = state.customTailoredModules.length >= 7;
+        if (!hasCompletePath || currentGoal !== goalDescription) {
+          const tailoredPath = await generateTailoredLearningPath(goalDescription);
+          state.customTailoredModules = tailoredPath;
+          state.moduleIndex = 0;
+          localStorage.setItem("sandbox.customTailoredModules", JSON.stringify(state.customTailoredModules));
+        }
+
+        // Ensure goal-tailored scenario is also generated
+        await ensureGoalTailoredScenario();
+      }
+
+      if (state.customTailoredModules.length < 7 && goalDescription) {
+        const fallbackPath = buildLocalTailoredLearningPath(goalDescription);
+        state.customTailoredModules = fallbackPath;
         state.customTailoredModules = tailoredPath; // Replace with full path, not append
         state.moduleIndex = 0;
         localStorage.setItem("sandbox.customTailoredModules", JSON.stringify(state.customTailoredModules));
       }
-      
-      // Ensure goal-tailored scenario is also generated
-      await ensureGoalTailoredScenario();
     } catch (e) {
       // proceed anyway
       console.warn('Goal-based content generation failed', e);
@@ -6923,13 +6928,16 @@ addCustomGoalBtn.addEventListener("click", async () => {
   const customGoalText = customGoalInput.value.trim();
   if (customGoalText && !state.userCustomGoals.includes(customGoalText)) {
     const totalGoals = state.userLearningGoals.length + state.userCustomGoals.length;
-    if (totalGoals < 3) {
+    if (totalGoals >= 0) {
       // Show loading state
       addCustomGoalBtn.disabled = true;
       const originalText = addCustomGoalBtn.textContent;
       addCustomGoalBtn.textContent = "Generating tailored learning path...";
-      
-      state.userCustomGoals.push(customGoalText);
+
+      // Single-goal mode: custom goal replaces any selected preset/custom goal.
+      state.userLearningGoals = [];
+      state.userCustomGoals = [customGoalText];
+      localStorage.setItem("sandbox.userLearningGoals", JSON.stringify(state.userLearningGoals));
       localStorage.setItem("sandbox.userCustomGoals", JSON.stringify(state.userCustomGoals));
       customGoalInput.value = "";
       
@@ -6957,6 +6965,7 @@ addCustomGoalBtn.addEventListener("click", async () => {
         addCustomGoalBtn.textContent = originalText;
       }
       
+      renderGoalsPage();
       renderCustomGoalsList();
       updateGoalsPageState();
     }
