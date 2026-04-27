@@ -6475,12 +6475,29 @@ goalsNextBtn.addEventListener("click", async () => {
 
   const totalGoals = state.userLearningGoals.length + state.userCustomGoals.length;
   if (totalGoals > 0 && totalGoals <= 3) {
-    // Ensure goal-tailored scenarios/modules are generated before navigating
+    // Generate tailored module and scenario based on selected goals
     try {
+      // Get goal labels for module generation
+      const allGoalLabels = [];
+      state.userLearningGoals.forEach((goalId) => {
+        const goal = LEARNING_GOALS.find((g) => g.id === goalId);
+        if (goal) allGoalLabels.push(goal.title);
+      });
+      
+      // If there are built-in goals selected and no existing tailored modules, generate one
+      if (allGoalLabels.length > 0 && state.customTailoredModules.length === 0) {
+        const goalDescription = allGoalLabels.join(" + ");
+        const tailoredModule = await generateTailoredLearningModule(goalDescription);
+        state.customTailoredModules.push(tailoredModule);
+        state.moduleIndex = 0;
+        localStorage.setItem("sandbox.customTailoredModules", JSON.stringify(state.customTailoredModules));
+      }
+      
+      // Ensure goal-tailored scenario is also generated
       await ensureGoalTailoredScenario();
     } catch (e) {
       // proceed anyway
-      console.warn('ensureGoalTailoredScenario failed', e);
+      console.warn('Goal-based content generation failed', e);
     }
     goToPage("choice");
   }
