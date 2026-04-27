@@ -1035,6 +1035,7 @@ const backFromBriefingBtn = document.getElementById("backFromBriefingBtn");
 const beginPracticeBtn = document.getElementById("beginPracticeBtn");
 const pickerActions = document.getElementById("pickerActions");
 const goToChoiceBtn = document.getElementById("goToChoiceBtn");
+const choiceBackBtn = document.getElementById("choiceBackBtn");
 const userNameInput = document.getElementById("userNameInput");
 const scenarioNameSetup = document.getElementById("scenarioNameSetup");
 const chooseLearnBtn = document.getElementById("chooseLearnBtn");
@@ -5711,6 +5712,10 @@ goalsNextBtn.addEventListener("click", () => {
   if (totalGoals > 0 && totalGoals <= 3) {
     goToPage("choice");
   }
+});
+
+choiceBackBtn.addEventListener("click", () => {
+  goToPage("goals");
 });
 
 addCustomGoalBtn.addEventListener("click", async () => {
