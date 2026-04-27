@@ -2104,11 +2104,99 @@ function renderModule() {
   }
   
   moduleTitle.innerHTML = titleHtml;
-  moduleSummary.textContent = section.summary;
-  moduleSectionCard.innerHTML = `
-    <p>${section.example}</p>
-    <ul>${section.points.map((point) => `<li>${escapeHtml(point)}</li>`).join("")}</ul>
-  `;
+  
+  // Handle both old and new module formats
+  if (section.objective) {
+    // NEW FORMAT: Detailed custom modules
+    moduleSummary.textContent = section.objective;
+    
+    let contentHtml = `
+      <section style="margin-bottom: 2rem;">
+        <h4 style="font-size: 0.95rem; color: var(--ink-dark); margin-bottom: 0.75rem;">Overview</h4>
+        <p style="margin: 0; line-height: 1.6;">${escapeHtml(section.overview)}</p>
+      </section>
+    `;
+    
+    // Key principles
+    if (section.keyPrinciples && section.keyPrinciples.length > 0) {
+      contentHtml += `
+      <section style="margin-bottom: 2rem;">
+        <h4 style="font-size: 0.95rem; color: var(--ink-dark); margin-bottom: 0.75rem;">Key Principles</h4>
+        <div style="display: grid; gap: 0.75rem;">
+          ${section.keyPrinciples.map((p) => `
+          <div style="padding: 1rem; background: rgba(29, 95, 229, 0.05); border-left: 3px solid var(--accent); border-radius: 4px;">
+            <strong style="display: block; margin-bottom: 0.3rem;">${escapeHtml(p.name)}</strong>
+            <p style="margin: 0; font-size: 0.9rem;">${escapeHtml(p.description)}</p>
+          </div>
+          `).join('')}
+        </div>
+      </section>
+      `;
+    }
+    
+    // Common mistakes
+    if (section.commonMistakes && section.commonMistakes.length > 0) {
+      contentHtml += `
+      <section style="margin-bottom: 2rem;">
+        <h4 style="font-size: 0.95rem; color: var(--ink-dark); margin-bottom: 0.75rem;">Common Mistakes to Avoid</h4>
+        <div style="display: grid; gap: 0.75rem;">
+          ${section.commonMistakes.map((m) => `
+          <div style="padding: 1rem; background: rgba(217, 117, 30, 0.05); border-left: 3px solid #d9751e; border-radius: 4px;">
+            <strong style="display: block; color: #d9751e; margin-bottom: 0.3rem;">❌ ${escapeHtml(m.mistake)}</strong>
+            <p style="margin: 0.3rem 0; font-size: 0.9rem;"><em>Why it doesn't work:</em> ${escapeHtml(m.why)}</p>
+            <p style="margin: 0; font-size: 0.9rem;"><strong>✓ Instead:</strong> ${escapeHtml(m.better)}</p>
+          </div>
+          `).join('')}
+        </div>
+      </section>
+      `;
+    }
+    
+    // Framework
+    if (section.framework) {
+      contentHtml += `
+      <section style="margin-bottom: 2rem;">
+        <h4 style="font-size: 0.95rem; color: var(--ink-dark); margin-bottom: 0.75rem;">Framework to Follow</h4>
+        <div style="padding: 1rem; background: rgba(14, 163, 122, 0.05); border-left: 3px solid #0fa37a; border-radius: 4px;">
+          <p style="margin: 0; line-height: 1.8; font-size: 0.95rem;">${escapeHtml(section.framework).split(' | ').map((step, i) => `<strong>Step ${i + 1}:</strong> ${step}`).join('<br>')}</p>
+        </div>
+      </section>
+      `;
+    }
+    
+    // Concrete example
+    if (section.concreteExample) {
+      contentHtml += `
+      <section style="margin-bottom: 2rem;">
+        <h4 style="font-size: 0.95rem; color: var(--ink-dark); margin-bottom: 0.75rem;">Concrete Example</h4>
+        <div style="padding: 1rem; background: rgba(100, 100, 100, 0.04); border-left: 3px solid #666; border-radius: 4px; font-size: 0.9rem; line-height: 1.6;">
+          <p style="margin: 0; font-style: italic;">${escapeHtml(section.concreteExample)}</p>
+        </div>
+      </section>
+      `;
+    }
+    
+    // Tips
+    if (section.tips && section.tips.length > 0) {
+      contentHtml += `
+      <section style="margin-bottom: 1rem;">
+        <h4 style="font-size: 0.95rem; color: var(--ink-dark); margin-bottom: 0.75rem;">Actionable Tips</h4>
+        <ul style="margin: 0; padding-left: 1.5rem;">
+          ${section.tips.map((tip) => `<li style="margin-bottom: 0.5rem;">${escapeHtml(tip)}</li>`).join('')}
+        </ul>
+      </section>
+      `;
+    }
+    
+    moduleSectionCard.innerHTML = contentHtml;
+  } else {
+    // OLD FORMAT: Standard modules
+    moduleSummary.textContent = section.summary;
+    moduleSectionCard.innerHTML = `
+      <p>${escapeHtml(section.example)}</p>
+      <ul>${section.points.map((point) => `<li>${escapeHtml(point)}</li>`).join("")}</ul>
+    `;
+  }
 
   modulePrevBtn.disabled = index === 0;
   moduleNextBtn.disabled = index === total - 1;
@@ -3708,17 +3796,30 @@ async function generateTailoredLearningModule(customGoal) {
   try {
     const systemPrompt = {
       role: "system",
-      content: `You are an expert in difficult conversations. Create a focused, short learning module for someone who wants to improve their skill in: "${customGoal}"
-      
-Return a JSON object with this exact structure:
+      content: `You are an expert in workplace communication and difficult conversations. Create a comprehensive, practical learning module for someone who wants to improve: "${customGoal}"
+
+IMPORTANT: Generate DETAILED, SPECIFIC learning content - not generic placeholders. Think of a framework, techniques, and real examples.
+
+Return a JSON object with this EXACT structure:
 {
-  "title": "Short title (5-8 words) specific to the goal",
-  "summary": "One sentence explaining the learning objective",
-  "points": ["Key point 1", "Key point 2", "Key point 3"],
-  "example": "A concrete workplace example showing how to apply this skill"
+  "title": "Specific title (5-8 words) exactly matching the goal",
+  "objective": "One sentence: what the learner will be able to do after this module",
+  "overview": "2-3 sentences explaining what this skill is and why it matters in difficult conversations",
+  "keyPrinciples": [
+    {"name": "Principle 1", "description": "Specific explanation of this principle"},
+    {"name": "Principle 2", "description": "Specific explanation of this principle"},
+    {"name": "Principle 3", "description": "Specific explanation of this principle"}
+  ],
+  "commonMistakes": [
+    {"mistake": "What people often do wrong", "why": "Why this backfires", "better": "What to do instead"},
+    {"mistake": "Another common error", "why": "Why this doesn't work", "better": "Better approach"}
+  ],
+  "framework": "A simple 3-5 step framework or technique with step names and brief descriptions",
+  "concreteExample": "A detailed workplace scenario showing the skill in action - at least 3 sentences with dialogue",
+  "tips": ["Actionable tip 1", "Actionable tip 2", "Actionable tip 3"]
 }
 
-Make it practical, actionable, and specific to the stated goal.`,
+Be specific, practical, and actionable. Avoid generic advice. Reference specific phrases and techniques.`,
     };
 
     const response = await callOpenAI([systemPrompt], "gpt-4");
@@ -3727,10 +3828,14 @@ Make it practical, actionable, and specific to the stated goal.`,
     return {
       id: `custom-module-${Date.now()}`,
       customGoal: customGoal,
-      title: parsed.title,
-      summary: parsed.summary,
-      points: parsed.points,
-      example: parsed.example,
+      title: parsed.title || customGoal,
+      objective: parsed.objective,
+      overview: parsed.overview,
+      keyPrinciples: parsed.keyPrinciples || [],
+      commonMistakes: parsed.commonMistakes || [],
+      framework: parsed.framework,
+      concreteExample: parsed.concreteExample,
+      tips: parsed.tips || [],
       isCustom: true,
     };
   } catch (error) {
@@ -3739,9 +3844,24 @@ Make it practical, actionable, and specific to the stated goal.`,
       id: `custom-module-${Date.now()}`,
       customGoal: customGoal,
       title: customGoal,
-      summary: "Custom learning goal",
-      points: ["Practice the specific skill you want to improve", "Reflect on what works in your context", "Apply it in real conversations"],
-      example: "Consider a real situation where this skill would help you. Practice it in a safe environment first.",
+      objective: `Master the skill of ${customGoal}`,
+      overview: `This module will help you develop the key skills needed to ${customGoal} effectively in workplace conversations.`,
+      keyPrinciples: [
+        { name: "Authenticity", description: "Be genuine in your approach - people respond better to sincerity." },
+        { name: "Clarity", description: "Be clear about your intent and what you're trying to communicate." },
+        { name: "Respect", description: "Honor the other person's perspective even when you disagree." },
+      ],
+      commonMistakes: [
+        { mistake: "Being too vague", why: "The other person won't understand what you're trying to accomplish", better: "State your purpose clearly upfront" },
+        { mistake: "Getting defensive", why: "This shuts down productive dialogue", better: "Listen first, then respond thoughtfully" },
+      ],
+      framework: "Step 1: Prepare and set intent | Step 2: Open clearly | Step 3: Listen actively | Step 4: Share your perspective | Step 5: Find agreement",
+      concreteExample: `Imagine you made a mistake on a project. Instead of saying "I didn't mess up that badly," try: "I realize my approach on this didn't work out as planned. I want to understand what went wrong from your perspective, and then I'd like to discuss how we can move forward together."`,
+      tips: [
+        "Start with what you're trying to accomplish, not what you're avoiding",
+        "Ask genuine questions before making your case",
+        "Acknowledge the other person's valid points",
+      ],
       isCustom: true,
     };
   }
