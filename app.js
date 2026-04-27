@@ -2833,8 +2833,10 @@ function renderChat() {
 function renderHeader() {
   const scenario = getScenario();
   const scaffold = getScaffoldLevelConfig();
+  const currentStage = ILETS[state.stageIndex];
+  const stageGuide = scenario.practice?.[currentStage] || STAGE_GUIDE[currentStage];
   scenarioTitle.textContent = scenario.title;
-  scenarioContext.textContent = `${scenario.context} Current stage: ${ILETS[state.stageIndex]}.`;
+  scenarioContext.textContent = `${scenario.difficulty}. Focus now: ${stageGuide.objective}`;
   roleBadge.textContent = `AI Role: ${scenario.aiRole}`;
   practiceIdentity.textContent = `Practicing as: ${getLearnerName()}`;
   if (practiceScaffoldMenuBtn) {
@@ -2882,12 +2884,8 @@ function renderBrief() {
   });
 
   if (state.briefTab === "scenario") {
-    const imageHtml = scenario.imageUrl
-      ? `<figure class="brief-inline-figure"><img src="${escapeHtml(scenario.imageUrl)}" alt="Illustration for ${escapeHtml(scenario.title)}" class="brief-inline-image" /></figure>`
-      : "";
     scenarioBriefContent.innerHTML = `
-      ${imageHtml}
-      <p><strong>${escapeHtml(scenario.title)}</strong> is designed for ${escapeHtml(scenario.difficulty.toLowerCase())} conversations.</p>
+      <p><strong>Session cue:</strong> ${escapeHtml(scenario.opening)}</p>
       <p class="muted">AI role partner: <strong>${escapeHtml(scenario.aiRole)}</strong></p>
     `;
     return;
