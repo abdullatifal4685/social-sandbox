@@ -2219,6 +2219,37 @@ function renderScenarioPicker() {
       : "Set your name once, then choose or create a scenario below.";
   }
 
+  // Add goal-context header if goals are selected
+  const goalsHeading = document.getElementById("scenarioPickerGoalsHeading");
+  if (goalsHeading) {
+    if (state.userLearningGoals.length > 0 || state.userCustomGoals.length > 0) {
+      const allGoals = [
+        ...state.userLearningGoals.map((id) => {
+          const goal = LEARNING_GOALS.find((g) => g.id === id);
+          return goal?.title || id;
+        }),
+        ...state.userCustomGoals,
+      ];
+      
+      const goalContextHtml = `
+        <div style="background: rgba(14, 95, 229, 0.05); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; border-left: 4px solid var(--accent);">
+          <h3 style="margin-top: 0; font-size: 1rem; color: var(--ink-dark);">📚 Recommended Scenarios for Your Goals</h3>
+          <p style="margin: 0.75rem 0 0 0; font-size: 0.9rem; color: var(--ink-dark);">
+            Based on your learning goals:
+            <strong>${allGoals.map((g) => `"${escapeHtml(g)}"`).join(", ")}</strong>
+          </p>
+          <p style="margin: 0.75rem 0 0 0; font-size: 0.85rem; color: var(--ink);">
+            These scenarios will help you practice the skills you want to develop. Start with a comfortable difficulty level and build up over time.
+          </p>
+        </div>
+      `;
+      goalsHeading.innerHTML = goalContextHtml;
+      goalsHeading.classList.remove("is-hidden");
+    } else {
+      goalsHeading.classList.add("is-hidden");
+    }
+  }
+
   scenarioPickerGrid.innerHTML = visibleScenarios
     .map((scenario) => {
       const scenarioGoals = getScenarioGoalMatch(scenario.id);
@@ -4707,22 +4738,33 @@ async function generateFeedback() {
   `;
 
   const analytics = computeAnalytics();
-  const communicationCard = `
+  
+  // Build stage performance bars from actual chat analysis
+  let stagePerformanceBarsHtml = '';
+  if (analysisData?.stagePerformance && Object.keys(analysisData.stagePerformance).length > 0) {
+    const ILETS_STAGES = ['Introduce', 'Listen', 'Empathize', 'Talk', 'Solve'];
+    stagePerformanceBarsHtml = `
     <article class="analytics-card">
-      <h4>Communication & Clarity</h4>
-      <p class="analytics-metric">Clarity Score: ${Math.max(20, 100 - analytics.fillerRate)}%</p>
-      <p class="analytics-metric">Directness Score: ${Math.round((total / max) * 100)}%</p>
-      <p class="analytics-metric">Filler Words: ${analytics.fillerCount} (${analytics.fillerRate}%)</p>
-      <p class="muted">Focus on clear, direct statements with concrete next steps. Reduce filler language.</p>
+      <h4>ILETS Stage Performance (Based on Your Chat)</h4>
+      <div class="mini-bars">
+        ${ILETS_STAGES.map((stage) => {
+          const score = analysisData.stagePerformance[stage] || 0;
+          const barWidth = Math.min(100, score);
+          return `
+        <div class="mini-bar-row">
+          <span>${stage}</span>
+          <div class="mini-track"><div class="mini-fill" style="width:${barWidth}%"></div></div>
+          <strong>${score}%</strong>
+        </div>
+          `;
+        }).join('')}
+      </div>
+      <p class="muted">Based on your actual performance in this session. Compare to your previous sessions below.</p>
     </article>
-  `;
-  const sessionHtml = `
-    <article class="analytics-card">
-      <h4>Analytics Overview</h4>
-      <p class="analytics-metric">Turns: ${analytics.totalTurns} | Avg words/turn: ${analytics.avgWords}</p>
-      <p class="muted">Stage coverage: ${analytics.stageCoverage}%</p>
-    </article>
-    ${communicationCard}
+    `;
+  } else {
+    // Fallback to generic metrics
+    stagePerformanceBarsHtml = `
     <article class="analytics-card">
       <h4>Performance Bars</h4>
       <div class="mini-bars">
@@ -4743,6 +4785,57 @@ async function generateFeedback() {
         </div>
       </div>
     </article>
+    `;
+  }
+
+  // Build comparison to previous session if available
+  let comparisonHtml = '';
+  if (analysisData?.previousSessionComparison) {
+    const { improvements } = analysisData.previousSessionComparison;
+    const improved = improvements.filter((i) => i.improved).length;
+    const total = improvements.length;
+    
+    comparisonHtml = `
+    <article class="analytics-card">
+      <h4>Progress vs. Last Session</h4>
+      <p style="margin: 0.5rem 0; font-size: 0.9rem;">
+        ${improved > 0 ? `✨ <strong>${improved} stage${improved === 1 ? '' : 's'} improved</strong> since your last practice!` : "Keep practicing to improve from your last session!"}
+      </p>
+      <div style="display: grid; gap: 0.5rem; margin-top: 0.75rem;">
+        ${improvements.map((imp) => {
+          const change = imp.current - imp.previous;
+          const changeSymbol = change > 0 ? '📈' : change < 0 ? '📉' : '→';
+          const changeText = change > 0 ? `+${change}%` : `${change}%`;
+          return `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: rgba(0,0,0,0.02); border-radius: 4px;">
+            <span>${imp.stage}</span>
+            <span style="font-size: 0.85rem;"><strong>${imp.current}%</strong> <span style="color:#888;">(${changeSymbol} ${changeText})</span></span>
+          </div>
+          `;
+        }).join('')}
+      </div>
+    </article>
+    `;
+  }
+  
+  const communicationCard = `
+    <article class="analytics-card">
+      <h4>Communication & Clarity</h4>
+      <p class="analytics-metric">Clarity Score: ${Math.max(20, 100 - analytics.fillerRate)}%</p>
+      <p class="analytics-metric">Directness Score: ${Math.round((total / max) * 100)}%</p>
+      <p class="analytics-metric">Filler Words: ${analytics.fillerCount} (${analytics.fillerRate}%)</p>
+      <p class="muted">Focus on clear, direct statements with concrete next steps. Reduce filler language.</p>
+    </article>
+  `;
+  const sessionHtml = `
+    <article class="analytics-card">
+      <h4>Analytics Overview</h4>
+      <p class="analytics-metric">Turns: ${analytics.totalTurns} | Avg words/turn: ${analytics.avgWords}</p>
+      <p class="muted">Stage coverage: ${analytics.stageCoverage}%</p>
+    </article>
+    ${stagePerformanceBarsHtml}
+    ${comparisonHtml}
+    ${communicationCard}
   `;
 
   feedbackPanel.innerHTML = overviewHtml;
