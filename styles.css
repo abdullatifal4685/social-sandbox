@@ -3001,6 +3001,64 @@ body.hide-left.hide-right .layout {
   gap: 0.5rem;
 }
 
+/* Custom Goal Input Section */
+.custom-goal-input-section {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--line);
+}
+
+.custom-goal-input-wrap {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.custom-goal-input-wrap input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--ink);
+}
+
+.custom-goal-input-wrap input::placeholder {
+  color: var(--ink-soft);
+}
+
+.custom-goal-input-wrap input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: rgba(29, 95, 229, 0.04);
+  box-shadow: 0 0 0 3px rgba(29, 95, 229, 0.08);
+}
+
+.custom-goal-input-wrap button {
+  padding: 0.75rem 1.2rem;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.custom-goal-input-wrap button:hover {
+  background: var(--accent-2);
+}
+
+.custom-goals-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+  gap: 0.5rem;
+}
+
 .user-goal-badge {
   display: inline-flex;
   align-items: center;

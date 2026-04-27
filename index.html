@@ -32,10 +32,20 @@
   <section id="pageGoals" class="flow-page flow-page-goals is-hidden">
     <div class="flow-card flow-card-goals">
       <h2>What do you want to learn?</h2>
-      <p class="muted">Select 2-3 learning goals that matter to you. These will guide which scenarios we recommend.</p>
+      <p class="muted">Select 2-3 learning goals regarding difficult conversations that matter to you. These will guide which learning materials and practice scenarios we recommend.</p>
 
       <div class="goals-grid" id="goalsGrid">
         <!-- Goals will be populated by JavaScript -->
+      </div>
+
+      <div class="custom-goal-input-section">
+        <label class="flow-label" for="customGoalInput">Or write your own learning goal</label>
+        <p class="muted" style="font-size: 0.85rem; margin-bottom: 0.5rem;">Describe a specific aspect of difficult conversations you want to improve (e.g., "how to apologize without making excuses")</p>
+        <div class="custom-goal-input-wrap">
+          <input id="customGoalInput" type="text" placeholder="e.g., How to deliver bad news without hurting relationships" maxlength="100" />
+          <button id="addCustomGoalBtn" class="ghost" type="button">Add</button>
+        </div>
+        <div id="customGoalsList" class="custom-goals-list"></div>
       </div>
 
       <div class="flow-actions flow-actions-wrap">

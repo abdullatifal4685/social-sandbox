@@ -855,6 +855,7 @@ const state = {
   moduleQuizPassed: false,
   userName: localStorage.getItem(USER_NAME_KEY) || "",
   userLearningGoals: JSON.parse(localStorage.getItem("sandbox.userLearningGoals") || "[]"),
+  userCustomGoals: JSON.parse(localStorage.getItem("sandbox.userCustomGoals") || "[]"),
   nameEditorOpen: false,
   messages: [],
   stageIndex: 0,
@@ -1004,6 +1005,9 @@ const practiceShell = document.getElementById("practiceShell");
 const goalsGrid = document.getElementById("goalsGrid");
 const goalsBackBtn = document.getElementById("goalsBackBtn");
 const goalsNextBtn = document.getElementById("goalsNextBtn");
+const customGoalInput = document.getElementById("customGoalInput");
+const addCustomGoalBtn = document.getElementById("addCustomGoalBtn");
+const customGoalsList = document.getElementById("customGoalsList");
 
 const briefingTitle = document.getElementById("briefingTitle");
 const briefingSubtitle = document.getElementById("briefingSubtitle");
@@ -2026,7 +2030,17 @@ function renderModule() {
   moduleProgressLabel.textContent = `Module ${index + 1}/${total}`;
   moduleProgressPercent.textContent = `${progress}%`;
   moduleProgressBar.style.width = `${progress}%`;
-  moduleTitle.textContent = section.title;
+  
+  // Check if this module is recommended for user's goals
+  const allUserGoals = [...state.userLearningGoals, ...state.userCustomGoals];
+  const isRecommendedForGoals = allUserGoals.length > 0;
+  
+  let titleHtml = section.title;
+  if (isRecommendedForGoals) {
+    titleHtml = `${section.title} <span style="display: inline-block; background: rgba(29, 95, 229, 0.15); color: var(--accent); padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; margin-left: 0.6rem;">Recommended for your goals</span>`;
+  }
+  
+  moduleTitle.innerHTML = titleHtml;
   moduleSummary.textContent = section.summary;
   moduleSectionCard.innerHTML = `
     <p>${section.example}</p>
@@ -2082,14 +2096,18 @@ function renderBriefingPage() {
   const userLearningGoalsList = document.getElementById("userLearningGoalsList");
   const userLearningGoalsSection = document.getElementById("userLearningGoalsSection");
   if (userLearningGoalsList && userLearningGoalsSection) {
-    if (state.userLearningGoals && state.userLearningGoals.length > 0) {
+    const allUserGoals = [...state.userLearningGoals, ...state.userCustomGoals];
+    if (allUserGoals && allUserGoals.length > 0) {
       const goalsHtml = state.userLearningGoals
         .map((goalId) => {
           const goal = LEARNING_GOALS.find((g) => g.id === goalId);
           return goal ? `<div class="user-goal-badge">${escapeHtml(goal.title)}</div>` : "";
         })
-        .join("");
-      userLearningGoalsList.innerHTML = goalsHtml;
+        .join("") + 
+        state.userCustomGoals
+          .map((customGoal) => `<div class="user-goal-badge" style="background: rgba(14, 163, 122, 0.2); color: var(--ink);">${escapeHtml(customGoal)}</div>`)
+          .join("");
+      userLearningGoalsList.innerHTML = goalsHtml || "No goals selected yet.";
       userLearningGoalsSection.classList.remove("is-hidden");
     } else {
       userLearningGoalsSection.classList.add("is-hidden");
@@ -3112,6 +3130,7 @@ function renderTips() {
 function renderGoalsPage() {
   // Clear previous state
   goalsGrid.innerHTML = "";
+  customGoalInput.value = "";
   
   // Create checkboxes for each learning goal
   LEARNING_GOALS.forEach((goal) => {
@@ -3143,20 +3162,63 @@ function renderGoalsPage() {
     
     goalsGrid.appendChild(goalCheckbox);
   });
-  
+
+  // Render custom goals
+  renderCustomGoalsList();
   updateGoalsPageState();
 }
 
+function renderCustomGoalsList() {
+  customGoalsList.innerHTML = "";
+  state.userCustomGoals.forEach((customGoal, index) => {
+    const goalBadge = document.createElement("div");
+    goalBadge.className = "custom-goal-badge";
+    goalBadge.style.cssText = `
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      background: rgba(29, 95, 229, 0.12);
+      border: 1px solid rgba(29, 95, 229, 0.3);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      color: var(--ink);
+    `;
+    goalBadge.innerHTML = `
+      <span>${escapeHtml(customGoal)}</span>
+      <button type="button" aria-label="Remove goal" style="
+        background: none;
+        border: none;
+        color: var(--ink-soft);
+        cursor: pointer;
+        padding: 0;
+        font-size: 1.1rem;
+        line-height: 1;
+      ">×</button>
+    `;
+    
+    const removeBtn = goalBadge.querySelector("button");
+    removeBtn.addEventListener("click", () => {
+      state.userCustomGoals.splice(index, 1);
+      localStorage.setItem("sandbox.userCustomGoals", JSON.stringify(state.userCustomGoals));
+      renderCustomGoalsList();
+      updateGoalsPageState();
+    });
+    
+    customGoalsList.appendChild(goalBadge);
+  });
+}
+
 function updateGoalsPageState() {
-  // Enable "Continue" button only if 1-3 goals are selected
-  const goalsSelected = state.userLearningGoals.length;
-  goalsNextBtn.disabled = goalsSelected === 0 || goalsSelected > 3;
+  // Enable "Continue" button if 1-3 total goals are selected (preset + custom)
+  const totalGoals = state.userLearningGoals.length + state.userCustomGoals.length;
+  goalsNextBtn.disabled = totalGoals === 0 || totalGoals > 3;
   
-  if (goalsSelected === 1) {
+  if (totalGoals === 1) {
     goalsNextBtn.textContent = "Continue";
-  } else if (goalsSelected === 2 || goalsSelected === 3) {
-    goalsNextBtn.textContent = `Continue (${goalsSelected} goals)`;
-  } else if (goalsSelected === 0) {
+  } else if (totalGoals === 2 || totalGoals === 3) {
+    goalsNextBtn.textContent = `Continue (${totalGoals} goals)`;
+  } else if (totalGoals === 0) {
     goalsNextBtn.textContent = "Select at least 1 goal";
   } else {
     goalsNextBtn.textContent = "Select up to 3 goals";
@@ -5494,8 +5556,30 @@ goalsBackBtn.addEventListener("click", () => {
 });
 
 goalsNextBtn.addEventListener("click", () => {
-  if (state.userLearningGoals.length > 0 && state.userLearningGoals.length <= 3) {
+  const totalGoals = state.userLearningGoals.length + state.userCustomGoals.length;
+  if (totalGoals > 0 && totalGoals <= 3) {
     goToPage("choice");
+  }
+});
+
+addCustomGoalBtn.addEventListener("click", () => {
+  const customGoalText = customGoalInput.value.trim();
+  if (customGoalText && !state.userCustomGoals.includes(customGoalText)) {
+    const totalGoals = state.userLearningGoals.length + state.userCustomGoals.length;
+    if (totalGoals < 3) {
+      state.userCustomGoals.push(customGoalText);
+      localStorage.setItem("sandbox.userCustomGoals", JSON.stringify(state.userCustomGoals));
+      customGoalInput.value = "";
+      renderCustomGoalsList();
+      updateGoalsPageState();
+    }
+  }
+});
+
+customGoalInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    addCustomGoalBtn.click();
   }
 });
 
