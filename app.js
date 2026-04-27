@@ -1,0 +1,5508 @@
+const ILETS = ["Introduce", "Listen", "Empathize", "Talk", "Solve"];
+const LEARNING_GOALS = [
+  {
+    id: "surface-risks",
+    title: "Surface Risks & Bad News",
+    description: "Learn to deliver difficult information, raise concerns, and surface risks diplomatically",
+    scenarios: ["failing-project", "quality-vs-speed"],
+  },
+  {
+    id: "peer-feedback",
+    title: "Give Peer Feedback",
+    description: "Address behavior, performance, or interpersonal issues with peers without defensiveness",
+    scenarios: ["dominance-in-meetings", "unsafe-shortcut"],
+  },
+  {
+    id: "navigate-authority",
+    title: "Navigate Authority Relationships",
+    description: "Communicate effectively with people above or below you in hierarchy, manage scope and decisions",
+    scenarios: ["failing-project", "resource-priority-conflict", "quality-vs-speed"],
+  },
+  {
+    id: "handle-pressure",
+    title: "Handle Pressure & Conflict",
+    description: "Stay composed when stressed, acknowledge constraints, find solutions in tight situations",
+    scenarios: ["unsafe-shortcut", "resource-priority-conflict"],
+  },
+  {
+    id: "listen-empathize",
+    title: "Improve Listening & Empathy",
+    description: "Ask better questions, understand others' perspectives, acknowledge emotion and pressure",
+    scenarios: ["failing-project", "dominance-in-meetings", "unsafe-shortcut"],
+  },
+  {
+    id: "provide-options",
+    title: "Provide Options & Solutions",
+    description: "Propose trade-offs, offer choices, co-create solutions instead of just saying no",
+    scenarios: ["resource-priority-conflict", "quality-vs-speed"],
+  },
+];
+const CUSTOM_SCENARIOS_KEY = "sandbox.customScenarios.v1";
+const USER_NAME_KEY = "sandbox.userName";
+const SCENARIO_OVERRIDES_KEY = "sandbox.scenarioOverrides.v1";
+const HIDDEN_SCENARIO_IDS_KEY = "sandbox.hiddenScenarioIds.v1";
+const REFLECTION_HISTORY_KEY = "sandbox.reflectionHistory.v1";
+const REFLECTION_DRAFTS_KEY = "sandbox.reflectionDrafts.v1";
+const IMPROVEMENT_TRACK_KEY = "sandbox.improvementTrack.v1";
+const SCAFFOLD_LEVEL_KEY = "sandbox.scaffoldLevel";
+const PEER_ROOM_PREFIX = "sandbox.peer.room.";
+const PEER_USER_ID_KEY = "sandbox.peer.userId";
+const PEER_REQUESTS_KEY = "sandbox.peer.requests.v1";
+const PEER_SESSION_HISTORY_KEY = "sandbox.peer.sessionHistory.v1";
+
+const SCAFFOLD_LEVELS = {
+  1: {
+    label: "Level 1: Fully Guided",
+    summary: "Scenario Catalyst, sentence starters, and coach support are always visible.",
+  },
+  2: {
+    label: "Level 2: Assisted",
+    summary: "Scenario Catalyst stays visible, but hints fade unless you request them.",
+  },
+  3: {
+    label: "Level 3: Independent",
+    summary: "Scenario Catalyst stays visible, while sentence starters and live prompts stay off.",
+  },
+};
+
+const MODULE_SECTIONS = [
+  {
+    title: "1. Notice What Makes the Conversation Hard",
+    summary: "A difficult conversation usually feels hard because the stakes, emotions, and relationships are all active at once.",
+    points: [
+      "Pause and identify what is making this conversation difficult.",
+      "Set one intention: solve the issue while preserving respect.",
+      "Prepare one opening sentence and one open question.",
+    ],
+    example:
+      "Example: Instead of 'This is a mess', try 'I want us to address two delays before they affect delivery.'",
+  },
+  {
+    title: "2. Start With Shared Intent",
+    summary: "Open with common purpose to reduce immediate defensiveness.",
+    points: [
+      "State why this matters for both sides, not just your side.",
+      "Avoid judgment labels in the first minute.",
+      "Signal collaboration: 'I want us to improve this together.'",
+    ],
+    example:
+      "Example: 'I value your contribution, and I want us to find a way to keep quality high under this deadline.'",
+  },
+  {
+    title: "3. Listen Before Persuading",
+    summary: "Understanding constraints first makes your response more realistic and more credible.",
+    points: [
+      "Ask one open question before making your argument.",
+      "Reflect key pressure points back in neutral language.",
+      "Separate facts from interpretation.",
+    ],
+    example:
+      "Example: 'What trade-offs were you balancing when this decision was made?'",
+  },
+  {
+    title: "4. Empathize + Talk With Evidence",
+    summary: "Empathy keeps trust; evidence keeps clarity.",
+    points: [
+      "Acknowledge pressure without dropping the core issue.",
+      "Use behavior-impact wording, not personality attacks.",
+      "Anchor your point with one concrete observable example.",
+    ],
+    example:
+      "Example: 'Two milestones slipped, which increases client risk and creates rework for the team.'",
+  },
+  {
+    title: "5. Solve With Commitments",
+    summary: "End with clear commitments, not vague agreement.",
+    points: [
+      "Agree on one immediate action and one owner.",
+      "Set a timeline and follow-up checkpoint.",
+      "Define what success will look like by that checkpoint.",
+    ],
+    example:
+      "Example: 'Can we align on one recovery action by Friday and review it Monday morning?'",
+  },
+  {
+    title: "6. Reflection and Transfer",
+    summary: "Turn one conversation into a repeatable leadership habit.",
+    points: [
+      "Identify your strongest and weakest ILETS stages.",
+      "Capture one sentence you will reuse in real life.",
+      "Plan one real conversation where you will apply this structure.",
+    ],
+    example:
+      "Example: 'In my next team conflict, I will start with shared intent before discussing impact.'",
+  },
+];
+
+const STAGE_GUIDE = {
+  Introduce: {
+    objective: "Set purpose and psychological safety in one calm sentence.",
+    starters: [
+      "Thanks for meeting with me. I want to discuss a risk I am seeing.",
+      "My goal is to solve this early and keep the project on track.",
+    ],
+  },
+  Listen: {
+    objective: "Ask questions first so you understand constraints before arguing.",
+    starters: [
+      "Can you share what trade-offs led to this decision?",
+      "What pressure are you managing right now from your side?",
+    ],
+  },
+  Empathize: {
+    objective: "Acknowledge pressure and emotion without dropping the core issue.",
+    starters: [
+      "I understand this deadline puts a lot of pressure on your team.",
+      "I can see why this is frustrating, and I appreciate your openness.",
+    ],
+  },
+  Talk: {
+    objective: "State behavior and impact with specific evidence.",
+    starters: [
+      "I noticed we missed two milestones, which increases client risk.",
+      "If this continues, we may face rework and delayed delivery.",
+    ],
+  },
+  Solve: {
+    objective: "Agree on actions with owner and follow-up date.",
+    starters: [
+      "Can we agree on one recovery action for this week and an owner?",
+      "Let us set a checkpoint on Friday to review progress together.",
+    ],
+  },
+};
+
+const DEFAULT_SCENARIOS = [
+  {
+    id: "failing-project",
+    title: "Report a Failing Project to Your Manager",
+    scenarioType: "hierarchical",
+    authorityGap: 3,
+    difficulty: "High authority gradient",
+    learningObjectives: [
+      "Surface risks diplomatically to authority figures",
+      "Present data without blame",
+      "Maintain credibility while raising concerns",
+      "Navigate power dynamics respectfully"
+    ],
+    context:
+      "You are a junior analyst on a 6-month IT modernization project. When the project kicked off three months ago, your senior manager was confident. But behind the scenes, technical debt is worse than expected. Two key milestones have slipped: your integration work is delayed, and the testing phase is now compressed into half the planned time. Your manager still believes the project can deliver on time and has not flagged issues to leadership yet. You have noticed stress rising in the team, and if risks are not surfaced now, delivery quality and team capacity are both at risk. You have a 10-minute sync to raise this carefully.",
+    imageUrl: "./assets/scenarios/failing-project.svg",
+    aiRole: "Senior Manager",
+    opening:
+      "You asked for this quick sync. I only have ten minutes, so tell me what you need.",
+    goals: [
+      "Surface risks without sounding alarmist or blaming",
+      "Present facts (milestone slippage and impact) before conclusions",
+      "Acknowledge leadership pressure while preserving psychological safety",
+      "Propose one actionable recovery option with ownership",
+    ],
+    silenceMetrics: true,
+    practice: {
+      Introduce: {
+        objective: "Open respectfully, signal shared intent, and set focus.",
+        starters: [
+          {
+            style: "deferential",
+            text: "Thanks for the time. I want to raise one delivery risk early so we can protect your timeline and avoid escalation later.",
+          },
+          {
+            style: "balanced",
+            text: "I want to flag a project risk now while we still have options. My goal is to help us stay credible on delivery.",
+          },
+          {
+            style: "direct",
+            text: "Two milestones slipped and testing is compressed. We need a decision this week on scope, timeline, or resources.",
+          },
+        ],
+      },
+      Listen: {
+        objective: "Understand their constraints first, then position your evidence.",
+        starters: [
+          {
+            style: "deferential",
+            text: "Before I go deeper, can I ask how you are seeing risk from your side and what constraints are most critical right now?",
+          },
+          {
+            style: "balanced",
+            text: "What trade-offs are you currently prioritizing: launch date, feature scope, or defect tolerance?",
+          },
+          {
+            style: "direct",
+            text: "What is non-negotiable for you right now: timeline, scope, or quality threshold?",
+          },
+        ],
+      },
+      Empathize: {
+        objective: "Acknowledge pressure while keeping urgency clear.",
+        starters: [
+          {
+            style: "deferential",
+            text: "I understand there is pressure from leadership to keep confidence high. I want to support that while helping us avoid avoidable risk.",
+          },
+          {
+            style: "balanced",
+            text: "I can see the timeline pressure you are carrying. I am raising this now so we still have room to correct responsibly.",
+          },
+          {
+            style: "direct",
+            text: "You are under deadline pressure. If we wait another week, our options narrow and risk goes up.",
+          },
+        ],
+      },
+      Talk: {
+        objective: "State impact with concrete evidence and no blame.",
+        starters: [
+          {
+            style: "deferential",
+            text: "Integration is 2 weeks behind, which compresses testing from 8 weeks to 4. That raises launch defect risk and increases rework exposure.",
+          },
+          {
+            style: "balanced",
+            text: "Current data: 2 missed milestones, 3 days of unplanned rework, and reduced test runway. If unchanged, quality and schedule confidence both drop.",
+          },
+          {
+            style: "direct",
+            text: "We are outside safe delivery limits. At the current pace, we will miss date or miss quality, likely both.",
+          },
+        ],
+      },
+      Solve: {
+        objective: "Propose options and secure explicit next-step ownership.",
+        starters: [
+          {
+            style: "deferential",
+            text: "Could we choose one path this week: slight scope trim, timeline adjustment, or temporary support? I can draft the option summary for your approval.",
+          },
+          {
+            style: "balanced",
+            text: "I suggest we pick one trade-off today and align owners. Can we review progress at a Friday checkpoint?",
+          },
+          {
+            style: "direct",
+            text: "Decision needed this week: scope, time, or resources. I will prepare the plan and owner matrix once you choose.",
+          },
+        ],
+      },
+    },
+  },
+  {
+    id: "unsafe-shortcut",
+    title: "Challenge an Unsafe Shortcut",
+    scenarioType: "general",
+    difficulty: "Time pressure and blame culture",
+    learningObjectives: [
+      "Address problems without blame",
+      "Acknowledge pressure and constraints",
+      "Protect standards while staying empathetic",
+      "Collaborate on solutions under stress"
+    ],
+    context:
+      "Your engineering team is racing to hit a quarterly release deadline. A teammate just committed code that bypasses a critical data validation step—a step that catches errors before they reach production. When you ask why, they say, 'We're already late. I'll add it back after launch.' You know this is risky. If bad data slips through, it will create downstream data corruption that's expensive to fix. The team is already stressed, and you don't want to trigger a blame conversation. But you also can't let this pass. You need to address it without making your teammate defensive.",
+    imageUrl: "./assets/scenarios/unsafe-shortcut.svg",
+    aiRole: "Teammate",
+    opening:
+      "We are already late. I skipped one check this time. Can we just move on?",
+    goals: [
+      "Open without blame or accusation",
+      "Understand the pressure and constraints they're under",
+      "Show empathy while protecting quality standards",
+      "Co-create a safer immediate next step (don't just say 'fix it')",
+    ],
+    silenceMetrics: false,
+    practice: {
+      Introduce: {
+        objective: "Flag the concern clearly without sounding judgmental.",
+        starters: [
+          { style: "deferential", text: "Can we pause for a minute? I noticed something in the commit and want to check in about it—not in blame, just to make sure we're aligned." },
+          { style: "balanced", text: "I saw the validation step was removed. I'm not trying to call you out—I want to understand the decision and make sure we're not risking the data." },
+          { style: "direct", text: "The validation bypass could create data corruption downstream. I need to understand why that happened and how we fix it." },
+        ],
+      },
+      Listen: {
+        objective: "Ask genuinely about the pressure before arguing.",
+        starters: [
+          { style: "deferential", text: "What was the biggest pressure you were facing when you made that call? What would have helped?" },
+          { style: "balanced", text: "What made you decide to remove it? Was it a time trade-off, or was there a technical reason?" },
+          { style: "direct", text: "Why did you remove the validation? What's the timeline you're working against?" },
+        ],
+      },
+      Empathize: {
+        objective: "Acknowledge pressure and timeline without dropping the issue.",
+        starters: [
+          { style: "deferential", text: "I get it—the deadline is real and you're trying to move fast. I appreciate you're under a lot of pressure. And I want to make sure we don't create a bigger problem later." },
+          { style: "balanced", text: "I understand the deadline crunch. Corners feel necessary. But a data corruption fix will cost us more time than adding the validation back now." },
+          { style: "direct", text: "You're under time pressure. That's real. But data corruption will create technical debt that costs us weeks to fix. We need to solve this now." },
+        ],
+      },
+      Talk: {
+        objective: "Explain the concrete business impact of the risk.",
+        starters: [
+          { style: "deferential", text: "If bad data gets through, we'll spend days debugging downstream systems instead of moving to the next feature. That's a bigger delay than adding validation now." },
+          { style: "balanced", text: "One bad record that passes through creates corruption in three downstream systems. Fixing that will take a week. The validation takes an hour now." },
+          { style: "direct", text: "Data corruption is a week-long incident response. The validation is a 1-hour fix. We're trading 1 hour today for 5 days later." },
+        ],
+      },
+      Solve: {
+        objective: "Agree on a safer path forward that acknowledges the timeline.",
+        starters: [
+          { style: "deferential", text: "Could we add the validation back and run the data through a quick smoke test? If we work together, I think we can finish in 2 hours instead of the full 4." },
+          { style: "balanced", text: "Let's add it back and do a quick burn-down of the blocked tests. Can we sync in 30 min and see where we stand?" },
+          { style: "direct", text: "The validation goes back in. Let's test it together right now so we move faster than debating." },
+        ],
+      },
+    },
+  },
+  {
+    id: "dominance-in-meetings",
+    title: "Address Meeting Dominance Respectfully",
+    scenarioType: "general",
+    difficulty: "Cross-team sensitivity",
+    learningObjectives: [
+      "Give feedback to peers without defensiveness",
+      "Name specific behaviors clearly",
+      "Preserve relationships while raising concerns",
+      "Invite shared ownership of change"
+    ],
+    context: `You work with a senior peer from another department who regularly dominates meetings. They interrupt people, jump to conclusions quickly, and shut down ideas from junior team members. In the last three meetings, you've watched your team's junior analysts stop offering input. You're not their manager, so you can't direct them. But you can talk to your senior peer. The challenge: they might get defensive, or worse, they might not even realize they're doing it. You want to name the behavior, show respect for their role, and invite them to co-own a solution without making it awkward.`,
+    imageUrl: "./assets/scenarios/meeting-dominance.svg",
+    aiRole: "Senior Peer",
+    opening:
+      "I heard you had concerns about our meeting style. What exactly is the issue?",
+    goals: [
+      "Name the behavior specifically without character attacks",
+      "Show respect for their role and intention",
+      "Invite their perspective and shared ownership",
+      "Agree on one visible behavior change for the next meeting",
+    ],
+    silenceMetrics: false,
+    practice: {
+      Introduce: {
+        objective: "Lead with respect and shared purpose, not complaint.",
+        starters: [
+          {
+            style: "deferential",
+            text: "I value your input a lot, and I want to bring an observation about how our meetings are landing. Would you be open to that?",
+          },
+          {
+            style: "balanced",
+            text: "I've noticed something about the meeting dynamic that I think is hurting information flow. I wanted to raise it as a peer because I respect you.",
+          },
+          {
+            style: "direct",
+            text: "The meeting format is suppressing junior input. I need to tell you directly because we're losing good ideas.",
+          },
+        ],
+      },
+      Listen: {
+        objective: "Invite their perspective on the meeting dynamic first.",
+        starters: [
+          {
+            style: "deferential",
+            text: "How are you experiencing the meetings? What's your intention when you move through topics quickly?",
+          },
+          {
+            style: "balanced",
+            text: "What's your goal in running meetings the way you do? Are you trying to keep things moving, or is there something else driving the pace?",
+          },
+          {
+            style: "direct",
+            text: "Why do you interrupt people? What are you optimizing for?",
+          },
+        ],
+      },
+      Empathize: {
+        objective: "Acknowledge their perspective and role while naming the team effect.",
+        starters: [
+          {
+            style: "deferential",
+            text: "I get it—you're trying to be efficient and not waste people's time. That's a strength. And I'm seeing that the pace is making juniors hesitant to speak up.",
+          },
+          {
+            style: "balanced",
+            text: "I see you're focused on keeping meetings productive. That matters. But it's also creating a dynamic where only senior voices are heard.",
+          },
+          {
+            style: "direct",
+            text: "You're trying to move fast. But you're also creating a chilling effect where junior people don't contribute.",
+          },
+        ],
+      },
+      Talk: {
+        objective: "Name the specific behavior and team impact with evidence.",
+        starters: [
+          {
+            style: "deferential",
+            text: "In the last three meetings, I noticed when the team attempts a thought, it gets cut off. That's happening about every 5-10 minutes. The result is junior people are stopping volunteering ideas.",
+          },
+          {
+            style: "balanced",
+            text: "Here's what I'm seeing: when someone starts with an idea, it gets interrupted before they finish. Three junior analysts haven't said anything in the last two meetings. That's lost information.",
+          },
+          {
+            style: "direct",
+            text: "You interrupt junior people mid-thought. That's killing their confidence. I watched three people stop contributing last week.",
+          },
+        ],
+      },
+      Solve: {
+        objective: "Propose a small, visible behavior change and commit together.",
+        starters: [
+          {
+            style: "deferential",
+            text: "Would you be open to trying something in the next meeting? Let's give people 30 seconds to finish their thought before responding. See if that changes what we hear?",
+          },
+          {
+            style: "balanced",
+            text: "I'd like to suggest a small change for next time: let people finish one complete thought before the discussion moves. Can we try that and see what shifts?",
+          },
+          {
+            style: "direct",
+            text: "I'm going to ask you to do one thing in the next meeting: don't interrupt. Let people finish. We'll see what happens.",
+          },
+        ],
+      },
+    },
+  },
+  {
+    id: "resource-priority-conflict",
+    title: "Resolve a Resource Priority Conflict",
+    scenarioType: "hierarchical",
+    authorityGap: 2,
+    difficulty: "Competing loyalties and scope creep",
+    learningObjectives: [
+      "Manage scope creep diplomatically",
+      "Present capacity constraints clearly",
+      "Offer options instead of just saying no",
+      "Align priorities across stakeholders"
+    ],
+    context: `You're a project lead working across two business units. Your primary sponsor told you a month ago that delivery date was fixed. But six weeks in, a more senior leader (not your direct manager) has been requesting increasing scope—new features, reports, data integrations. The problem: each addition adds 1-2 weeks to the timeline, and your team is already stretched. Your original sponsor is now asking why feature X isn't done yet, unaware that the scope has expanded. You need to have a conversation with the senior leader about timeline vs. scope trade-offs. But they outrank you, and you don't want to seem uncooperative or like you're refusing work. How do you raise this without appearing to say no?`,
+    imageUrl: "./assets/scenarios/resource-priority.svg",
+    aiRole: "Senior Leader (Different Unit)",
+    opening: "I've been thinking about next steps. We should add the user dashboard to this release. I know it's late in the cycle, but the stakeholder asked for it. Can you make it work?",
+    goals: [
+      "Acknowledge the senior leader's request respectfully",
+      "Surface the timeline and resource reality clearly",
+      "Ask questions about priorities (not just say no)",
+      "Propose trade-off options (expand timeline, reduce features, or more resources)",
+    ],
+    silenceMetrics: true,
+    practice: {
+      Introduce: {
+        objective: "Signal that you want to find a solution, not block.",
+        starters: [
+          {
+            style: "deferential",
+            text: "Thank you for thinking about how to expand value. I want to work with you on this. Before I commit, I need to walk you through what we're juggling.",
+          },
+          {
+            style: "balanced",
+            text: "I appreciate the feature idea—it's solid. I want to make sure we build it right. Let me show you the current capacity so we can figure out the best path.",
+          },
+          {
+            style: "direct",
+            text: "That feature is good work, but we need to talk timeline and scope because we can't do both the original plan and this addition.",
+          },
+        ],
+      },
+      Listen: {
+        objective: "Understand their priorities before pushing back.",
+        starters: [
+          {
+            style: "deferential",
+            text: "Can I ask—is the dashboard critical for the business case, or is it nice-to-have? Understanding your priority will help me figure out the best path.",
+          },
+          {
+            style: "balanced",
+            text: "What's driving the urgency on the dashboard? Is it a business requirement, or is it opportunistic?",
+          },
+          {
+            style: "direct",
+            text: "How critical is this dashboard to your success metrics? Is it a must-have or a want?",
+          },
+        ],
+      },
+      Empathize: {
+        objective: "Show you understand the business pressure while being honest.",
+        starters: [
+          {
+            style: "deferential",
+            text: "I understand you're under pressure to show value early, and I want to help you succeed. I'm going to be straight with you about what that requires.",
+          },
+          {
+            style: "balanced",
+            text: "I know your stakeholders have high expectations. My job is to help you deliver what matters most without breaking the team.",
+          },
+          {
+            style: "direct",
+            text: "You're trying to maximize value. So am I. But we need to be realistic about the constraint we're operating under.",
+          },
+        ],
+      },
+      Talk: {
+        objective: "Lay out the timeline and capacity reality clearly.",
+        starters: [
+          {
+            style: "deferential",
+            text: "Here's where we stand: we have 4 weeks left. Current scope is 3.5 weeks of work. The dashboard is 1.5 weeks. So we can deliver either the original plan on time, or the original plan plus the dashboard in 5.5 weeks.",
+          },
+          {
+            style: "balanced",
+            text: "We committed to Feature A, B, and C by week 4. We're tracking to deliver. The dashboard adds week 5 to the timeline. The team is already at capacity.",
+          },
+          {
+            style: "direct",
+            text: "You have three options: hit the date with the original scope, extend the date to include the dashboard, or pull a feature from the original scope to make room for the dashboard.",
+          },
+        ],
+      },
+      Solve: {
+        objective: "Get explicit agreement on which trade-off to make.",
+        starters: [
+          {
+            style: "deferential",
+            text: "Which of these works best for you? I can build a case for any of them—I just need to know which direction to move in.",
+          },
+          {
+            style: "balanced",
+            text: "I'd recommend talking to your stakeholder about which matters most: the date or the dashboard. Once you decide, I can adjust the plan accordingly.",
+          },
+          {
+            style: "direct",
+            text: "Decide now: timeline, scope, or resources. I'll organize the team around that decision.",
+          },
+        ],
+      },
+    },
+  },
+  {
+    id: "quality-vs-speed",
+    title: "Push Back on a Rushed Quality Review",
+    scenarioType: "hierarchical",
+    authorityGap: 2,
+    difficulty: "Authority and standards tension",
+    learningObjectives: [
+      "Advocate for quality without blocking progress",
+      "Use data to support difficult positions",
+      "Find middle-ground solutions",
+      "Balance business pressure with standards"
+    ],
+    context: `You're a QA lead on a product launch. Your test plan includes three rounds of testing—unit, integration, and user acceptance. Today, your product manager informed you that to hit the market window, testing needs to be compressed to one week (originally two weeks) and only cover "critical path" functionality. They're feeling pressure from executives to get to market fast. But you know that skipping integration testing has historically led to 10-15% of bugs reaching production. That's not acceptable for this product category. You need to push back—but respectfully, because your manager agrees with the compressed timeline, and you don't want to be seen as slowing the company down. How do you advocate for quality without sounding obstructionist?`,
+    imageUrl: "./assets/scenarios/quality-vs-speed.svg",
+    aiRole: "Product Manager",
+    opening: "I know the test plan is ambitious, but we've got to cut it. The market window is closing. Can you get to MVP quality in one week instead of two?",
+    goals: [
+      "Acknowledge their market pressure and constraints",
+      "Surface the quality risk with historical data, not opinion",
+      "Propose a middle ground (prioritized testing, parallel work)",
+      "Get explicit agreement on acceptable risk level",
+    ],
+    silenceMetrics: true,
+    practice: {
+      Introduce: {
+        objective: "Signal partnership while setting up the conversation.",
+        starters: [
+          {
+            style: "deferential",
+            text: "I hear the market pressure. I want us to launch fast and safely. Before we cut the testing plan, let me show you the risk profile.",
+          },
+          {
+            style: "balanced",
+            text: "I understand the timeline crunch. I also need to make sure we're making an informed decision about quality trade-offs.",
+          },
+          {
+            style: "direct",
+            text: "Cutting integration testing increases bug risk to 10-15%. I need to tell you that risk before we commit.",
+          },
+        ],
+      },
+      Listen: {
+        objective: "Understand the market constraints and business drivers.",
+        starters: [
+          {
+            style: "deferential",
+            text: "Can you help me understand what's driving the week-long deadline? Is it a market window, customer commitment, or internal target?",
+          },
+          {
+            style: "balanced",
+            text: "What happens if we launch one week later than this date? Is the market opportunity lost, or just delayed?",
+          },
+          {
+            style: "direct",
+            text: "What's the financial impact if we miss this window versus if we have a bug incident at launch?",
+          },
+        ],
+      },
+      Empathize: {
+        objective: "Acknowledge their pressure while being honest about trade-offs.",
+        starters: [
+          {
+            style: "deferential",
+            text: "I know executives are putting real pressure on you. My goal is to help you launch on time and avoid a crisis that costs way more time.",
+          },
+          {
+            style: "balanced",
+            text: "I get the competitive pressure you're under. I'm not trying to slow you down—I'm trying to keep us from launching a buggy product.",
+          },
+          {
+            style: "direct",
+            text: "You're trying to capture a market moment. But a 10% bug rate will create a PR crisis that costs us months.",
+          },
+        ],
+      },
+      Talk: {
+        objective: "Present the quality data and historical patterns.",
+        starters: [
+          {
+            style: "deferential",
+            text: "In the past four launches where we compressed integration testing, we had an average of 12 production bugs. In launches where we ran full integration testing, we had 2 bugs. That's a 6x difference in customer impact.",
+          },
+          {
+            style: "balanced",
+            text: "Skipping integration testing historically increases production bugs by 10-15%. That's not a number I'm comfortable putting in production with our SLA.",
+          },
+          {
+            style: "direct",
+            text: "Our integration test catch rate is 92%. That means 8% of bugs get to production if we skip it. For this product, that's unacceptable.",
+          },
+        ],
+      },
+      Solve: {
+        objective: "Propose a middle path and get explicit agreement.",
+        starters: [
+          {
+            style: "deferential",
+            text: "What if we do this: prioritize critical path integration tests (2 days), run user acceptance testing in parallel with other features, and cut some nice-to-have tests? That gets us to a one-week timeline with acceptable risk.",
+          },
+          {
+            style: "balanced",
+            text: "I propose we focus hard on critical path integration tests and ship with known minor issues in secondary features. I think we can hit the timeline and keep risk manageable.",
+          },
+          {
+            style: "direct",
+            text: "Run integration tests on critical path only, do UAT in parallel, launch with known minor bugs. That's a one-week plan with 5% residual risk instead of 15%.",
+          },
+        ],
+      },
+    },
+  },
+];
+
+function loadCustomScenarios() {
+  try {
+    const raw = localStorage.getItem(CUSTOM_SCENARIOS_KEY);
+    if (!raw) {
+      return [];
+    }
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function loadScenarioOverrides() {
+  try {
+    const raw = localStorage.getItem(SCENARIO_OVERRIDES_KEY);
+    if (!raw) {
+      return {};
+    }
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function loadHiddenScenarioIds() {
+  try {
+    const raw = localStorage.getItem(HIDDEN_SCENARIO_IDS_KEY);
+    if (!raw) {
+      return [];
+    }
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function loadReflectionHistory() {
+  try {
+    const raw = localStorage.getItem(REFLECTION_HISTORY_KEY);
+    if (!raw) {
+      return [];
+    }
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function loadReflectionDrafts() {
+  try {
+    const raw = localStorage.getItem(REFLECTION_DRAFTS_KEY);
+    if (!raw) {
+      return [];
+    }
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function loadImprovementTrack() {
+  try {
+    const raw = localStorage.getItem(IMPROVEMENT_TRACK_KEY);
+    if (!raw) {
+      return [];
+    }
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function loadPeerRequests() {
+  try {
+    const raw = localStorage.getItem(PEER_REQUESTS_KEY);
+    if (!raw) {
+      return [];
+    }
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function loadPeerSessionHistory() {
+  try {
+    const raw = localStorage.getItem(PEER_SESSION_HISTORY_KEY);
+    if (!raw) {
+      return [];
+    }
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function getPeerUserId() {
+  const existing = localStorage.getItem(PEER_USER_ID_KEY);
+  if (existing) {
+    return existing;
+  }
+  const generated = `peer-${Math.random().toString(36).slice(2, 10)}`;
+  localStorage.setItem(PEER_USER_ID_KEY, generated);
+  return generated;
+}
+
+function buildPeerRoomCode() {
+  return Math.random().toString(36).slice(2, 8).toUpperCase();
+}
+
+function loadScaffoldLevel() {
+  const raw = Number(localStorage.getItem(SCAFFOLD_LEVEL_KEY));
+  return raw === 2 || raw === 3 ? raw : 1;
+}
+
+function getScaffoldLevelConfig() {
+  return SCAFFOLD_LEVELS[state.scaffold.level] || SCAFFOLD_LEVELS[1];
+}
+
+function normalizeScaffoldLevel(value) {
+  return value === 2 || value === 3 ? value : 1;
+}
+
+function getScaffoldLabel(level) {
+  const normalized = normalizeScaffoldLevel(Number(level));
+  return SCAFFOLD_LEVELS[normalized]?.label || SCAFFOLD_LEVELS[1].label;
+}
+
+function persistScaffoldLevel() {
+  localStorage.setItem(SCAFFOLD_LEVEL_KEY, String(state.scaffold.level));
+}
+
+function buildInitialScenarios() {
+  const overrides = loadScenarioOverrides();
+  const hiddenIds = new Set(loadHiddenScenarioIds());
+  const merged = [...DEFAULT_SCENARIOS, ...loadCustomScenarios()]
+    .map((scenario) => {
+      const override = overrides[scenario.id];
+      if (!override) {
+        return scenario;
+      }
+      return {
+        ...scenario,
+        ...override,
+      };
+    })
+    .filter((scenario) => !hiddenIds.has(scenario.id));
+
+  return merged.length ? merged : [...DEFAULT_SCENARIOS];
+}
+
+const state = {
+  scenarios: buildInitialScenarios(),
+  selectedScenarioId: DEFAULT_SCENARIOS[0].id,
+  page: "landing",
+  moduleIndex: 0,
+  moduleQuizPassed: false,
+  userName: localStorage.getItem(USER_NAME_KEY) || "",
+  userLearningGoals: JSON.parse(localStorage.getItem("sandbox.userLearningGoals") || "[]"),
+  nameEditorOpen: false,
+  messages: [],
+  stageIndex: 0,
+  isTyping: false,
+  briefTab: "scenario",
+  scenarioBriefExpanded: true,
+  scenariosExpanded: true,
+  scenarioListExpanded: false,
+  scenarioPickerExpanded: false,
+  editingScenarioId: null,
+  iletsExpanded: true,
+  rightTab: "coach",
+  focusMode: false,
+  leftVisible: true,
+  rightVisible: true,
+  tipsExpanded: false,
+  coachNote: "Type a message and I’ll give you a quick note here.",
+  coachNoteHistory: [],
+  reflectionHistory: loadReflectionHistory(),
+  reflectionDrafts: loadReflectionDrafts(),
+  finalReflectionDraftLocked: false,
+  improvementTrack: loadImprovementTrack(),
+  improvementTrackRange: "all",
+  inMomentPrompt: null,
+  inMomentPromptAtTurn: 0,
+  inMomentSubmitting: false,
+  latestStageScores: [],
+  latestSessionScorePercent: 0,
+  activeReflectionPrompts: [],
+  finalReflectionSubmitting: false,
+  finalReflectionFeedback: "",
+  settings: {
+    mode: localStorage.getItem("sandbox.mode") || "openai",
+    proxyUrl: localStorage.getItem("sandbox.proxyUrl") || "http://localhost:8787/api/chat",
+    apiKey: localStorage.getItem("sandbox.apiKey") || "",
+    model: localStorage.getItem("sandbox.model") || "gpt-4.1-mini",
+  },
+  scaffold: {
+    level: loadScaffoldLevel(),
+    hintsVisible: loadScaffoldLevel() === 1,
+    lastScenarioAppliedId: null,
+  },
+  peer: {
+    requests: loadPeerRequests(),
+    sessionHistory: loadPeerSessionHistory(),
+    activeSession: null,
+    activeView: "community",
+    dashboardView: "summary",
+    nameEditorOpen: false,
+    lastSessionSummary: null,
+    sessionChecklist: {
+      Introduce: false,
+      Listen: false,
+      Empathize: false,
+      Talk: false,
+      Solve: false,
+    },
+    sharedNotes: "",
+    sharedNotesSaved: false,
+    feedbackDraft: "",
+    feedbackSent: false,
+    feedbackNotes: [],
+  },
+};
+
+if (!state.scenarios.some((scenario) => scenario.id === state.selectedScenarioId)) {
+  state.selectedScenarioId = state.scenarios[0]?.id || DEFAULT_SCENARIOS[0].id;
+}
+
+const peerUserId = getPeerUserId();
+
+function persistCustomScenarios() {
+  const customOnly = state.scenarios.filter((scenario) => scenario.custom === true);
+  localStorage.setItem(CUSTOM_SCENARIOS_KEY, JSON.stringify(customOnly));
+}
+
+function persistScenarioOverrides() {
+  const overrides = state.scenarios
+    .filter((scenario) => scenario.custom !== true)
+    .reduce((acc, scenario) => {
+      const baseline = DEFAULT_SCENARIOS.find((item) => item.id === scenario.id);
+      if (!baseline) {
+        return acc;
+      }
+
+      const changed =
+        baseline.title !== scenario.title ||
+        baseline.difficulty !== scenario.difficulty ||
+        baseline.context !== scenario.context ||
+        baseline.aiRole !== scenario.aiRole ||
+        baseline.opening !== scenario.opening ||
+        normalizeScaffoldLevel(Number(baseline.scaffoldLevel || 1)) !== normalizeScaffoldLevel(Number(scenario.scaffoldLevel || 1)) ||
+        JSON.stringify(baseline.goals) !== JSON.stringify(scenario.goals);
+
+      if (changed) {
+        acc[scenario.id] = {
+          title: scenario.title,
+          difficulty: scenario.difficulty,
+          context: scenario.context,
+          aiRole: scenario.aiRole,
+          opening: scenario.opening,
+          scaffoldLevel: normalizeScaffoldLevel(Number(scenario.scaffoldLevel || 1)),
+          goals: scenario.goals,
+          practice: scenario.practice,
+        };
+      }
+
+      return acc;
+    }, {});
+
+  localStorage.setItem(SCENARIO_OVERRIDES_KEY, JSON.stringify(overrides));
+}
+
+function persistHiddenScenarioIds() {
+  const hiddenIds = DEFAULT_SCENARIOS
+    .map((scenario) => scenario.id)
+    .filter((id) => !state.scenarios.some((scenario) => scenario.id === id));
+  localStorage.setItem(HIDDEN_SCENARIO_IDS_KEY, JSON.stringify(hiddenIds));
+}
+
+function persistReflectionHistory() {
+  const trimmed = state.reflectionHistory.slice(-60);
+  localStorage.setItem(REFLECTION_HISTORY_KEY, JSON.stringify(trimmed));
+}
+
+function persistReflectionDrafts() {
+  const trimmed = state.reflectionDrafts.slice(-40);
+  localStorage.setItem(REFLECTION_DRAFTS_KEY, JSON.stringify(trimmed));
+}
+
+function persistImprovementTrack() {
+  const trimmed = state.improvementTrack.slice(-80);
+  localStorage.setItem(IMPROVEMENT_TRACK_KEY, JSON.stringify(trimmed));
+}
+
+const pageLanding = document.getElementById("pageLanding");
+const pageGoals = document.getElementById("pageGoals");
+const pageChoice = document.getElementById("pageChoice");
+const pageLearn = document.getElementById("pageLearn");
+const pagePeerPracticum = document.getElementById("pagePeerPracticum");
+const pageScenarioBriefing = document.getElementById("pageScenarioBriefing");
+const pageDashboard = document.getElementById("pageDashboard");
+const pageFinal = document.getElementById("pageFinal");
+const practiceShell = document.getElementById("practiceShell");
+
+// Goal selection page elements
+const goalsGrid = document.getElementById("goalsGrid");
+const goalsBackBtn = document.getElementById("goalsBackBtn");
+const goalsNextBtn = document.getElementById("goalsNextBtn");
+
+const briefingTitle = document.getElementById("briefingTitle");
+const briefingSubtitle = document.getElementById("briefingSubtitle");
+const selectedUserName = document.getElementById("selectedUserName");
+const editUserNameBtn = document.getElementById("editUserNameBtn");
+const userNameEditor = document.getElementById("userNameEditor");
+const briefUserNameInput = document.getElementById("briefUserNameInput");
+const scenarioPickerSection = document.getElementById("scenarioPickerSection");
+const scenarioPickerGrid = document.getElementById("scenarioPickerGrid");
+const toggleScenarioPickerListBtn = document.getElementById("toggleScenarioPickerListBtn");
+const createScenarioBriefingBtn = document.getElementById("createScenarioBriefingBtn");
+const scenarioBriefingSection = document.getElementById("scenarioBriefingSection");
+const briefScenarioTitle = document.getElementById("briefScenarioTitle");
+const briefScenarioDifficulty = document.getElementById("briefScenarioDifficulty");
+const briefContext = document.getElementById("briefContext");
+const briefRole = document.getElementById("briefRole");
+const briefGoals = document.getElementById("briefGoals");
+const briefOpening = document.getElementById("briefOpening");
+const briefScaffoldHint = document.getElementById("briefScaffoldHint");
+const briefScaffoldLevelGroup = document.getElementById("briefScaffoldLevelGroup");
+const cancelBriefingBtn = document.getElementById("cancelBriefingBtn");
+const backFromBriefingBtn = document.getElementById("backFromBriefingBtn");
+const beginPracticeBtn = document.getElementById("beginPracticeBtn");
+const pickerActions = document.getElementById("pickerActions");
+const goToChoiceBtn = document.getElementById("goToChoiceBtn");
+const userNameInput = document.getElementById("userNameInput");
+const scenarioNameSetup = document.getElementById("scenarioNameSetup");
+const chooseLearnBtn = document.getElementById("chooseLearnBtn");
+const choosePracticeBtn = document.getElementById("choosePracticeBtn");
+const choosePeerBtn = document.getElementById("choosePeerBtn");
+const choiceWelcomeTitle = document.getElementById("choiceWelcomeTitle");
+const choiceWelcomeSubtitle = document.getElementById("choiceWelcomeSubtitle");
+const choiceNameInput = document.getElementById("choiceNameInput");
+const choiceSaveNameBtn = document.getElementById("choiceSaveNameBtn");
+const choiceNameStatus = document.getElementById("choiceNameStatus");
+const choiceStageLabel = document.getElementById("choiceStageLabel");
+const choiceWeakStage = document.getElementById("choiceWeakStage");
+const choiceRecentScore = document.getElementById("choiceRecentScore");
+const choiceCompletionRate = document.getElementById("choiceCompletionRate");
+const choiceScaffoldLevel = document.getElementById("choiceScaffoldLevel");
+const cycleScaffoldLevelBtn = document.getElementById("cycleScaffoldLevelBtn");
+const openDashboardBtn = document.getElementById("openDashboardBtn");
+const dashboardIdentity = document.getElementById("dashboardIdentity");
+const dashboardStageLabel = document.getElementById("dashboardStageLabel");
+const dashboardWeakStage = document.getElementById("dashboardWeakStage");
+const dashboardRecentScore = document.getElementById("dashboardRecentScore");
+const dashboardCompletionRate = document.getElementById("dashboardCompletionRate");
+const dashboardWeakBreakdown = document.getElementById("dashboardWeakBreakdown");
+const dashboardHistory = document.getElementById("dashboardHistory");
+const dashboardPracticeAiBtn = document.getElementById("dashboardPracticeAiBtn");
+const dashboardPracticePeerBtn = document.getElementById("dashboardPracticePeerBtn");
+const dashboardBackBtn = document.getElementById("dashboardBackBtn");
+const learnBackBtn = document.getElementById("learnBackBtn");
+const startPracticeBtn = document.getElementById("startPracticeBtn");
+const moduleProgressLabel = document.getElementById("moduleProgressLabel");
+const moduleProgressPercent = document.getElementById("moduleProgressPercent");
+const moduleProgressBar = document.getElementById("moduleProgressBar");
+const moduleTitle = document.getElementById("moduleTitle");
+const moduleSummary = document.getElementById("moduleSummary");
+const moduleSectionCard = document.getElementById("moduleSectionCard");
+const modulePrevBtn = document.getElementById("modulePrevBtn");
+const moduleNextBtn = document.getElementById("moduleNextBtn");
+const moduleQuiz = document.getElementById("moduleQuiz");
+const submitQuizBtn = document.getElementById("submitQuizBtn");
+const quizResultText = document.getElementById("quizResultText");
+const finalIdentity = document.getElementById("finalIdentity");
+const finalTabOverview = document.getElementById("finalTabOverview");
+const finalTabReflection = document.getElementById("finalTabReflection");
+const finalTabSession = document.getElementById("finalTabSession");
+const finalOverviewSection = document.getElementById("finalOverviewSection");
+const finalReflectionSection = document.getElementById("finalReflectionSection");
+const finalSessionSection = document.getElementById("finalSessionSection");
+const finalFeedbackContent = document.getElementById("finalFeedbackContent");
+const finalReflectionContent = document.getElementById("finalReflectionContent");
+const analyticsSummary = document.getElementById("analyticsSummary");
+const restartPracticeBtn = document.getElementById("restartPracticeBtn");
+const backToChoiceBtn = document.getElementById("backToChoiceBtn");
+const toggleScenariosBtn = document.getElementById("toggleScenariosBtn");
+const scenariosBody = document.getElementById("scenariosBody");
+const stageList = document.getElementById("stageList");
+const toggleIletsBtn = document.getElementById("toggleIletsBtn");
+const iletsBody = document.getElementById("iletsBody");
+const scenarioTitle = document.getElementById("scenarioTitle");
+const scenarioContext = document.getElementById("scenarioContext");
+const roleBadge = document.getElementById("roleBadge");
+const practiceIdentity = document.getElementById("practiceIdentity");
+const practiceScaffoldMenuBtn = document.getElementById("practiceScaffoldMenuBtn");
+const practiceScaffoldMenu = document.getElementById("practiceScaffoldMenu");
+const feedbackPanel = document.getElementById("feedbackPanel");
+const stageHelp = document.getElementById("stageHelp");
+const stageProgress = document.getElementById("stageProgress");
+const briefTabs = document.getElementById("briefTabs");
+const toggleScenarioBriefBtn = document.getElementById("toggleScenarioBriefBtn");
+const scenarioBriefBody = document.getElementById("scenarioBriefBody");
+const scenarioBriefContent = document.getElementById("scenarioBriefContent");
+const stageObjectiveTitle = document.getElementById("stageObjectiveTitle");
+const stageObjectiveText = document.getElementById("stageObjectiveText");
+const stageStartersMeta = document.getElementById("stageStartersMeta");
+const stageStarters = document.getElementById("stageStarters");
+const toggleStartersBtn = document.getElementById("toggleStartersBtn");
+const nextStageBtn = document.getElementById("nextStageBtn");
+const practiceScaffoldChip = document.getElementById("practiceScaffoldChip");
+const rightTabs = document.getElementById("rightTabs");
+const sectionCoach = document.getElementById("sectionCoach");
+const sectionFeedback = document.getElementById("sectionFeedback");
+const sectionPractice = document.getElementById("sectionPractice");
+const toggleFocusBtn = document.getElementById("toggleFocusBtn");
+const toggleLeftColumnBtn = document.getElementById("toggleLeftColumnBtn");
+const toggleRightColumnBtn = document.getElementById("toggleRightColumnBtn");
+const openScenarioBuilderBtn = document.getElementById("openScenarioBuilderBtn");
+const scenarioBuilderDialog = document.getElementById("scenarioBuilderDialog");
+const scenarioBuilderForm = document.getElementById("scenarioBuilderForm");
+const createScenarioBtn = document.getElementById("createScenarioBtn");
+const builderTitle = document.getElementById("builderTitle");
+const builderRole = document.getElementById("builderRole");
+const builderDifficulty = document.getElementById("builderDifficulty");
+const builderContext = document.getElementById("builderContext");
+const builderGoals = document.getElementById("builderGoals");
+const builderOpening = document.getElementById("builderOpening");
+const builderScaffoldLevel = document.getElementById("builderScaffoldLevel");
+const coachNote = document.getElementById("coachNote");
+const coachNoteList = document.getElementById("coachNoteList");
+const inMomentReflectionCard = document.getElementById("inMomentReflectionCard");
+const inMomentPromptText = document.getElementById("inMomentPromptText");
+const inMomentAnswerInput = document.getElementById("inMomentAnswerInput");
+const submitInMomentReflectionBtn = document.getElementById("submitInMomentReflectionBtn");
+const inMomentReflectionFeedback = document.getElementById("inMomentReflectionFeedback");
+const toggleTipsBtn = document.getElementById("toggleTipsBtn");
+const tipsContent = document.getElementById("tipsContent");
+const tipsLead = document.getElementById("tipsLead");
+const tipsList = document.getElementById("tipsList");
+
+const peerIdentityName = document.getElementById("peerIdentityName");
+const peerEditNameBtn = document.getElementById("peerEditNameBtn");
+const peerUserNameEditor = document.getElementById("peerUserNameEditor");
+const peerUserNameInput = document.getElementById("peerUserNameInput");
+const peerTabCommunity = document.getElementById("peerTabCommunity");
+const peerTabSession = document.getElementById("peerTabSession");
+const peerTabReflection = document.getElementById("peerTabReflection");
+const peerTabDashboard = document.getElementById("peerTabDashboard");
+const peerCommunityView = document.getElementById("peerCommunityView");
+const peerSessionView = document.getElementById("peerSessionView");
+const peerFeedbackView = document.getElementById("peerFeedbackView");
+const peerDashboardView = document.getElementById("peerDashboardView");
+const peerUserDirectory = document.getElementById("peerUserDirectory");
+const peerRequestList = document.getElementById("peerRequestList");
+const peerBackToChoiceBtn = document.getElementById("peerBackToChoiceBtn");
+const peerSessionTitle = document.getElementById("peerSessionTitle");
+const peerSessionMeta = document.getElementById("peerSessionMeta");
+const peerEndSessionBtn = document.getElementById("peerEndSessionBtn");
+const peerVoiceModeBtn = document.getElementById("peerVoiceModeBtn");
+const peerVoiceStatusText = document.getElementById("peerVoiceStatusText");
+const peerReflectionMeta = document.getElementById("peerReflectionMeta");
+const peerReflectionSummary = document.getElementById("peerReflectionSummary");
+const peerChatMessages = document.getElementById("peerChatMessages");
+const peerChatForm = document.getElementById("peerChatForm");
+const peerChatInput = document.getElementById("peerChatInput");
+const peerSharedNotes = document.getElementById("peerSharedNotes");
+const peerSaveSharedNotesBtn = document.getElementById("peerSaveSharedNotesBtn");
+const peerEditSharedNotesBtn = document.getElementById("peerEditSharedNotesBtn");
+const peerSharedNotesStatus = document.getElementById("peerSharedNotesStatus");
+const peerFeedbackInput = document.getElementById("peerFeedbackInput");
+const peerSubmitFeedbackBtn = document.getElementById("peerSubmitFeedbackBtn");
+const peerEditFeedbackBtn = document.getElementById("peerEditFeedbackBtn");
+const peerFeedbackStatus = document.getElementById("peerFeedbackStatus");
+const peerFeedbackList = document.getElementById("peerFeedbackList");
+const peerDashboardSummary = document.getElementById("peerDashboardSummary");
+const peerDashboardTrend = document.getElementById("peerDashboardTrend");
+const peerDashboardSession = document.getElementById("peerDashboardSession");
+
+const chatMessages = document.getElementById("chatMessages");
+const chatForm = document.getElementById("chatForm");
+const promptInput = document.getElementById("promptInput");
+const voiceModeBtn = document.getElementById("voiceModeBtn");
+const voiceStatusText = document.getElementById("voiceStatusText");
+const sendBtn = document.getElementById("sendBtn");
+const finishBtn = document.getElementById("finishBtn");
+const goHomeBtn = document.getElementById("goHomeBtn");
+const goLearningPathBtn = document.getElementById("goLearningPathBtn");
+const backToBriefingBtn = document.getElementById("backToBriefingBtn");
+
+const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+let voiceRecognition = null;
+let voiceSendTimer = null;
+let peerVoiceRecognition = null;
+let peerVoiceSendTimer = null;
+let scaffoldPauseTimer = null;
+
+function clearScaffoldPauseTimer() {
+  if (scaffoldPauseTimer) {
+    clearTimeout(scaffoldPauseTimer);
+    scaffoldPauseTimer = null;
+  }
+}
+
+function pushCoachNoteHistory(note) {
+  if (!note) {
+    return;
+  }
+  const normalized = note.trim();
+  if (!normalized) {
+    return;
+  }
+  const existing = state.coachNoteHistory || [];
+  const withoutDupes = existing.filter((item) => item.trim() !== normalized);
+  state.coachNoteHistory = [normalized, ...withoutDupes].slice(0, 4);
+}
+
+function maybeTriggerScaffoldPauseSupport() {
+  if (state.page !== "practice" || state.scaffold.level !== 2 || state.isTyping) {
+    return;
+  }
+
+  if (!state.scaffold.hintsVisible) {
+    state.scaffold.hintsVisible = true;
+    state.coachNote = "Pause support: hints are now visible. Pick one starter and adapt it in your own words.";
+    pushCoachNoteHistory("Pause support: Use one hint, then continue in your own words.");
+    renderPracticeStrip();
+    renderCoachNote();
+  }
+}
+
+function armScaffoldPauseTimer() {
+  clearScaffoldPauseTimer();
+  if (state.page !== "practice" || state.scaffold.level !== 2) {
+    return;
+  }
+  scaffoldPauseTimer = window.setTimeout(() => {
+    maybeTriggerScaffoldPauseSupport();
+  }, 10000);
+}
+
+state.voice = {
+  supported: Boolean(SpeechRecognitionAPI),
+  mode: false,
+  listening: false,
+  speaking: false,
+  interim: "",
+  pendingFinal: "",
+};
+
+state.peer.voice = {
+  supported: Boolean(SpeechRecognitionAPI),
+  mode: false,
+  listening: false,
+  speaking: false,
+  interim: "",
+  pendingFinal: "",
+};
+
+function renderVoiceUi() {
+  if (!voiceModeBtn || !voiceStatusText) {
+    return;
+  }
+
+  if (!state.voice.supported) {
+    voiceModeBtn.disabled = true;
+    voiceModeBtn.classList.remove("is-active");
+    voiceModeBtn.setAttribute("aria-pressed", "false");
+    voiceModeBtn.title = "Voice input is not supported in this browser";
+    voiceModeBtn.setAttribute("aria-label", voiceModeBtn.title);
+    voiceStatusText.textContent = "Voice input is not supported in this browser.";
+    return;
+  }
+
+  voiceModeBtn.disabled = false;
+  voiceModeBtn.classList.toggle("is-active", state.voice.mode);
+  voiceModeBtn.setAttribute("aria-pressed", state.voice.mode ? "true" : "false");
+  voiceModeBtn.title = state.voice.mode ? "Stop voice mode" : "Start voice mode";
+  voiceModeBtn.setAttribute("aria-label", voiceModeBtn.title);
+
+  if (!state.voice.mode) {
+    voiceStatusText.textContent = "Voice mode is off.";
+    return;
+  }
+  if (state.voice.speaking) {
+    voiceStatusText.textContent = "Speaking AI response...";
+    return;
+  }
+  if (state.voice.listening) {
+    voiceStatusText.textContent = state.voice.interim
+      ? `Listening: ${state.voice.interim}`
+      : "Listening... speak naturally.";
+    return;
+  }
+  if (state.isTyping) {
+    voiceStatusText.textContent = "Waiting for AI response...";
+    return;
+  }
+  voiceStatusText.textContent = "Voice mode active. Waiting for your voice.";
+}
+
+function renderPeerVoiceUi() {
+  if (!peerVoiceModeBtn || !peerVoiceStatusText) {
+    return;
+  }
+
+  if (!state.peer.voice.supported) {
+    peerVoiceModeBtn.disabled = true;
+    peerVoiceModeBtn.classList.remove("is-active");
+    peerVoiceModeBtn.setAttribute("aria-pressed", "false");
+    peerVoiceModeBtn.title = "Voice input is not supported in this browser";
+    peerVoiceModeBtn.setAttribute("aria-label", peerVoiceModeBtn.title);
+    peerVoiceStatusText.textContent = "Voice input is not supported in this browser.";
+    return;
+  }
+
+  peerVoiceModeBtn.disabled = false;
+  peerVoiceModeBtn.classList.toggle("is-active", state.peer.voice.mode);
+  peerVoiceModeBtn.setAttribute("aria-pressed", state.peer.voice.mode ? "true" : "false");
+  peerVoiceModeBtn.title = state.peer.voice.mode ? "Stop peer voice mode" : "Start peer voice mode";
+  peerVoiceModeBtn.setAttribute("aria-label", peerVoiceModeBtn.title);
+
+  if (!state.peer.voice.mode) {
+    peerVoiceStatusText.textContent = "Voice mode is off.";
+    return;
+  }
+  if (state.peer.voice.listening) {
+    peerVoiceStatusText.textContent = state.peer.voice.interim
+      ? `Listening: ${state.peer.voice.interim}`
+      : "Listening... speak naturally.";
+    return;
+  }
+  if (state.peer.voice.speaking) {
+    peerVoiceStatusText.textContent = "Submitting your voice response...";
+    return;
+  }
+  peerVoiceStatusText.textContent = "Voice mode active. Waiting for your voice.";
+}
+
+function stopVoiceListening() {
+  if (voiceRecognition && state.voice.listening) {
+    voiceRecognition.stop();
+  }
+  state.voice.listening = false;
+  renderVoiceUi();
+}
+
+function stopPeerVoiceListening() {
+  if (peerVoiceRecognition && state.peer.voice.listening) {
+    peerVoiceRecognition.stop();
+  }
+  state.peer.voice.listening = false;
+  renderPeerVoiceUi();
+}
+
+function initPeerVoiceRecognition() {
+  if (!state.peer.voice.supported || peerVoiceRecognition) {
+    return;
+  }
+
+  peerVoiceRecognition = new SpeechRecognitionAPI();
+  peerVoiceRecognition.lang = "en-US";
+  peerVoiceRecognition.interimResults = true;
+  peerVoiceRecognition.continuous = true;
+
+  peerVoiceRecognition.onstart = () => {
+    state.peer.voice.listening = true;
+    renderPeerVoiceUi();
+  };
+
+  peerVoiceRecognition.onresult = (event) => {
+    let interim = "";
+    let finalChunk = "";
+
+    for (let i = event.resultIndex; i < event.results.length; i += 1) {
+      const transcript = event.results[i][0]?.transcript?.trim() || "";
+      if (!transcript) {
+        continue;
+      }
+      if (event.results[i].isFinal) {
+        finalChunk += `${transcript} `;
+      } else {
+        interim += `${transcript} `;
+      }
+    }
+
+    if (finalChunk.trim()) {
+      state.peer.voice.pendingFinal = `${state.peer.voice.pendingFinal} ${finalChunk}`.trim();
+      if (peerVoiceSendTimer) {
+        clearTimeout(peerVoiceSendTimer);
+      }
+      peerVoiceSendTimer = window.setTimeout(() => {
+        sendPendingPeerVoiceTranscript();
+      }, 800);
+    }
+
+    state.peer.voice.interim = interim.trim();
+    const preview = `${state.peer.voice.pendingFinal} ${state.peer.voice.interim}`.trim();
+    if (preview && peerChatInput) {
+      peerChatInput.value = preview;
+    }
+    renderPeerVoiceUi();
+  };
+
+  peerVoiceRecognition.onerror = () => {
+    state.peer.voice.listening = false;
+    renderPeerVoiceUi();
+  };
+
+  peerVoiceRecognition.onend = () => {
+    state.peer.voice.listening = false;
+    renderPeerVoiceUi();
+
+    if (!state.peer.voice.mode) {
+      return;
+    }
+
+    sendPendingPeerVoiceTranscript();
+  };
+}
+
+function startPeerVoiceListening() {
+  if (!state.peer.voice.mode || !state.peer.voice.supported || state.peer.voice.listening) {
+    return;
+  }
+  initPeerVoiceRecognition();
+  if (!peerVoiceRecognition || state.peer.voice.listening) {
+    return;
+  }
+  try {
+    peerVoiceRecognition.start();
+  } catch {
+    renderPeerVoiceUi();
+  }
+}
+
+function sendPendingPeerVoiceTranscript() {
+  if (!state.peer.voice.mode) {
+    return;
+  }
+
+  const transcript = state.peer.voice.pendingFinal.trim();
+  state.peer.voice.pendingFinal = "";
+  state.peer.voice.interim = "";
+  if (!transcript) {
+    renderPeerVoiceUi();
+    return;
+  }
+
+  if (peerChatInput) {
+    peerChatInput.value = transcript;
+  }
+  if (peerChatForm) {
+    peerChatForm.requestSubmit();
+  }
+  renderPeerVoiceUi();
+}
+
+function togglePeerVoiceMode() {
+  if (!state.peer.voice.supported) {
+    renderPeerVoiceUi();
+    return;
+  }
+
+  state.peer.voice.mode = !state.peer.voice.mode;
+
+  if (!state.peer.voice.mode) {
+    state.peer.voice.pendingFinal = "";
+    state.peer.voice.interim = "";
+    if (peerVoiceSendTimer) {
+      clearTimeout(peerVoiceSendTimer);
+      peerVoiceSendTimer = null;
+    }
+    stopPeerVoiceListening();
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    state.peer.voice.speaking = false;
+    renderPeerVoiceUi();
+    return;
+  }
+
+  renderPeerVoiceUi();
+  startPeerVoiceListening();
+}
+
+function initVoiceRecognition() {
+  if (!state.voice.supported || voiceRecognition) {
+    return;
+  }
+
+  voiceRecognition = new SpeechRecognitionAPI();
+  voiceRecognition.lang = "en-US";
+  voiceRecognition.interimResults = true;
+  voiceRecognition.continuous = true;
+
+  voiceRecognition.onstart = () => {
+    state.voice.listening = true;
+    renderVoiceUi();
+  };
+
+  voiceRecognition.onresult = (event) => {
+    let interim = "";
+    let finalChunk = "";
+
+    for (let i = event.resultIndex; i < event.results.length; i += 1) {
+      const transcript = event.results[i][0]?.transcript?.trim() || "";
+      if (!transcript) {
+        continue;
+      }
+      if (event.results[i].isFinal) {
+        finalChunk += `${transcript} `;
+      } else {
+        interim += `${transcript} `;
+      }
+    }
+
+    if (finalChunk.trim()) {
+      state.voice.pendingFinal = `${state.voice.pendingFinal} ${finalChunk}`.trim();
+      if (voiceSendTimer) {
+        clearTimeout(voiceSendTimer);
+      }
+      voiceSendTimer = window.setTimeout(() => {
+        sendPendingVoiceTranscript();
+      }, 800);
+    }
+
+    state.voice.interim = interim.trim();
+    const preview = `${state.voice.pendingFinal} ${state.voice.interim}`.trim();
+    if (preview) {
+      promptInput.value = preview;
+    }
+    renderVoiceUi();
+  };
+
+  voiceRecognition.onerror = () => {
+    state.voice.listening = false;
+    renderVoiceUi();
+  };
+
+  voiceRecognition.onend = () => {
+    state.voice.listening = false;
+    renderVoiceUi();
+
+    if (!state.voice.mode) {
+      return;
+    }
+
+    sendPendingVoiceTranscript();
+
+    if (!state.voice.speaking && !state.isTyping) {
+      startVoiceListening();
+    }
+  };
+}
+
+function startVoiceListening() {
+  if (!state.voice.mode || !state.voice.supported || state.voice.speaking || state.isTyping) {
+    return;
+  }
+  initVoiceRecognition();
+  if (!voiceRecognition || state.voice.listening) {
+    return;
+  }
+  try {
+    voiceRecognition.start();
+  } catch {
+    renderVoiceUi();
+  }
+}
+
+function sendPendingVoiceTranscript() {
+  if (!state.voice.mode || state.isTyping) {
+    return;
+  }
+
+  const transcript = state.voice.pendingFinal.trim();
+  state.voice.pendingFinal = "";
+  state.voice.interim = "";
+  if (!transcript) {
+    renderVoiceUi();
+    return;
+  }
+
+  promptInput.value = transcript;
+  chatForm.requestSubmit();
+  renderVoiceUi();
+}
+
+function speakAssistantReply(text) {
+  if (!state.voice.mode || !window.speechSynthesis || !text) {
+    return;
+  }
+
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.rate = 1;
+  utterance.pitch = 1;
+
+  utterance.onstart = () => {
+    state.voice.speaking = true;
+    stopVoiceListening();
+    renderVoiceUi();
+  };
+
+  utterance.onend = () => {
+    state.voice.speaking = false;
+    renderVoiceUi();
+    startVoiceListening();
+  };
+
+  utterance.onerror = () => {
+    state.voice.speaking = false;
+    renderVoiceUi();
+    startVoiceListening();
+  };
+
+  window.speechSynthesis.speak(utterance);
+}
+
+function toggleVoiceMode() {
+  if (!state.voice.supported) {
+    renderVoiceUi();
+    return;
+  }
+
+  state.voice.mode = !state.voice.mode;
+
+  if (!state.voice.mode) {
+    state.voice.pendingFinal = "";
+    state.voice.interim = "";
+    if (voiceSendTimer) {
+      clearTimeout(voiceSendTimer);
+      voiceSendTimer = null;
+    }
+    stopVoiceListening();
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    state.voice.speaking = false;
+    renderVoiceUi();
+    return;
+  }
+
+  renderVoiceUi();
+  startVoiceListening();
+}
+
+const openSettingsBtn = document.getElementById("openSettingsBtn");
+const settingsDialog = document.getElementById("settingsDialog");
+const settingsForm = document.getElementById("settingsForm");
+const modeSelect = document.getElementById("modeSelect");
+const proxyUrlInput = document.getElementById("proxyUrlInput");
+const apiKeyInput = document.getElementById("apiKeyInput");
+
+function getLearnerName() {
+  const raw = (state.userName || "").trim();
+  return raw || "Learner";
+}
+
+function saveUserName(value) {
+  state.userName = typeof value === "string" ? value.trim() : "";
+  localStorage.setItem(USER_NAME_KEY, state.userName);
+}
+
+function hasLearnerName() {
+  return Boolean((state.userName || "").trim());
+}
+
+function setChoiceNameStatus(message) {
+  if (!choiceNameStatus) {
+    return;
+  }
+  choiceNameStatus.textContent = message;
+}
+
+function ensureLearnerNameSet() {
+  const candidate = (state.userName || choiceNameInput?.value || userNameInput?.value || "").trim();
+  if (candidate) {
+    if (candidate !== state.userName) {
+      saveUserName(candidate);
+    }
+    return true;
+  }
+
+  setChoiceNameStatus("Please set your name once before continuing.");
+  if (choiceNameInput) {
+    choiceNameInput.focus();
+    choiceNameInput.select();
+  }
+  return false;
+}
+
+function renderChoiceIdentity() {
+  const learner = (state.userName || "").trim();
+
+  if (choiceWelcomeTitle) {
+    choiceWelcomeTitle.textContent = learner ? `Hi ${learner}, choose your path` : "Choose Your Path";
+  }
+  if (choiceWelcomeSubtitle) {
+    choiceWelcomeSubtitle.textContent = learner
+      ? "Select your learning preference below."
+      : "Set your name once, then select your learning preference below.";
+  }
+
+  if (choiceNameInput && document.activeElement !== choiceNameInput) {
+    choiceNameInput.value = state.userName;
+  }
+
+  if (!choiceNameStatus) {
+    return;
+  }
+
+  if (learner) {
+    choiceNameStatus.textContent = "Name saved. This identity is used in AI practice and peer practice.";
+  } else {
+    choiceNameStatus.textContent = "This name is used for AI practice and peer practice.";
+  }
+}
+
+function renderUserNameSummary() {
+  if (selectedUserName) {
+    selectedUserName.textContent = getLearnerName();
+  }
+}
+
+function renderPage() {
+  const map = {
+    landing: pageLanding,
+    goals: pageGoals,
+    choice: pageChoice,
+    learn: pageLearn,
+    dashboard: pageDashboard,
+    peerPracticum: pagePeerPracticum,
+    scenarioBriefing: pageScenarioBriefing,
+    practice: practiceShell,
+    final: pageFinal,
+  };
+
+  Object.entries(map).forEach(([key, element]) => {
+    element.classList.toggle("is-hidden", key !== state.page);
+  });
+}
+
+function getCurrentWeakStageFocusInfo() {
+  const finalEntries = state.reflectionHistory.filter((entry) => entry.kind === "final");
+  const recent = finalEntries.slice(-8);
+  const weakMap = recent.reduce((acc, item) => {
+    (item.weakStages || []).forEach((stage) => {
+      acc[stage] = (acc[stage] || 0) + 1;
+    });
+    return acc;
+  }, {});
+
+  const sorted = Object.entries(weakMap).sort((a, b) => b[1] - a[1]);
+  const topCount = sorted[0]?.[1] || 0;
+  const tied = sorted.filter((item) => item[1] === topCount).map((item) => item[0]);
+
+  if (!sorted.length) {
+    return {
+      stage: "Introduce",
+      isTie: false,
+      hasData: false,
+    };
+  }
+
+  return {
+    stage: tied.length > 1 ? "Multiple stages" : tied[0],
+    isTie: tied.length > 1,
+    hasData: true,
+  };
+}
+
+function hasFinalHistory() {
+  return state.reflectionHistory.some((entry) => entry.kind === "final");
+}
+
+function getRecommendedStartStage() {
+  const focus = getCurrentWeakStageFocusInfo();
+  if (!hasFinalHistory()) {
+    return "Introduce";
+  }
+  return focus.isTie ? "Introduce" : focus.stage;
+}
+
+function renderChoiceSnapshot() {
+  if (!choiceWeakStage || !choiceRecentScore || !choiceCompletionRate) {
+    return;
+  }
+
+  const finalEntries = state.reflectionHistory.filter((entry) => entry.kind === "final");
+  const recent = finalEntries.slice(-5);
+  const avgRecent = recent.length
+    ? Math.round(recent.reduce((sum, item) => sum + (item.scorePercent || 0), 0) / recent.length)
+    : null;
+
+  const focus = getCurrentWeakStageFocusInfo();
+
+  const attempts = state.improvementTrack.reduce((sum, item) => sum + (item.attempts || 0), 0);
+  const completions = state.improvementTrack.reduce((sum, item) => sum + (item.completions || 0), 0);
+  const completionRate = attempts ? Math.round((completions / attempts) * 100) : 0;
+
+  const isReturning = finalEntries.length > 0;
+  if (choiceStageLabel) {
+    choiceStageLabel.textContent = isReturning ? "Most frequent weak stage" : "Start here (recommended)";
+  }
+  if (isReturning && focus.isTie) {
+    choiceStageLabel.textContent = "Current focus (tie)";
+    choiceWeakStage.textContent = "Multiple stages";
+  } else {
+    choiceWeakStage.textContent = isReturning ? focus.stage : "Introduce";
+  }
+  choiceRecentScore.textContent = avgRecent === null ? "No history yet" : `${avgRecent}%`;
+  choiceCompletionRate.textContent = `${completionRate}%`;
+
+  const scaffold = getScaffoldLevelConfig();
+  if (choiceScaffoldLevel) {
+    choiceScaffoldLevel.textContent = scaffold.label;
+  }
+  if (cycleScaffoldLevelBtn) {
+    const nextLevel = state.scaffold.level === 1 ? 2 : (state.scaffold.level === 2 ? 3 : 1);
+    cycleScaffoldLevelBtn.textContent = `Switch to Level ${nextLevel}`;
+  }
+}
+
+function buildDashboardWeakBreakdownHtml() {
+  const finalEntries = state.reflectionHistory.filter((entry) => entry.kind === "final").slice(-12);
+  const weakMap = finalEntries.reduce((acc, item) => {
+    (item.weakStages || []).forEach((stage) => {
+      acc[stage] = (acc[stage] || 0) + 1;
+    });
+    return acc;
+  }, {});
+
+  const rows = Object.entries(weakMap).sort((a, b) => b[1] - a[1]);
+  if (!rows.length) {
+    return "<p class=\"muted\">No weak-stage data yet.</p>";
+  }
+
+  return `<ul class=\"dashboard-list\">${rows
+    .map(([stage, count]) => `<li><strong>${escapeHtml(stage)}</strong>: ${count} session(s)</li>`)
+    .join("")}</ul>`;
+}
+
+function buildDashboardHistoryHtml() {
+  const items = state.reflectionHistory
+    .filter((entry) => entry.kind === "final")
+    .slice(-6)
+    .reverse();
+
+  if (!items.length) {
+    return "<p class=\"muted\">No reflection history yet.</p>";
+  }
+
+  return `<ul class=\"dashboard-list\">${items
+    .map((entry) => {
+      const date = new Date(entry.createdAt).toLocaleDateString();
+      const weak = (entry.weakStages || []).join(", ") || "-";
+      const level = getScaffoldLabel(entry.scaffoldLevel || 1);
+      return `<li><strong>${escapeHtml(date)}</strong> - Score ${entry.scorePercent || 0}% - ${escapeHtml(level)} - Focus: ${escapeHtml(weak)}</li>`;
+    })
+    .join("")}</ul>`;
+}
+
+function renderDashboardPage() {
+  const finalEntries = state.reflectionHistory.filter((entry) => entry.kind === "final");
+  const recent = finalEntries.slice(-5);
+  const avgRecent = recent.length
+    ? Math.round(recent.reduce((sum, item) => sum + (item.scorePercent || 0), 0) / recent.length)
+    : null;
+  const focus = getCurrentWeakStageFocusInfo();
+  const isReturning = finalEntries.length > 0;
+  const attempts = state.improvementTrack.reduce((sum, item) => sum + (item.attempts || 0), 0);
+  const completions = state.improvementTrack.reduce((sum, item) => sum + (item.completions || 0), 0);
+  const completionRate = attempts ? Math.round((completions / attempts) * 100) : 0;
+
+  if (dashboardIdentity) {
+    dashboardIdentity.textContent = isReturning
+      ? `${getLearnerName()}, review your details and pick your next focus stage.`
+      : `${getLearnerName()}, start with Introduce or pick any stage you prefer.`;
+  }
+  if (dashboardStageLabel) {
+    dashboardStageLabel.textContent = isReturning
+      ? (focus.isTie ? "Current focus (tie)" : "Most frequent weak stage")
+      : "Start here (recommended)";
+  }
+  if (dashboardWeakStage) {
+    dashboardWeakStage.textContent = isReturning
+      ? (focus.isTie ? "Multiple stages" : focus.stage)
+      : "Introduce";
+  }
+  if (dashboardRecentScore) {
+    dashboardRecentScore.textContent = avgRecent === null ? "No history yet" : `${avgRecent}%`;
+  }
+  if (dashboardCompletionRate) {
+    dashboardCompletionRate.textContent = `${completionRate}%`;
+  }
+  if (dashboardWeakBreakdown) {
+    dashboardWeakBreakdown.innerHTML = buildDashboardWeakBreakdownHtml();
+  }
+  if (dashboardHistory) {
+    dashboardHistory.innerHTML = buildDashboardHistoryHtml();
+  }
+}
+
+function renderDashboardTabs(tab) {
+  const activeTab = tab || "overview";
+
+  if (finalTabOverview) {
+    finalTabOverview.classList.toggle("active", activeTab === "overview");
+  }
+  if (finalTabReflection) {
+    finalTabReflection.classList.toggle("active", activeTab === "reflection");
+  }
+  if (finalTabSession) {
+    finalTabSession.classList.toggle("active", activeTab === "session");
+  }
+
+  if (finalOverviewSection) {
+    finalOverviewSection.classList.toggle("active", activeTab === "overview");
+  }
+  if (finalReflectionSection) {
+    finalReflectionSection.classList.toggle("active", activeTab === "reflection");
+  }
+  if (finalSessionSection) {
+    finalSessionSection.classList.toggle("active", activeTab === "session");
+  }
+}
+
+function goToPage(page) {
+  if (page !== "practice" && state.voice?.mode) {
+    state.voice.mode = false;
+    stopVoiceListening();
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    state.voice.speaking = false;
+    renderVoiceUi();
+  }
+
+  if (page !== "peerPracticum" && state.peer?.voice?.mode) {
+    state.peer.voice.mode = false;
+    state.peer.voice.pendingFinal = "";
+    state.peer.voice.interim = "";
+    state.peer.voice.speaking = false;
+    if (peerVoiceSendTimer) {
+      clearTimeout(peerVoiceSendTimer);
+      peerVoiceSendTimer = null;
+    }
+    stopPeerVoiceListening();
+    renderPeerVoiceUi();
+  }
+
+  state.page = page;
+  if (page === "learn") {
+    renderModule();
+  }
+  if (page === "goals") {
+    renderGoalsPage();
+  }
+  if (page === "choice") {
+    renderChoiceIdentity();
+    renderChoiceSnapshot();
+  }
+  if (page === "dashboard") {
+    renderDashboardPage();
+  }
+  if (page === "scenarioBriefing") {
+    applyScenarioScaffoldDefault(state.selectedScenarioId);
+    renderScenarioPicker();
+  }
+  if (page === "peerPracticum") {
+    renderPeerPracticum();
+  }
+  renderPage();
+  window.scrollTo(0, 0);
+}
+
+window.__ssNavigate = (targetPage) => {
+  if (targetPage === "goals") {
+    renderGoalsPage();
+    goToPage("goals");
+    return;
+  }
+
+  if (targetPage === "choice") {
+    goToPage("choice");
+    return;
+  }
+
+  if (targetPage === "learn") {
+    state.moduleIndex = 0;
+    state.moduleQuizPassed = false;
+    if (quizResultText) {
+      quizResultText.textContent = "";
+    }
+    document.querySelectorAll("input[name='q1'], input[name='q2'], input[name='q3']").forEach((input) => {
+      input.checked = false;
+    });
+    goToPage("learn");
+    return;
+  }
+
+  if (targetPage === "scenarioBriefing") {
+    if (!ensureLearnerNameSet()) {
+      return;
+    }
+    goToPage("scenarioBriefing");
+    return;
+  }
+
+  if (targetPage === "peerPracticum") {
+    if (!ensureLearnerNameSet()) {
+      return;
+    }
+    goToPage("peerPracticum");
+    return;
+  }
+
+  goToPage(targetPage);
+};
+
+function renderModule() {
+  const total = MODULE_SECTIONS.length;
+  const index = state.moduleIndex;
+  const section = MODULE_SECTIONS[index];
+  const progress = Math.round(((index + 1) / total) * 100);
+
+  moduleProgressLabel.textContent = `Module ${index + 1}/${total}`;
+  moduleProgressPercent.textContent = `${progress}%`;
+  moduleProgressBar.style.width = `${progress}%`;
+  moduleTitle.textContent = section.title;
+  moduleSummary.textContent = section.summary;
+  moduleSectionCard.innerHTML = `
+    <p>${section.example}</p>
+    <ul>${section.points.map((point) => `<li>${point}</li>`).join("")}</ul>
+  `;
+
+  modulePrevBtn.disabled = index === 0;
+  moduleNextBtn.disabled = index === total - 1;
+  moduleQuiz.classList.toggle("is-hidden", index !== total - 1);
+  startPracticeBtn.disabled = false;
+  startPracticeBtn.textContent = "Start Conversation Practice";
+}
+
+function renderBriefingPage() {
+  const scenario = getScenario();
+  const scenarioScaffoldLevel = normalizeScaffoldLevel(Number(scenario.scaffoldLevel || 1));
+  const scenarioTypeLabel = scenario.scenarioType === "hierarchical" ? "Hierarchical dynamics" : "General difficult conversation";
+
+  briefScenarioTitle.textContent = scenario.title;
+  briefScenarioDifficulty.textContent = `Challenge: ${scenario.difficulty} | Type: ${scenarioTypeLabel}`;
+  briefContext.textContent = scenario.context;
+  briefRole.innerHTML = `<span class="role-badge">Talking with: ${escapeHtml(scenario.aiRole)}</span>`;
+  if (selectedUserName) {
+    selectedUserName.textContent = getLearnerName();
+  }
+  if (briefUserNameInput) {
+    briefUserNameInput.value = state.userName;
+  }
+  if (userNameEditor) {
+    userNameEditor.classList.toggle("is-hidden", !state.nameEditorOpen);
+  }
+  if (editUserNameBtn) {
+    editUserNameBtn.textContent = state.nameEditorOpen ? "Done" : "Edit";
+    editUserNameBtn.setAttribute("aria-expanded", state.nameEditorOpen ? "true" : "false");
+  }
+  
+  // Render scenario image if available
+  const imageSection = document.getElementById("briefScenarioImageSection");
+  const imageElement = document.getElementById("briefScenarioImage");
+  if (scenario.imageUrl && imageElement && imageSection) {
+    imageElement.src = scenario.imageUrl;
+    imageElement.alt = `Visual context for: ${scenario.title}`;
+    imageSection.classList.remove("is-hidden");
+  } else if (imageSection) {
+    imageSection.classList.add("is-hidden");
+  }
+  
+  briefGoals.innerHTML = scenario.goals
+    .map((goal) => `<li>${escapeHtml(goal)}</li>`)
+    .join("");
+  
+  // Render user's selected learning goals
+  const userLearningGoalsList = document.getElementById("userLearningGoalsList");
+  const userLearningGoalsSection = document.getElementById("userLearningGoalsSection");
+  if (userLearningGoalsList && userLearningGoalsSection) {
+    if (state.userLearningGoals && state.userLearningGoals.length > 0) {
+      const goalsHtml = state.userLearningGoals
+        .map((goalId) => {
+          const goal = LEARNING_GOALS.find((g) => g.id === goalId);
+          return goal ? `<div class="user-goal-badge">${escapeHtml(goal.title)}</div>` : "";
+        })
+        .join("");
+      userLearningGoalsList.innerHTML = goalsHtml;
+      userLearningGoalsSection.classList.remove("is-hidden");
+    } else {
+      userLearningGoalsSection.classList.add("is-hidden");
+    }
+  }
+  
+  briefOpening.innerHTML = `<em>${escapeHtml(scenario.opening)}</em>`;
+
+  if (briefScaffoldHint) {
+    briefScaffoldHint.textContent = `Choose how much support you want before starting. Scenario default: ${SCAFFOLD_LEVELS[scenarioScaffoldLevel].label}.`;
+  }
+
+  if (briefScaffoldLevelGroup) {
+    briefScaffoldLevelGroup.querySelectorAll("[data-brief-scaffold]").forEach((button) => {
+      const level = normalizeScaffoldLevel(Number(button.getAttribute("data-brief-scaffold")));
+      const active = level === state.scaffold.level;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+  }
+  
+  scenarioPickerSection.classList.add("is-hidden");
+  scenarioBriefingSection.classList.remove("is-hidden");
+  pickerActions.classList.add("is-hidden");
+}
+
+function renderScenarioPicker() {
+  state.nameEditorOpen = false;
+  const previewCount = 6;
+  const orderedScenarios = getOrderedScenarios();
+  const visibleScenarios = state.scenarioPickerExpanded
+    ? orderedScenarios
+    : orderedScenarios.slice(0, previewCount);
+
+  if (userNameInput && document.activeElement !== userNameInput) {
+    userNameInput.value = state.userName;
+  }
+
+  if (scenarioNameSetup) {
+    scenarioNameSetup.classList.toggle("is-hidden", hasLearnerName());
+  }
+
+  if (briefingSubtitle) {
+    briefingSubtitle.textContent = hasLearnerName()
+      ? "Choose or create a scenario below."
+      : "Set your name once, then choose or create a scenario below.";
+  }
+
+  scenarioPickerGrid.innerHTML = visibleScenarios
+    .map((scenario) => {
+      const scenarioGoals = getScenarioGoalMatch(scenario.id);
+      const goalBadges = scenarioGoals
+        .map((goalId) => {
+          const goal = LEARNING_GOALS.find((g) => g.id === goalId);
+          return goal ? `<span class="goal-badge" title="${escapeHtml(goal.title)}">${escapeHtml(goal.title)}</span>` : "";
+        })
+        .join("");
+      const isRecommended = state.userLearningGoals.length > 0 && scenarioGoals.some((id) => state.userLearningGoals.includes(id));
+
+      return `
+      <article class="scenario-picker-card ${scenario.id === state.selectedScenarioId ? "active" : ""} ${isRecommended ? "is-recommended" : ""}" data-scenario-id="${escapeHtml(scenario.id)}">
+        ${isRecommended ? '<div class="recommended-badge">Recommended for your goals</div>' : ""}
+        <button class="picker-card-select" data-scenario-id="${escapeHtml(scenario.id)}" type="button">
+          ${scenario.imageUrl ? `<img class="picker-card-illustration" src="${escapeHtml(scenario.imageUrl)}" alt="Illustration for ${escapeHtml(scenario.title)}" />` : ""}
+          <div class="picker-card-head">
+            <strong>${escapeHtml(scenario.title)}</strong>
+            <span class="picker-card-badge">${escapeHtml(scenario.difficulty)}</span>
+          </div>
+          <p class="picker-card-text">${escapeHtml(scenario.context.substring(0, 80))}...</p>
+          <p class="picker-card-role">Partner: ${escapeHtml(scenario.aiRole)}</p>
+          ${goalBadges ? `<div class="picker-card-goals">${goalBadges}</div>` : ""}
+        </button>
+        <div class="picker-card-actions">
+          <button class="picker-card-choose-btn picker-card-select" data-scenario-id="${escapeHtml(scenario.id)}" type="button">
+            Choose this scenario
+          </button>
+          <div class="picker-card-actions-right">
+          <button class="picker-card-icon-btn" data-scenario-action="edit" data-scenario-id="${escapeHtml(scenario.id)}" type="button" aria-label="Edit scenario ${escapeHtml(scenario.title)}" title="Edit scenario">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 15.5V20h4.5L19.7 8.8a1.8 1.8 0 0 0 0-2.6l-1.9-1.9a1.8 1.8 0 0 0-2.6 0L4 15.5Zm2 1.1 9.5-9.5 1.8 1.8L7.8 18.4H6v-1.8Z" />
+            </svg>
+          </button>
+          <button class="picker-card-icon-btn danger" data-scenario-action="delete" data-scenario-id="${escapeHtml(scenario.id)}" type="button" aria-label="Delete scenario ${escapeHtml(scenario.title)}" title="Delete scenario">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8.5 4.5h7l.6 1.6H20v2h-1.4l-.8 10.4A2.3 2.3 0 0 1 15.5 20h-7a2.3 2.3 0 0 1-2.3-1.5L5.4 8.1H4v-2h3l1.5-1.6Zm1.2 1.6-.4.5h5.4l-.3-.5H9.7Zm-1 3 .7 8.7c0 .2.2.4.5.4h6.3c.3 0 .5-.2.5-.4l.7-8.7H8.7Zm2.1 1.3h1.9v5.2h-1.9v-5.2Zm3.2 0h1.9v5.2H14v-5.2Z" />
+            </svg>
+          </button>
+          </div>
+        </div>
+      </article>
+    `;
+    })
+    .join("");
+
+  if (orderedScenarios.length > previewCount) {
+    toggleScenarioPickerListBtn.classList.remove("is-hidden");
+    const hiddenCount = orderedScenarios.length - previewCount;
+    toggleScenarioPickerListBtn.textContent = state.scenarioPickerExpanded
+      ? "Show fewer scenarios"
+      : `More scenarios (${hiddenCount})`;
+  } else {
+    toggleScenarioPickerListBtn.classList.add("is-hidden");
+  }
+
+  scenarioPickerSection.classList.remove("is-hidden");
+  scenarioBriefingSection.classList.add("is-hidden");
+  pickerActions.classList.remove("is-hidden");
+}
+
+function getOrderedScenarios() {
+  const baseScenarios = state.scenarios
+    .map((scenario, index) => ({ scenario, index }))
+    .sort((a, b) => {
+      if (a.scenario.custom !== b.scenario.custom) {
+        return Number(b.scenario.custom) - Number(a.scenario.custom);
+      }
+      if (a.scenario.custom && b.scenario.custom) {
+        return (b.scenario.createdAt || 0) - (a.scenario.createdAt || 0);
+      }
+      return a.index - b.index;
+    })
+    .map((entry) => entry.scenario);
+
+  // If user has selected learning goals, reorder scenarios by goal relevance
+  if (state.userLearningGoals && state.userLearningGoals.length > 0) {
+    return getRecommendedScenariosForGoals(state.userLearningGoals);
+  }
+
+  return baseScenarios;
+}
+
+const PEER_DIRECTORY = [
+  { id: "sarah-uk", name: "Sarah", country: "United Kingdom", focus: "Listen" },
+  { id: "dimas-id", name: "Dimas", country: "Indonesia", focus: "Introduce" },
+  { id: "mei-sg", name: "Mei", country: "Singapore", focus: "Empathize" },
+  { id: "carlos-mx", name: "Carlos", country: "Mexico", focus: "Talk" },
+  { id: "amina-ke", name: "Amina", country: "Kenya", focus: "Solve" },
+  { id: "luca-it", name: "Luca", country: "Italy", focus: "Listen" },
+];
+
+function persistPeerRequests() {
+  localStorage.setItem(PEER_REQUESTS_KEY, JSON.stringify(state.peer.requests.slice(-50)));
+}
+
+function persistPeerSessionHistory() {
+  localStorage.setItem(PEER_SESSION_HISTORY_KEY, JSON.stringify(state.peer.sessionHistory.slice(-60)));
+}
+
+function renderPeerDirectory() {
+  peerUserDirectory.innerHTML = PEER_DIRECTORY.map((user) => `
+    <article class="peer-user-card">
+      <h4>${escapeHtml(user.name)}</h4>
+      <p class="muted">${escapeHtml(user.country)} • Focus: ${escapeHtml(user.focus)}</p>
+      <button type="button" data-peer-request="${escapeHtml(user.id)}">Ask to Practice</button>
+    </article>
+  `).join("");
+}
+
+function renderPeerRequests() {
+  if (!state.peer.requests.length) {
+    peerRequestList.innerHTML = "<li class=\"muted\">No requests yet. Ask someone from the directory to practice.</li>";
+    return;
+  }
+
+  peerRequestList.innerHTML = state.peer.requests
+    .slice()
+    .reverse()
+    .map((request) => {
+      const user = PEER_DIRECTORY.find((item) => item.id === request.peerId);
+      const peerName = user?.name || "Peer";
+      const status = request.status || "pending";
+      const action = status === "accepted"
+        ? `<button class=\"ghost\" type=\"button\" data-peer-start=\"${request.id}\">Start Conversation</button>`
+        : `<button class=\"ghost\" type=\"button\" data-peer-accept=\"${request.id}\">Mark Accepted</button>`;
+
+      return `<li>
+        <strong>${escapeHtml(peerName)}</strong> • ${escapeHtml(status)}
+        <div class="flow-actions">${action}</div>
+      </li>`;
+    })
+    .join("");
+}
+
+function renderPeerTabs() {
+  if (peerTabCommunity) {
+    peerTabCommunity.classList.toggle("active", state.peer.activeView === "community");
+  }
+
+  if (peerTabSession) {
+    const sessionAvailable = Boolean(state.peer.activeSession);
+    peerTabSession.classList.toggle("active", state.peer.activeView === "session" && sessionAvailable);
+    peerTabSession.disabled = !sessionAvailable;
+    peerTabSession.setAttribute("aria-disabled", (!sessionAvailable).toString());
+    peerTabSession.title = sessionAvailable ? "Open live session" : "Start a peer conversation first";
+  }
+
+  if (peerTabReflection) {
+    peerTabReflection.classList.toggle("active", state.peer.activeView === "reflection");
+  }
+
+  if (peerTabDashboard) {
+    peerTabDashboard.classList.toggle("active", state.peer.activeView === "dashboard");
+  }
+}
+
+function renderPeerDashboardTab(view) {
+  state.peer.dashboardView = view;
+
+  document.querySelectorAll("[data-peer-dashboard-view]").forEach((button) => {
+    const tabView = button.getAttribute("data-peer-dashboard-view");
+    button.classList.toggle("active", tabView === view);
+  });
+
+  if (peerDashboardSummary) {
+    peerDashboardSummary.classList.toggle("active", view === "summary");
+  }
+  if (peerDashboardTrend) {
+    peerDashboardTrend.classList.toggle("active", view === "trend");
+  }
+  if (peerDashboardSession) {
+    peerDashboardSession.classList.toggle("active", view === "session");
+  }
+}
+
+function renderPeerDashboard() {
+  if (!peerDashboardSummary || !peerDashboardTrend || !peerDashboardSession) {
+    return;
+  }
+
+  const sessions = state.peer.sessionHistory
+    .slice()
+    .sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0));
+  const totalSessions = sessions.length;
+  const totalTurns = sessions.reduce((sum, entry) => sum + Number(entry.turns || 0), 0);
+  const averageTurns = totalSessions ? Math.round((totalTurns / totalSessions) * 10) / 10 : 0;
+  const stageCompletionRate = totalSessions
+    ? Math.round((sessions.filter((entry) => (entry.completedStages || []).length > 0).length / totalSessions) * 100)
+    : 0;
+
+  const stageCounts = ILETS.reduce((acc, stage) => {
+    acc[stage] = 0;
+    return acc;
+  }, {});
+
+  sessions.forEach((entry) => {
+    (entry.completedStages || []).forEach((stage) => {
+      if (stageCounts[stage] !== undefined) {
+        stageCounts[stage] += 1;
+      }
+    });
+  });
+
+  const strongestStageEntry = Object.entries(stageCounts).sort((a, b) => b[1] - a[1])[0];
+  const strongestStage = strongestStageEntry && strongestStageEntry[1] > 0
+    ? strongestStageEntry[0]
+    : "No data yet";
+
+  peerDashboardSummary.innerHTML = `
+    <div class="peer-dashboard-grid">
+      <article class="peer-dashboard-card">
+        <p class="muted">Completed Sessions</p>
+        <strong>${totalSessions}</strong>
+      </article>
+      <article class="peer-dashboard-card">
+        <p class="muted">Average Learner Turns</p>
+        <strong>${averageTurns}</strong>
+      </article>
+      <article class="peer-dashboard-card">
+        <p class="muted">Stage Completion Rate</p>
+        <strong>${stageCompletionRate}%</strong>
+      </article>
+      <article class="peer-dashboard-card">
+        <p class="muted">Most Practiced Stage</p>
+        <strong>${escapeHtml(strongestStage)}</strong>
+      </article>
+    </div>
+  `;
+
+  peerDashboardTrend.innerHTML = `
+    <ul class="peer-trend-list">
+      ${ILETS.map((stage) => {
+    const count = stageCounts[stage] || 0;
+    const percent = totalSessions ? Math.round((count / totalSessions) * 100) : 0;
+    return `
+        <li>
+          <div class="peer-trend-row">
+            <span>${escapeHtml(stage)}</span>
+            <strong>${count} sessions</strong>
+          </div>
+          <div class="peer-trend-bar"><span style="width:${percent}%"></span></div>
+        </li>
+      `;
+  }).join("")}
+    </ul>
+  `;
+
+  if (!sessions.length) {
+    peerDashboardSession.innerHTML = "<p class=\"muted\">No completed peer sessions yet. Finish one conversation to populate analytics.</p>";
+  } else {
+    peerDashboardSession.innerHTML = sessions
+      .slice(0, 8)
+      .map((entry) => {
+        const completedStages = (entry.completedStages || []).length
+          ? entry.completedStages.join(", ")
+          : "None recorded";
+        return `
+          <article class="peer-session-item">
+            <p><strong>${escapeHtml(entry.peerName || "Peer")}</strong> • ${new Date(entry.completedAt).toLocaleString()}</p>
+            <p class="muted">Turns: ${entry.turns || 0} • Duration: ${entry.durationMin || 0} min</p>
+            <p class="muted">Stages: ${escapeHtml(completedStages)}</p>
+          </article>
+        `;
+      })
+      .join("");
+  }
+
+  renderPeerDashboardTab(state.peer.dashboardView || "summary");
+}
+
+function setPeerView(view) {
+  if (view !== "session" && state.peer.voice.mode) {
+    state.peer.voice.mode = false;
+    state.peer.voice.pendingFinal = "";
+    state.peer.voice.interim = "";
+    state.peer.voice.speaking = false;
+    if (peerVoiceSendTimer) {
+      clearTimeout(peerVoiceSendTimer);
+      peerVoiceSendTimer = null;
+    }
+    stopPeerVoiceListening();
+  }
+
+  if (view === "session" && !state.peer.activeSession) {
+    return;
+  }
+
+  state.peer.activeView = view;
+  renderPeerSession();
+}
+
+function renderPeerSession() {
+  if (!peerCommunityView || !peerSessionView || !peerFeedbackView || !peerDashboardView) {
+    return;
+  }
+
+  const session = state.peer.activeSession;
+  if (!session && state.peer.activeView === "session") {
+    state.peer.activeView = state.peer.lastSessionSummary ? "reflection" : "community";
+  }
+
+  renderPeerTabs();
+
+  peerCommunityView.classList.toggle("is-hidden", state.peer.activeView !== "community");
+  peerSessionView.classList.toggle("is-hidden", state.peer.activeView !== "session" || !session);
+  peerFeedbackView.classList.toggle("is-hidden", state.peer.activeView !== "reflection");
+  peerDashboardView.classList.toggle("is-hidden", state.peer.activeView !== "dashboard");
+
+  if (session) {
+    peerSessionTitle.textContent = `Conversation with ${session.peerName}`;
+    peerSessionMeta.textContent = `Started ${new Date(session.startedAt).toLocaleTimeString()} • Stage focus: ${session.stageFocus}`;
+
+    peerChatMessages.innerHTML = session.messages
+      .map((message) => `<article class="peer-chat-item"><small>${escapeHtml(message.author)} • ${new Date(message.timestamp).toLocaleTimeString()}</small><p>${escapeHtml(message.text)}</p></article>`)
+      .join("");
+    peerChatMessages.scrollTop = peerChatMessages.scrollHeight;
+  } else if (peerChatMessages) {
+    peerSessionTitle.textContent = "Conversation with Peer";
+    peerSessionMeta.textContent = "Select a peer from Community to start a live session.";
+    peerChatMessages.innerHTML = `
+      <article class="peer-chat-item">
+        <small>System</small>
+        <p>No active session. Choose Community to request a practice partner.</p>
+      </article>
+    `;
+  }
+
+  document.querySelectorAll("[data-peer-stage]").forEach((checkbox) => {
+    const stage = checkbox.getAttribute("data-peer-stage");
+    checkbox.checked = Boolean(state.peer.sessionChecklist[stage]);
+  });
+
+  if (document.activeElement !== peerSharedNotes) {
+    peerSharedNotes.value = state.peer.sharedNotes;
+  }
+
+  if (peerSharedNotes) {
+    peerSharedNotes.readOnly = state.peer.sharedNotesSaved;
+    peerSharedNotes.classList.toggle("peer-field-saved", state.peer.sharedNotesSaved);
+  }
+
+  if (peerSaveSharedNotesBtn) {
+    peerSaveSharedNotesBtn.disabled = state.peer.sharedNotesSaved;
+    peerSaveSharedNotesBtn.textContent = state.peer.sharedNotesSaved ? "Saved" : "Save Notes";
+  }
+
+  if (peerEditSharedNotesBtn) {
+    peerEditSharedNotesBtn.disabled = !state.peer.sharedNotesSaved;
+  }
+
+  if (peerSharedNotesStatus) {
+    if (state.peer.sharedNotesSaved && state.peer.sharedNotes) {
+      peerSharedNotesStatus.textContent = "Saved. Click Edit to update notes.";
+    } else if (state.peer.sharedNotes) {
+      peerSharedNotesStatus.textContent = "Unsaved changes.";
+    } else {
+      peerSharedNotesStatus.textContent = "Not saved yet.";
+    }
+  }
+
+  if (document.activeElement !== peerFeedbackInput) {
+    peerFeedbackInput.value = state.peer.feedbackDraft || "";
+  }
+
+  if (peerFeedbackInput) {
+    peerFeedbackInput.readOnly = state.peer.feedbackSent;
+    peerFeedbackInput.classList.toggle("peer-field-saved", state.peer.feedbackSent);
+  }
+
+  if (peerSubmitFeedbackBtn) {
+    peerSubmitFeedbackBtn.disabled = state.peer.feedbackSent;
+    peerSubmitFeedbackBtn.textContent = state.peer.feedbackSent ? "Sent" : "Send Feedback";
+  }
+
+  if (peerEditFeedbackBtn) {
+    peerEditFeedbackBtn.disabled = !state.peer.feedbackSent;
+  }
+
+  if (peerFeedbackStatus) {
+    if (state.peer.feedbackSent && state.peer.feedbackDraft) {
+      peerFeedbackStatus.textContent = "Sent. Click Edit to revise feedback.";
+    } else if (state.peer.feedbackDraft) {
+      peerFeedbackStatus.textContent = "Draft not sent yet.";
+    } else {
+      peerFeedbackStatus.textContent = "Not sent yet.";
+    }
+  }
+
+  if (peerReflectionMeta) {
+    peerReflectionMeta.textContent = state.peer.lastSessionSummary
+      ? `Most recent conversation: ${state.peer.lastSessionSummary.peerName} • ${new Date(state.peer.lastSessionSummary.completedAt).toLocaleTimeString()}`
+      : "Finish a conversation to exchange feedback and capture notes.";
+  }
+
+  if (peerReflectionSummary) {
+    peerReflectionSummary.textContent = state.peer.lastSessionSummary?.summary || "No session summary yet.";
+  }
+
+  renderPeerDashboard();
+
+  peerFeedbackList.innerHTML = state.peer.feedbackNotes
+    .slice()
+    .reverse()
+    .map((note) => `<li><strong>${escapeHtml(note.author)}:</strong> ${escapeHtml(note.text)}</li>`)
+    .join("");
+
+  renderPeerVoiceUi();
+}
+
+function startPeerSession(requestId) {
+  const request = state.peer.requests.find((item) => item.id === requestId);
+  if (!request) {
+    return;
+  }
+  const peer = PEER_DIRECTORY.find((item) => item.id === request.peerId);
+
+  state.peer.activeSession = {
+    id: `session-${Date.now()}`,
+    peerId: request.peerId,
+    peerName: peer?.name || "Peer",
+    startedAt: Date.now(),
+    stageFocus: peer?.focus || "Introduce",
+    messages: [
+      {
+        author: "System",
+        text: `Session started with ${peer?.name || "peer"}. Focus on respectful role-play and finish with mutual feedback.`,
+        timestamp: Date.now(),
+      },
+    ],
+  };
+  state.peer.sessionChecklist = {
+    Introduce: false,
+    Listen: false,
+    Empathize: false,
+    Talk: false,
+    Solve: false,
+  };
+  state.peer.sharedNotes = "";
+  state.peer.sharedNotesSaved = false;
+  state.peer.feedbackDraft = "";
+  state.peer.feedbackSent = false;
+  state.peer.feedbackNotes = [];
+  state.peer.activeView = "session";
+  state.peer.dashboardView = "summary";
+  state.peer.lastSessionSummary = null;
+  state.peer.voice.mode = false;
+  state.peer.voice.pendingFinal = "";
+  state.peer.voice.interim = "";
+  state.peer.voice.speaking = false;
+  stopPeerVoiceListening();
+  renderPeerSession();
+}
+
+function endPeerSession() {
+  if (!state.peer.activeSession) {
+    return;
+  }
+
+  const completed = Object.entries(state.peer.sessionChecklist).filter((entry) => entry[1]).map((entry) => entry[0]);
+  const learnerTurns = state.peer.activeSession.messages.filter((message) => message.author === getLearnerName()).length;
+  const durationMin = Math.max(1, Math.round((Date.now() - state.peer.activeSession.startedAt) / 60000));
+  const completedAt = Date.now();
+  const summary = `Session ended. Completed ILETS stages: ${completed.length ? completed.join(", ") : "None recorded yet"}.`;
+  state.peer.requests.unshift({
+    id: `rec-${Date.now()}`,
+    peerId: state.peer.activeSession.peerId,
+    status: "completed",
+    summary,
+    createdAt: Date.now(),
+  });
+  persistPeerRequests();
+
+  state.peer.lastSessionSummary = {
+    peerName: state.peer.activeSession.peerName,
+    summary,
+    completedAt,
+  };
+
+  state.peer.sessionHistory.push({
+    id: `peer-log-${completedAt}`,
+    peerId: state.peer.activeSession.peerId,
+    peerName: state.peer.activeSession.peerName,
+    completedAt,
+    completedStages: completed,
+    turns: learnerTurns,
+    durationMin,
+  });
+  state.peer.sessionHistory = state.peer.sessionHistory.slice(-60);
+  persistPeerSessionHistory();
+
+  state.peer.activeSession = null;
+  state.peer.activeView = "reflection";
+  state.peer.voice.mode = false;
+  state.peer.voice.pendingFinal = "";
+  state.peer.voice.interim = "";
+  state.peer.voice.speaking = false;
+  stopPeerVoiceListening();
+  renderPeerRequests();
+  renderPeerSession();
+}
+
+function renderPeerPracticum() {
+  if (!peerCommunityView || !peerSessionView || !peerFeedbackView || !peerDashboardView) {
+    return;
+  }
+
+  if (peerIdentityName) {
+    peerIdentityName.textContent = getLearnerName();
+  }
+  if (peerUserNameInput && document.activeElement !== peerUserNameInput) {
+    peerUserNameInput.value = state.userName;
+  }
+  if (peerUserNameEditor) {
+    peerUserNameEditor.classList.toggle("is-hidden", !state.peer.nameEditorOpen);
+  }
+  if (peerEditNameBtn) {
+    peerEditNameBtn.textContent = state.peer.nameEditorOpen ? "Done" : "Edit";
+    peerEditNameBtn.setAttribute("aria-expanded", state.peer.nameEditorOpen ? "true" : "false");
+  }
+  renderPeerDirectory();
+  renderPeerRequests();
+  renderPeerSession();
+}
+
+function enterPracticeCompactMode() {
+  state.leftVisible = true;
+  state.rightVisible = false;
+  state.scenarioBriefExpanded = true;
+  state.scenariosExpanded = true;
+  state.iletsExpanded = true;
+  state.rightTab = "coach";
+  state.focusMode = false;
+}
+
+function computeAnalytics() {
+  const userMessages = state.messages.filter((m) => m.role === "user").map((m) => m.content);
+  const text = userMessages.join(" ").toLowerCase();
+  const words = text.split(/\s+/).filter(Boolean);
+  const fillerTerms = ["um", "uh", "like", "you know", "actually", "just", "maybe"];
+  const fillerCount = fillerTerms.reduce((sum, term) => {
+    const regex = new RegExp(`\\b${term.replace(" ", "\\s+")}\\b`, "g");
+    const matches = text.match(regex);
+    return sum + (matches ? matches.length : 0);
+  }, 0);
+
+  const avgWords = userMessages.length ? Math.round(words.length / userMessages.length) : 0;
+  const fillerRate = words.length ? Math.round((fillerCount / words.length) * 1000) / 10 : 0;
+
+  const starters = userMessages
+    .map((msg) => msg.trim().split(/\s+/).slice(0, 2).join(" ").toLowerCase())
+    .filter(Boolean);
+  const starterMap = starters.reduce((acc, item) => {
+    acc[item] = (acc[item] || 0) + 1;
+    return acc;
+  }, {});
+  const repeatedStarter = Object.entries(starterMap).sort((a, b) => b[1] - a[1])[0];
+
+  return {
+    totalTurns: userMessages.length,
+    avgWords,
+    fillerCount,
+    fillerRate,
+    repeatedStarter: repeatedStarter ? `${repeatedStarter[0]} (${repeatedStarter[1]}x)` : "None",
+    stageCoverage: Math.round(((state.stageIndex + 1) / ILETS.length) * 100),
+  };
+}
+
+function getScenario() {
+  return state.scenarios.find((s) => s.id === state.selectedScenarioId) || state.scenarios[0];
+}
+
+function escapeHtml(unsafe) {
+  return unsafe
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function saveSettings() {
+  localStorage.setItem("sandbox.mode", state.settings.mode);
+  localStorage.setItem("sandbox.proxyUrl", state.settings.proxyUrl);
+  localStorage.setItem("sandbox.apiKey", state.settings.apiKey);
+  localStorage.setItem("sandbox.model", state.settings.model);
+}
+
+function renderScenarios() {
+  const selectedScenario = getScenario();
+  const previewCount = 3;
+  const orderedScenarios = getOrderedScenarios();
+
+  const previewScenarios = state.scenarioListExpanded
+    ? orderedScenarios
+    : orderedScenarios.slice(0, previewCount);
+  const previewIds = new Set(previewScenarios.map((scenario) => scenario.id));
+  const visibleScenarios = state.scenarioListExpanded || previewIds.has(selectedScenario.id)
+    ? previewScenarios
+    : [...previewScenarios, selectedScenario];
+
+  scenarioList.innerHTML = visibleScenarios.map(
+    (scenario) => `
+      <button class="scenario-btn ${scenario.id === state.selectedScenarioId ? "active" : ""}" data-scenario-id="${scenario.id}" type="button">
+        <strong>${escapeHtml(scenario.title)}</strong>
+        <small>${escapeHtml(scenario.difficulty)}</small>
+      </button>
+    `
+  ).join("");
+
+  if (state.scenarios.length > previewCount) {
+    const toggleLabel = state.scenarioListExpanded ? "Show fewer scenarios" : `More scenarios (${state.scenarios.length - previewCount})`;
+    scenarioList.insertAdjacentHTML(
+      "beforeend",
+      `<button class="scenario-list-more ghost" type="button" data-scenario-list-toggle="true">${toggleLabel}</button>`
+    );
+  }
+}
+
+function renderStages() {
+  stageList.innerHTML = ILETS.map((stage, index) => {
+    const done = index < state.stageIndex;
+    const active = index === state.stageIndex;
+    const classes = ["stage-item", done ? "done" : "", active ? "active" : ""].join(" ").trim();
+    return `<li><button class="${classes}" data-stage-index="${index}" type="button">${index + 1}. ${stage}</button></li>`;
+  }).join("");
+
+  const helpText = {
+    Introduce: "Introduce: Open with purpose and respectful intent.",
+    Listen: "Listen: Ask open questions and invite their perspective.",
+    Empathize: "Empathize: Name pressure or emotion without losing your point.",
+    Talk: "Talk: State behavior, impact, and risk with concrete examples.",
+    Solve: "Solve: End with action, owner, and follow-up time.",
+  };
+  if (stageHelp) {
+    stageHelp.textContent = helpText[ILETS[state.stageIndex]];
+  }
+  if (stageProgress) {
+    stageProgress.textContent = `Progress: ${state.stageIndex + 1} of ${ILETS.length} stages`;
+  }
+}
+
+function renderScenariosVisibility() {
+  scenariosBody.classList.toggle("is-collapsed", !state.scenariosExpanded);
+  toggleScenariosBtn.textContent = state.scenariosExpanded ? "Hide" : "Show";
+}
+
+function renderIletsVisibility() {
+  iletsBody.classList.toggle("is-collapsed", !state.iletsExpanded);
+  toggleIletsBtn.textContent = state.iletsExpanded ? "Hide" : "Show";
+}
+
+function renderPracticeStrip() {
+  const currentStage = ILETS[state.stageIndex];
+  const scenario = getScenario();
+  const guide = scenario.practice?.[currentStage] || STAGE_GUIDE[currentStage];
+  const scaffold = getScaffoldLevelConfig();
+  const hintsAlwaysVisible = state.scaffold.level === 1;
+  const hintsDisabled = state.scaffold.level === 3;
+  const showHints = hintsAlwaysVisible || state.scaffold.hintsVisible;
+
+  stageObjectiveTitle.textContent = currentStage;
+  stageObjectiveText.textContent = guide.objective;
+
+  if (stageStartersMeta) {
+    stageStartersMeta.textContent = hintsDisabled
+      ? "Level 3 minimizes support. Continue without sentence starters."
+      : (showHints
+        ? scaffold.summary
+        : "Hints are hidden. Try your own opening first, then use Show Hints if needed.");
+  }
+
+  if (practiceScaffoldChip) {
+    const chipDetail = state.scaffold.level === 1
+      ? "Always-on hints"
+      : (state.scaffold.level === 2
+        ? (showHints ? "Hints revealed after pause" : "Hints hidden until request or pause")
+        : "Independent mode");
+    practiceScaffoldChip.textContent = `Active Scaffold: ${scaffold.label} (${chipDetail})`;
+  }
+
+  if (toggleStartersBtn) {
+    toggleStartersBtn.disabled = hintsAlwaysVisible || hintsDisabled;
+    toggleStartersBtn.textContent = hintsAlwaysVisible
+      ? "Hints Always On"
+      : (hintsDisabled ? "Hints Off in Level 3" : (showHints ? "Hide Hints" : "Show Hints"));
+    toggleStartersBtn.setAttribute("aria-pressed", showHints ? "true" : "false");
+  }
+
+  if (showHints && !hintsDisabled) {
+    const starters = guide.starters;
+    const hasTemplates = starters.length > 0 && typeof starters[0] === "object" && starters[0].style;
+    
+    if (hasTemplates) {
+      // Render template tabs (deferential, balanced, direct)
+      stageStarters.innerHTML = starters
+        .map(
+          (template) =>
+            `<div class="starter-template" data-template-style="${escapeHtml(template.style || "")}">
+              <span class="template-style-badge">${escapeHtml(template.style || "").charAt(0).toUpperCase() + (template.style || "").slice(1)}</span>
+              <button class="starter-chip" type="button" data-starter="${escapeHtml(template.text)}">${escapeHtml(template.text)}</button>
+            </div>`
+        )
+        .join("");
+    } else {
+      // Fallback to simple string starters
+      stageStarters.innerHTML = starters
+        .map(
+          (starter) =>
+            `<button class="starter-chip" type="button" data-starter="${escapeHtml(starter)}">${escapeHtml(starter)}</button>`
+        )
+        .join("");
+    }
+  } else {
+    stageStarters.innerHTML = "<p class=\"muted starter-empty\">Hints are hidden for this level.</p>";
+  }
+
+  nextStageBtn.disabled = state.stageIndex === ILETS.length - 1;
+  nextStageBtn.textContent =
+    state.stageIndex === ILETS.length - 1 ? "Final Stage Reached" : "Mark Stage Done";
+}
+
+function renderCoachNote() {
+  coachNote.textContent = state.coachNote || "Type a message and I’ll give you a quick note here.";
+  const current = (state.coachNote || "").trim();
+  const uniqueHistory = [...new Set((state.coachNoteHistory || []).map((item) => item.trim()).filter(Boolean))]
+    .filter((item) => item !== current);
+  const items = uniqueHistory.length
+    ? uniqueHistory
+    : [
+        "Keep the opening short and purposeful.",
+        "Use a question after you state the issue.",
+        "Move from concern to next step quickly.",
+      ];
+  coachNoteList.innerHTML = items.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+}
+
+function renderLiveFeedbackPanel() {
+  if (!feedbackPanel || state.page !== "practice") {
+    return;
+  }
+
+  const turns = getUserTurnCount();
+  if (turns === 0) {
+    feedbackPanel.innerHTML = `
+      <h3>Gap Analysis</h3>
+      <p class="muted">No values yet. Send your first response to see live progress here, then click Finish + Feedback for full session review.</p>
+    `;
+    return;
+  }
+
+  const scores = getStageScoresFromMessages(state.messages);
+  const weak = scores.filter((item) => item.score === 0).map((item) => item.stage);
+  const strong = scores.filter((item) => item.score === 2).map((item) => item.stage);
+  const stageCoverage = Math.round(((state.stageIndex + 1) / ILETS.length) * 100);
+
+  feedbackPanel.innerHTML = `
+    <h3>Gap Analysis (Live)</h3>
+    <p class="analytics-metric">Turns: ${turns} | Stage coverage: ${stageCoverage}%</p>
+    <p class="muted">Current stage: ${escapeHtml(ILETS[state.stageIndex])}</p>
+    <ul>
+      <li><strong>Strength signal:</strong> ${escapeHtml(strong.length ? strong.join(", ") : "Building baseline")}</li>
+      <li><strong>Focus now:</strong> ${escapeHtml(weak.length ? weak.join(", ") : "Move to next stage with clearer evidence")}</li>
+    </ul>
+    <p class="muted">Finish + Feedback gives full coaching, reflection, and analytics.</p>
+  `;
+}
+
+function renderRightPanel() {
+  const tabs = rightTabs.querySelectorAll(".right-tab");
+  tabs.forEach((tab) => {
+    const isActive = tab.getAttribute("data-right-tab") === state.rightTab;
+    tab.classList.toggle("active", isActive);
+  });
+
+  sectionCoach.classList.toggle("active", state.rightTab === "coach");
+  sectionFeedback.classList.toggle("active", state.rightTab === "feedback");
+  sectionPractice.classList.toggle("active", state.rightTab === "practice");
+}
+
+function renderFocusMode() {
+  document.body.classList.toggle("focus-mode", state.focusMode);
+  toggleFocusBtn.classList.toggle("is-active", state.focusMode);
+  toggleFocusBtn.title = state.focusMode ? "Exit focus mode" : "Enter focus mode";
+  toggleFocusBtn.setAttribute("aria-label", toggleFocusBtn.title);
+}
+
+function renderColumnVisibility() {
+  document.body.classList.toggle("hide-left", !state.leftVisible);
+  document.body.classList.toggle("hide-right", !state.rightVisible);
+  toggleLeftColumnBtn.classList.toggle("is-active", !state.leftVisible);
+  toggleRightColumnBtn.classList.toggle("is-active", !state.rightVisible);
+  toggleLeftColumnBtn.title = state.leftVisible ? "Collapse left panel" : "Expand left panel";
+  toggleRightColumnBtn.title = state.rightVisible ? "Collapse right panel" : "Expand right panel";
+  toggleLeftColumnBtn.setAttribute("aria-label", toggleLeftColumnBtn.title);
+  toggleRightColumnBtn.setAttribute("aria-label", toggleRightColumnBtn.title);
+  toggleLeftColumnBtn.setAttribute("aria-pressed", (!state.leftVisible).toString());
+  toggleRightColumnBtn.setAttribute("aria-pressed", (!state.rightVisible).toString());
+}
+
+function renderChat() {
+  const typingHtml = state.isTyping
+    ? '<article class="message assistant">Thinking through your situation...</article>'
+    : "";
+
+  chatMessages.innerHTML = state.messages
+    .map(
+      (msg) =>
+        `<article class="message ${msg.role === "user" ? "user" : "assistant"}">${escapeHtml(msg.content)}</article>`
+    )
+    .join("") + typingHtml;
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function renderHeader() {
+  const scenario = getScenario();
+  const scaffold = getScaffoldLevelConfig();
+  scenarioTitle.textContent = scenario.title;
+  scenarioContext.textContent = "Review the brief below, then start your first response.";
+  roleBadge.textContent = `AI Role: ${scenario.aiRole}`;
+  practiceIdentity.textContent = `Practicing as: ${getLearnerName()}`;
+  if (practiceScaffoldMenuBtn) {
+    practiceScaffoldMenuBtn.innerHTML = `
+      <span class="scaffold-menu-title">Scaffold Level</span>
+      <span class="scaffold-menu-current">${escapeHtml(scaffold.label)}</span>
+      <span class="scaffold-menu-change">Change</span>
+      <span class="scaffold-menu-caret" aria-hidden="true">▾</span>
+    `;
+    practiceScaffoldMenuBtn.title = "Change scaffold level";
+    practiceScaffoldMenuBtn.setAttribute("aria-label", `Change scaffold level. Current ${scaffold.label}`);
+  }
+
+  if (practiceScaffoldMenu) {
+    practiceScaffoldMenu.querySelectorAll("[data-practice-scaffold]").forEach((option) => {
+      const level = normalizeScaffoldLevel(Number(option.getAttribute("data-practice-scaffold")));
+      const baseLabel = option.getAttribute("data-base-label") || option.textContent?.replace(/^\u2713\s*/, "") || "";
+      option.setAttribute("data-base-label", baseLabel);
+      const active = level === state.scaffold.level;
+      option.classList.toggle("active", active);
+      option.textContent = active ? `✓ ${baseLabel}` : baseLabel;
+    });
+  }
+}
+
+function setPracticeScaffoldMenuOpen(open) {
+  if (!practiceScaffoldMenu || !practiceScaffoldMenuBtn) {
+    return;
+  }
+  practiceScaffoldMenu.classList.toggle("is-hidden", !open);
+  practiceScaffoldMenuBtn.setAttribute("aria-expanded", open ? "true" : "false");
+}
+
+function renderBrief() {
+  if (!scenarioBriefContent) {
+    return;
+  }
+  const scenario = getScenario();
+
+  scenarioBriefContent.innerHTML = `
+    <section class="briefing-section">
+      <h4 class="briefing-label">Your Situation</h4>
+      <p class="briefing-text">${escapeHtml(scenario.context)}</p>
+    </section>
+    <section class="briefing-section">
+      <h4 class="briefing-label">Your Role</h4>
+      <p class="briefing-role"><span class="role-badge">Talking with: ${escapeHtml(scenario.aiRole)}</span></p>
+    </section>
+    <section class="briefing-section">
+      <h4 class="briefing-label">What You're Aiming For</h4>
+      <ul class="briefing-goals">${scenario.goals.map((goal) => `<li>${escapeHtml(goal)}</li>`).join("")}</ul>
+    </section>
+  `;
+}
+
+function renderScenarioBriefVisibility() {
+  if (scenarioBriefBody) {
+    scenarioBriefBody.classList.toggle("is-collapsed", !state.scenarioBriefExpanded);
+  }
+  if (toggleScenarioBriefBtn) {
+    toggleScenarioBriefBtn.textContent = state.scenarioBriefExpanded ? "Hide Details" : "Show Details";
+  }
+}
+
+function openScenarioBuilderForCreate() {
+  state.editingScenarioId = null;
+  scenarioBuilderForm.reset();
+  builderDifficulty.value = "Medium tension";
+  if (builderScaffoldLevel) {
+    builderScaffoldLevel.value = "1";
+  }
+  createScenarioBtn.textContent = "Create Scenario";
+  scenarioBuilderDialog.showModal();
+}
+
+function openScenarioBuilderForEdit(scenarioId) {
+  const scenario = state.scenarios.find((item) => item.id === scenarioId);
+  if (!scenario) {
+    return;
+  }
+
+  state.editingScenarioId = scenarioId;
+  builderTitle.value = scenario.title;
+  builderRole.value = scenario.aiRole;
+  builderDifficulty.value = scenario.difficulty;
+  builderContext.value = scenario.context;
+  builderGoals.value = scenario.goals.join("\n");
+  builderOpening.value = scenario.opening;
+  if (builderScaffoldLevel) {
+    builderScaffoldLevel.value = String(normalizeScaffoldLevel(Number(scenario.scaffoldLevel || 1)));
+  }
+  createScenarioBtn.textContent = "Save Changes";
+  scenarioBuilderDialog.showModal();
+}
+
+function deleteCustomScenario(scenarioId) {
+  const scenario = state.scenarios.find((item) => item.id === scenarioId);
+  if (!scenario) {
+    return;
+  }
+
+  if (state.scenarios.length <= 1) {
+    window.alert("At least one scenario must remain.");
+    return;
+  }
+
+  const confirmDelete = window.confirm(`Delete scenario \"${scenario.title}\"?`);
+  if (!confirmDelete) {
+    return;
+  }
+
+  state.scenarios = state.scenarios.filter((item) => item.id !== scenarioId);
+  persistCustomScenarios();
+  persistScenarioOverrides();
+  persistHiddenScenarioIds();
+
+  if (state.selectedScenarioId === scenarioId) {
+    state.selectedScenarioId = getOrderedScenarios()[0]?.id || DEFAULT_SCENARIOS[0].id;
+  }
+
+  render();
+  if (state.page === "scenarioBriefing") {
+    renderScenarioPicker();
+  }
+}
+
+function persistScenarioState() {
+  persistCustomScenarios();
+  persistScenarioOverrides();
+  persistHiddenScenarioIds();
+}
+
+function renderTips() {
+  tipsContent.classList.toggle("is-collapsed", !state.tipsExpanded);
+  toggleTipsBtn.textContent = state.tipsExpanded ? "Hide Coaching Tips" : "Show Coaching Tips";
+  toggleTipsBtn.setAttribute("aria-expanded", state.tipsExpanded ? "true" : "false");
+
+  const stageDefaults = {
+    Introduce: "Start with a clear purpose and respectful intent.",
+    Listen: "Use one open question and pause for their perspective.",
+    Empathize: "Name emotion or pressure without losing your point.",
+    Talk: "Describe behavior and impact with one concrete example.",
+    Solve: "Close with action, owner, and follow-up timeline.",
+  };
+
+  const currentHint = state.latestHint || stageDefaults[ILETS[state.stageIndex]];
+  tipsLead.textContent = `Current tip (${ILETS[state.stageIndex]}): ${currentHint}`;
+
+  const tips = state.hintHistory?.length ? state.hintHistory : Object.values(stageDefaults);
+  tipsList.innerHTML = tips.map((tip) => `<li>${escapeHtml(tip)}</li>`).join("");
+}
+
+function renderGoalsPage() {
+  // Clear previous state
+  goalsGrid.innerHTML = "";
+  
+  // Create checkboxes for each learning goal
+  LEARNING_GOALS.forEach((goal) => {
+    const isChecked = state.userLearningGoals.includes(goal.id);
+    const goalCheckbox = document.createElement("label");
+    goalCheckbox.className = "goal-checkbox";
+    goalCheckbox.setAttribute("data-goal-id", goal.id);
+    
+    goalCheckbox.innerHTML = `
+      <input type="checkbox" value="${goal.id}" ${isChecked ? "checked" : ""} />
+      <div class="goal-checkbox-content">
+        <strong>${escapeHtml(goal.title)}</strong>
+        <p class="muted">${escapeHtml(goal.description)}</p>
+      </div>
+    `;
+    
+    const checkbox = goalCheckbox.querySelector("input");
+    checkbox.addEventListener("change", (e) => {
+      if (e.target.checked) {
+        if (!state.userLearningGoals.includes(goal.id)) {
+          state.userLearningGoals.push(goal.id);
+        }
+      } else {
+        state.userLearningGoals = state.userLearningGoals.filter((id) => id !== goal.id);
+      }
+      localStorage.setItem("sandbox.userLearningGoals", JSON.stringify(state.userLearningGoals));
+      updateGoalsPageState();
+    });
+    
+    goalsGrid.appendChild(goalCheckbox);
+  });
+  
+  updateGoalsPageState();
+}
+
+function updateGoalsPageState() {
+  // Enable "Continue" button only if 1-3 goals are selected
+  const goalsSelected = state.userLearningGoals.length;
+  goalsNextBtn.disabled = goalsSelected === 0 || goalsSelected > 3;
+  
+  if (goalsSelected === 1) {
+    goalsNextBtn.textContent = "Continue";
+  } else if (goalsSelected === 2 || goalsSelected === 3) {
+    goalsNextBtn.textContent = `Continue (${goalsSelected} goals)`;
+  } else if (goalsSelected === 0) {
+    goalsNextBtn.textContent = "Select at least 1 goal";
+  } else {
+    goalsNextBtn.textContent = "Select up to 3 goals";
+  }
+}
+
+function getScenarioGoalMatch(scenarioId) {
+  // Returns which learning goals this scenario addresses
+  const matchedGoals = LEARNING_GOALS.filter((goal) =>
+    goal.scenarios.includes(scenarioId)
+  ).map((goal) => goal.id);
+  return matchedGoals;
+}
+
+function getRecommendedScenariosForGoals(goalIds) {
+  // Returns scenarios that match the selected learning goals, sorted by relevance
+  if (!goalIds || goalIds.length === 0) {
+    return state.scenarios;
+  }
+
+  // Score each scenario based on how many selected goals it addresses
+  const scored = state.scenarios.map((scenario) => {
+    const scenarioGoals = getScenarioGoalMatch(scenario.id);
+    const matchCount = scenarioGoals.filter((goal) => goalIds.includes(goal)).length;
+    return { scenario, matchCount };
+  });
+
+  // Sort by match count (descending), then by original order
+  return scored.sort((a, b) => b.matchCount - a.matchCount).map((item) => item.scenario);
+}
+
+function render() {
+  renderScenarios();
+  renderScenariosVisibility();
+  renderStages();
+  renderIletsVisibility();
+  renderHeader();
+  renderBrief();
+  renderScenarioBriefVisibility();
+  renderPracticeStrip();
+  renderCoachNote();
+  renderInMomentReflectionCard();
+  renderRightPanel();
+  renderLiveFeedbackPanel();
+  renderFocusMode();
+  renderColumnVisibility();
+  renderTips();
+  renderChat();
+}
+
+function setPending(isPending) {
+  sendBtn.disabled = isPending;
+  sendBtn.setAttribute("aria-busy", isPending ? "true" : "false");
+  promptInput.disabled = isPending;
+  state.isTyping = isPending;
+  sendBtn.title = isPending ? "Thinking..." : "Send message";
+  sendBtn.setAttribute("aria-label", sendBtn.title);
+  renderChat();
+  renderVoiceUi();
+}
+
+function openSessionIntro() {
+  const scenario = getScenario();
+  state.scaffold.hintsVisible = state.scaffold.level === 1;
+  state.rightTab = "practice";
+  state.briefTab = "scenario";
+  state.messages = [
+    {
+      role: "assistant",
+      content: personalizeReply(scenario.opening),
+    },
+  ];
+  state.stageIndex = 0;
+  state.latestHint = "";
+  state.hintHistory = [];
+  state.inMomentPrompt = null;
+  state.inMomentPromptAtTurn = 0;
+  state.inMomentSubmitting = false;
+  state.finalReflectionSubmitting = false;
+  state.finalReflectionFeedback = "";
+  state.activeReflectionPrompts = [];
+  promptInput.placeholder = "Respond using Introduce stage...";
+  feedbackPanel.innerHTML = `
+    <h3>Gap Analysis</h3>
+    <p class="muted">Session reset. Practice each ILETS stage, then click Finish + Feedback.</p>
+  `;
+  if (state.scaffold.level === 2) {
+    state.coachNote = "Level 2 active: start independently. If you pause for 10 seconds, support hints will appear.";
+    pushCoachNoteHistory("Level 2: independent start enabled.");
+  } else if (state.scaffold.level === 3) {
+    state.coachNote = "Level 3 active: independent mode. Apply ILETS without sentence starters.";
+    pushCoachNoteHistory("Level 3: independent practice mode enabled.");
+  }
+  armScaffoldPauseTimer();
+}
+
+function setScaffoldLevel(level) {
+  const normalized = normalizeScaffoldLevel(level);
+  state.scaffold.level = normalized;
+  state.scaffold.hintsVisible = normalized === 1;
+  state.scaffold.lastScenarioAppliedId = state.selectedScenarioId;
+  persistScaffoldLevel();
+  setPracticeScaffoldMenuOpen(false);
+  if (state.page === "practice") {
+    if (normalized === 2) {
+      armScaffoldPauseTimer();
+    } else {
+      clearScaffoldPauseTimer();
+    }
+  }
+}
+
+function applyScenarioScaffoldDefault(scenarioId) {
+  const scenario = state.scenarios.find((item) => item.id === scenarioId);
+  if (!scenario) {
+    return;
+  }
+  const scenarioLevel = normalizeScaffoldLevel(Number(scenario.scaffoldLevel || 1));
+  if (state.scaffold.lastScenarioAppliedId === scenario.id) {
+    return;
+  }
+  setScaffoldLevel(scenarioLevel);
+}
+
+function messageShowsStageProgress(text, stageName) {
+  const value = text.toLowerCase();
+  const checks = {
+    Introduce: ["i want to discuss", "can we talk", "thank you for meeting", "my goal"],
+    Listen: ["can you share", "help me understand", "what happened", "?"],
+    Empathize: ["i understand", "i hear", "that sounds", "i appreciate", "it makes sense"],
+    Talk: ["i noticed", "impact", "concern", "risk", "deadline", "evidence"],
+    Solve: ["next step", "plan", "agree", "action", "follow up", "by"],
+  };
+
+  return checks[stageName].some((needle) => value.includes(needle));
+}
+
+function advanceStageFromUserMessage(message) {
+  const current = ILETS[state.stageIndex];
+  if (messageShowsStageProgress(message, current) && state.stageIndex < ILETS.length - 1) {
+    state.stageIndex += 1;
+    promptInput.placeholder = `Respond using ${ILETS[state.stageIndex]} stage...`;
+    renderPracticeStrip();
+  }
+}
+
+function buildRoleplayPrompt() {
+  const scenario = getScenario();
+  return [
+    "You are a roleplay partner in Social Sandbox, a difficult conversations lab.",
+    `Scenario: ${scenario.title}`,
+    `Context: ${scenario.context}`,
+    `You are speaking as: ${scenario.aiRole}`,
+    `Learner name: ${getLearnerName()}`,
+    `Current user stage is: ${ILETS[state.stageIndex]}`,
+    "Rules:",
+    "- Respond naturally in 2-4 sentences.",
+    "- Do not prepend speaker labels like 'Senior Manager:' or names.",
+    "- Keep realistic tension but avoid hostility.",
+    "- Respond directly to the user’s last point, not with the same question each turn.",
+    "- Vary the opening sentence so replies do not feel repetitive.",
+    "- If the user is brief, acknowledge them and ask for one specific detail.",
+    "- Mention the learner by name naturally at least once every 1-2 turns.",
+    "- Add one coaching hint line prefixed with 'Coach Hint:' aligned with current ILETS stage.",
+    "- Keep the coaching hint short and actionable.",
+  ].join("\n");
+}
+
+function withTimeout(promise, timeoutMs) {
+  let timeoutId;
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutId = window.setTimeout(() => {
+      reject(new Error("Timed out waiting for AI reply."));
+    }, timeoutMs);
+  });
+
+  return Promise.race([promise, timeoutPromise]).finally(() => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+  });
+}
+
+function personalizeReply(message) {
+  const learner = getLearnerName();
+  if (learner === "Learner") {
+    return message;
+  }
+  if (message.toLowerCase().includes(learner.toLowerCase())) {
+    return message;
+  }
+  return `${learner}, ${message}`;
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function parseAssistantOutput(rawText) {
+  const scenario = getScenario();
+  const lines = rawText.split("\n").map((line) => line.trim()).filter(Boolean);
+
+  let hint = "";
+  const messageLines = [];
+
+  lines.forEach((line) => {
+    if (/^coach hint\s*:/i.test(line)) {
+      hint = line.replace(/^coach hint\s*:/i, "").trim();
+      return;
+    }
+    messageLines.push(line);
+  });
+
+  let message = messageLines.join("\n").trim();
+  message = message.replace(new RegExp(`^${escapeRegExp(scenario.aiRole)}\s*[:\-]\s*`, "i"), "");
+
+  return {
+    message: message || "Thanks for sharing that. Can you tell me a bit more so we can solve it together?",
+    hint,
+  };
+}
+
+async function callProxyAPI(payload) {
+  const res = await fetch(state.settings.proxyUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Proxy error ${res.status}: ${text || "Unknown error"}`);
+  }
+  const data = await res.json();
+  if (!data.reply) {
+    throw new Error("Proxy response missing reply field");
+  }
+  return data.reply;
+}
+
+async function callOpenAI(messages, model = null) {
+  if (!state.settings.apiKey) {
+    throw new Error("OpenAI API key is empty. Add it in Settings.");
+  }
+
+  const modelToUse = model || state.settings.model || "gpt-4";
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${state.settings.apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: modelToUse,
+      messages: messages,
+      temperature: 0.7,
+      max_tokens: 500,
+    }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`OpenAI error ${res.status}: ${text || "Unknown error"}`);
+  }
+
+  const data = await res.json();
+  const content = data.choices?.[0]?.message?.content;
+  if (content && typeof content === "string" && content.trim()) {
+    return content.trim();
+  }
+  throw new Error("No text output found in OpenAI response");
+}
+
+async function generateCoachingFeedback(messages) {
+  // Analyze conversation to identify strengths and growth areas
+  const systemPrompt = {
+    role: "system",
+    content: `You are an expert coach analyzing a difficult conversation practice session. 
+Based on the conversation history, identify:
+1. One clear STRENGTH the learner demonstrated
+2. One clear GROWTH AREA the learner should focus on next
+
+Format your response exactly as:
+STRENGTH: [one sentence about what they did well]
+GROWTH AREA: [one sentence about what to improve]
+
+Be specific to the actual conversation content.`,
+  };
+
+  const conversationSummary = {
+    role: "user",
+    content: `Please analyze this conversation:\n\n${messages.map((m) => `${m.role.toUpperCase()}: ${m.content}`).join("\n\n")}`,
+  };
+
+  try {
+    const feedback = await callOpenAI([systemPrompt, conversationSummary], "gpt-4");
+    return feedback;
+  } catch (error) {
+    console.warn("Coach feedback generation failed:", error);
+    return "Good practice session. Keep practicing to build confidence.";
+  }
+}
+
+async function generateReflectionAdaptiveFeedback(reflectionAnswers, draftHistory, weakStages) {
+  // Generate adaptive feedback based on reflection text, draft history, and weak stages
+  const systemPrompt = {
+    role: "system",
+    content: `You are an adaptive learning coach. Based on a learner's reflection responses, previous drafts, and their weak ILETS stages (Introduce, Listen, Empathize, Talk, Solve), provide personalized feedback.
+
+Generate 2-3 sentences of actionable feedback that:
+1. Acknowledge what they shared
+2. Connect their reflection to their weak stage
+3. Suggest one concrete next practice focus
+
+Be warm and encouraging while being specific.`,
+  };
+
+  const reflectionContext = {
+    role: "user",
+    content: `Learner's reflection answers:
+${reflectionAnswers.map((a, i) => `Q${i + 1}: ${a}`).join("\n")}
+
+Weak stages to improve: ${weakStages.join(", ")}
+
+${draftHistory && draftHistory.length > 1 ? `Previous draft attempts: ${draftHistory.length}` : ""}
+
+Please provide adaptive feedback.`,
+  };
+
+  try {
+    const feedback = await callOpenAI([systemPrompt, reflectionContext], "gpt-4");
+    return feedback;
+  } catch (error) {
+    console.warn("Reflection feedback generation failed:", error);
+    return "Great reflection work. Focus on applying these insights in your next practice session.";
+  }
+}
+
+async function generateAnalyticsSummary(messages, scenarioTitle) {
+  // Generate analytics overview and speech clarity insights
+  const userMessages = messages.filter((m) => m.role === "user").map((m) => m.content);
+  const conversationText = userMessages.join(" ");
+
+  const systemPrompt = {
+    role: "system",
+    content: `You are a communication analytics expert. Analyze the conversation and provide:
+1. Speech Clarity insights (filler words, repetition patterns)
+2. Analytics Overview (conversation style, effectiveness)
+
+Format as:
+CLARITY_SCORE: [0-100 number]
+FILLER_WORDS: [estimated count]
+REPEATED_OPENER: [most common phrase or word]
+OVERVIEW: [1-2 sentences about overall communication effectiveness]
+
+Be analytical and constructive.`,
+  };
+
+  const analyticsQuery = {
+    role: "user",
+    content: `Analyze this conversation from scenario "${scenarioTitle}":
+
+${userMessages.map((m, i) => `Message ${i + 1}: ${m}`).join("\n\n")}`,
+  };
+
+  try {
+    const analysis = await callOpenAI([systemPrompt, analyticsQuery], "gpt-4");
+    return analysis;
+  } catch (error) {
+    console.warn("Analytics generation failed:", error);
+    return "Clarity Score: 75\nFiller Words: 3\nRepeated Opener: [analyzing...]\nOverview: Good conversation flow.";
+  }
+}
+
+function localFallbackReply(userText) {
+  const stage = ILETS[state.stageIndex];
+  const text = userText.toLowerCase();
+  const scenario = getScenario();
+  const shortInput = userText.trim().length < 10;
+
+  if (text === "hi" || text === "hello" || text === "hey") {
+    return {
+      message: "Hi, thanks for starting this conversation. What is the most important issue you want to raise today?",
+      hint: "Begin with one clear sentence about your goal.",
+    };
+  }
+
+  const scenarioOpeners = {
+    "failing-project": "I can hear this matters. What is the main risk you want me to understand first?",
+    "unsafe-shortcut": "I see why you raised this. What happened right before the shortcut was taken?",
+    "peer-feedback": "I appreciate you bringing this up. What part of the meeting behavior is affecting the team most?",
+  };
+
+  const acknowledge = text.includes("sorry")
+    ? "I appreciate your honesty."
+    : text.includes("concern") || text.includes("risk")
+      ? "Thanks for raising this early."
+      : "I hear your point.";
+
+  const prompts = {
+    Introduce: {
+      message: shortInput
+        ? `${scenarioOpeners[scenario.id] || "I hear you. What do you want to change in this conversation?"}`
+        : `${acknowledge} Can you frame the purpose of this discussion and what outcome you hope for today?`,
+      hint: "Open with intent and respect in one clear sentence.",
+    },
+    Listen: {
+      message: shortInput
+        ? "Thanks, that helps. What details should I understand before I respond?"
+        : "I want to understand your perspective better. What happened, and what signs are you seeing?",
+      hint: "Ask one open question before persuading.",
+    },
+    Empathize: {
+      message: shortInput
+        ? "That makes sense. I can see why this feels difficult to raise."
+        : "I can see why this feels difficult to raise. Thank you for bringing it up directly.",
+      hint: "Name both emotion and pressure to build safety.",
+    },
+    Talk: {
+      message: shortInput
+        ? "Understood. What is the concrete impact if this continues?"
+        : "Understood. Walk me through the impact on team outcomes if this continues.",
+      hint: "Use behavior plus impact, not personality labels.",
+    },
+    Solve: {
+      message: shortInput
+        ? "Let us choose one next step and decide who owns it."
+        : "Let us agree on one concrete next step, who owns it, and when we review progress.",
+      hint: "Propose one action, one owner, one follow-up date.",
+    },
+  };
+  return prompts[stage];
+}
+
+function addHint(hint) {
+  if (!hint) {
+    return;
+  }
+  state.latestHint = hint;
+  if (!state.hintHistory) {
+    state.hintHistory = [];
+  }
+  if (!state.hintHistory.includes(hint)) {
+    state.hintHistory.unshift(hint);
+    state.hintHistory = state.hintHistory.slice(0, 6);
+  }
+}
+
+function addCoachNote(userText, replyObject) {
+  const scenario = getScenario();
+  const stage = ILETS[state.stageIndex];
+  const lower = userText.toLowerCase();
+
+  let note = "";
+
+  if (/^(hi|hello|hey)$/i.test(userText.trim())) {
+    note = "Great start. Open a little more directly so the other person understands why you asked for this conversation.";
+  } else if (lower.includes("deadline") || lower.includes("risk") || lower.includes("late")) {
+    note = "Great point. Make the intro a bit clearer so the issue feels purposeful, not abrupt.";
+  } else if (lower.includes("sorry") || lower.includes("frustrat") || lower.includes("stress")) {
+    note = "Good acknowledgement. Now keep it short and move toward one specific question.";
+  } else if (stage === "Listen") {
+    note = "Good question. Follow it with one pause, then reflect back what you heard.";
+  } else if (stage === "Empathize") {
+    note = "Strong empathy. Keep the concern visible so the conversation still moves forward.";
+  } else if (stage === "Talk") {
+    note = "Better. Add one concrete example or number so the impact is easier to trust.";
+  } else if (stage === "Solve") {
+    note = "Nice direction. Make the next step explicit: owner, timeline, and follow-up.";
+  } else if ((replyObject?.message || "").length < 60) {
+    note = "Good start. Expand the intro slightly so it feels more grounded.";
+  } else {
+    note = `Good direction for ${scenario.title.toLowerCase()}. Keep the message concise and avoid overexplaining.`;
+  }
+
+  state.coachNote = note;
+  pushCoachNoteHistory(note);
+}
+
+function buildCustomPractice(goals, roleLabel) {
+  const goal = (index, fallback) => goals[index] || fallback;
+  const role = roleLabel || "the other person";
+
+  return {
+    Introduce: {
+      objective: "Open with purpose and lower defensiveness.",
+      starters: [
+        `I want to discuss ${goal(0, "an important issue").toLowerCase()}.`,
+        `My goal today is ${goal(1, "to align on a practical next step").toLowerCase()}.`,
+      ],
+    },
+    Listen: {
+      objective: "Ask first and understand their constraints.",
+      starters: [
+        `Can you share how you are seeing this from your side, ${role}?`,
+        "What constraints are you balancing right now?",
+      ],
+    },
+    Empathize: {
+      objective: "Acknowledge pressure while staying constructive.",
+      starters: [
+        "I understand this is a difficult situation with real pressure.",
+        "I appreciate you discussing this openly with me.",
+      ],
+    },
+    Talk: {
+      objective: "State behavior and impact with specifics.",
+      starters: [
+        `From what I have seen, ${goal(0, "this issue is affecting outcomes").toLowerCase()}.`,
+        `The impact right now is ${goal(2, "reduced trust and slower execution").toLowerCase()}.`,
+      ],
+    },
+    Solve: {
+      objective: "Agree one clear action with owner and timeline.",
+      starters: [
+        "Could we agree one concrete next step and owner today?",
+        "Can we set a follow-up checkpoint to review progress?",
+      ],
+    },
+  };
+}
+
+async function generateRoleplayReply() {
+  const systemPrompt = { role: "system", content: buildRoleplayPrompt() };
+  const conversation = [systemPrompt, ...state.messages];
+
+  if (state.settings.mode === "proxy") {
+    return callProxyAPI({ model: state.settings.model, messages: conversation });
+  }
+
+  return callOpenAI(conversation);
+}
+
+function scoreStage(messages, stage) {
+  const userMessages = messages.filter((m) => m.role === "user").map((m) => m.content.toLowerCase());
+  const hasEvidence = userMessages.some((text) => messageShowsStageProgress(text, stage));
+  const attempts = userMessages.length;
+  if (!hasEvidence && attempts < 2) {
+    return 0;
+  }
+  if (hasEvidence && attempts < 4) {
+    return 1;
+  }
+  return hasEvidence ? 2 : 0;
+}
+
+function getUserTurnCount() {
+  return state.messages.filter((message) => message.role === "user").length;
+}
+
+function getStageScoresFromMessages(messages) {
+  return ILETS.map((stage) => ({
+    stage,
+    score: scoreStage(messages, stage),
+  })).sort((a, b) => a.score - b.score);
+}
+
+function buildAdaptivePrompts(stageScores) {
+  const promptBank = {
+    Introduce: {
+      inMoment: "What intention do you want the other person to hear in your next sentence?",
+      end: "How clear was your opening intent, and what would you rewrite to reduce defensiveness?",
+    },
+    Listen: {
+      inMoment: "What assumption are you making right now, and what question could test it before you react?",
+      end: "Where did assumptions replace listening, and how will you ask better follow-up questions next time?",
+    },
+    Empathize: {
+      inMoment: "What emotion from the other side have you acknowledged so far, and what is still missing?",
+      end: "How well did you name emotion and pressure without losing your main point?",
+    },
+    Talk: {
+      inMoment: "What one concrete fact can you include next so your concern sounds specific, not personal?",
+      end: "Which part of your explanation lacked evidence, and what proof would make it stronger?",
+    },
+    Solve: {
+      inMoment: "What commitment can you propose now with owner and timeline?",
+      end: "How specific was your close in terms of action, owner, and follow-up timing?",
+    },
+  };
+
+  const weakest = stageScores[0]?.stage || "Listen";
+  const secondWeakest = stageScores[1]?.stage || weakest;
+
+  return [
+    {
+      id: "emotion-awareness",
+      stage: weakest,
+      question: `Emotion check (${weakest}): ${promptBank[weakest].end}`,
+    },
+    {
+      id: "strategy-adjustment",
+      stage: secondWeakest,
+      question: `Strategy check (${secondWeakest}): ${promptBank[secondWeakest].end}`,
+    },
+    {
+      id: "transfer-plan",
+      stage: "Solve",
+      question: "Transfer plan: What exact sentence will you use in a real conversation this week, and when will you use it?",
+    },
+  ];
+}
+
+function getInMomentPrompt(stageScores) {
+  const weakest = stageScores[0]?.stage || "Listen";
+  const inMomentPrompts = {
+    Introduce: "Pause for 20 seconds: what opening sentence shows shared purpose clearly?",
+    Listen: "Pause for 20 seconds: what assumption can you replace with one open question right now?",
+    Empathize: "Pause for 20 seconds: what feeling from the other person can you acknowledge next?",
+    Talk: "Pause for 20 seconds: what concrete fact can strengthen your next message?",
+    Solve: "Pause for 20 seconds: what specific next-step commitment can you ask for now?",
+  };
+
+  return {
+    stage: weakest,
+    question: inMomentPrompts[weakest],
+  };
+}
+
+function renderInMomentReflectionCard() {
+  if (!inMomentReflectionCard) {
+    return;
+  }
+
+  if (!state.inMomentPrompt) {
+    inMomentReflectionCard.classList.add("is-hidden");
+    if (inMomentAnswerInput) {
+      inMomentAnswerInput.value = "";
+    }
+    if (inMomentReflectionFeedback) {
+      inMomentReflectionFeedback.textContent = "";
+    }
+    return;
+  }
+
+  inMomentReflectionCard.classList.remove("is-hidden");
+  inMomentPromptText.textContent = `${state.inMomentPrompt.question} (${state.inMomentPrompt.stage})`;
+  submitInMomentReflectionBtn.disabled = state.inMomentSubmitting;
+  submitInMomentReflectionBtn.textContent = state.inMomentSubmitting ? "Analyzing..." : "Save Reflection";
+}
+
+function buildRuleBasedReflectionFeedback(entries, weakStages) {
+  const joined = entries.join(" ").toLowerCase();
+  const hasEmotion = /(frustrat|stress|nervous|defensive|anxious|calm|pressure)/.test(joined);
+  const hasAction = /(next step|owner|timeline|follow-up|by\s+\w+day|action)/.test(joined);
+  const hasQuestion = /\?/.test(joined) || /(ask|question|listen|understand)/.test(joined);
+
+  const strengths = [];
+  const growth = [];
+
+  if (hasEmotion) {
+    strengths.push("You are noticing emotional signals instead of only content.");
+  } else {
+    growth.push("Name one emotion cue earlier so you can regulate your response faster.");
+  }
+
+  if (hasQuestion) {
+    strengths.push("You are using inquiry as a strategy, which supports stronger listening.");
+  } else {
+    growth.push("Add one open question before your next persuasive statement.");
+  }
+
+  if (hasAction) {
+    strengths.push("Your reflection shows commitment-focused closing behavior.");
+  } else {
+    growth.push("Close with one action, one owner, and one follow-up date.");
+  }
+
+  const weakText = weakStages.length ? weakStages.join(", ") : "Listen";
+  return [
+    `Strengths: ${strengths.join(" ") || "You are building awareness of your conversation pattern."}`,
+    `Growth focus (${weakText}): ${growth.join(" ") || "Keep practicing with specific evidence and clear commitments."}`,
+    "Next attempt: apply one change immediately in your next two turns so reflection turns into behavior.",
+  ].join("\n\n");
+}
+
+async function generateReflectionFeedbackText(prompts, answers, weakStages) {
+  const promptText = [
+    "You are a coaching assistant for difficult conversations.",
+    "Provide concise, actionable feedback in 3 short paragraphs:",
+    "1) Strength seen in the reflection answers.",
+    "2) Growth area tied to weak stages.",
+    "3) One concrete behavioral experiment for next attempt.",
+    `Weak stages: ${weakStages.join(", ") || "Listen"}`,
+    "Questions and answers:",
+    ...prompts.map((item, index) => `Q${index + 1}: ${item.question}\nA${index + 1}: ${answers[index] || "(blank)"}`),
+  ].join("\n");
+
+  try {
+    if (state.settings.mode === "proxy") {
+      return await callProxyAPI({
+        model: state.settings.model,
+        messages: [{ role: "user", content: promptText }],
+      });
+    }
+
+    if (!state.settings.apiKey) {
+      return buildRuleBasedReflectionFeedback(answers, weakStages);
+    }
+
+    return await callOpenAI([{ role: "user", content: promptText }]);
+  } catch {
+    return buildRuleBasedReflectionFeedback(answers, weakStages);
+  }
+}
+
+function saveReflectionEntry(entry) {
+  state.reflectionHistory.push(entry);
+  if (state.reflectionHistory.length > 60) {
+    state.reflectionHistory = state.reflectionHistory.slice(-60);
+  }
+  persistReflectionHistory();
+}
+
+function buildReflectionTrendHtml() {
+  const finalEntries = state.reflectionHistory.filter((entry) => entry.kind === "final");
+  if (!finalEntries.length) {
+    return "<p class=\"muted\">No reflection trend yet. Submit your first reflection to start tracking progress.</p>";
+  }
+
+  const recent = finalEntries.slice(-5);
+  const avgRecent = Math.round(recent.reduce((sum, item) => sum + (item.scorePercent || 0), 0) / recent.length);
+  const weakStageMap = recent.reduce((acc, item) => {
+    (item.weakStages || []).forEach((stage) => {
+      acc[stage] = (acc[stage] || 0) + 1;
+    });
+    return acc;
+  }, {});
+  const topWeakStage = Object.entries(weakStageMap).sort((a, b) => b[1] - a[1])[0]?.[0] || "None";
+
+  return `
+    <ul>
+      <li>Total reflection sessions: <strong>${finalEntries.length}</strong></li>
+      <li>Average structure score (last ${recent.length}): <strong>${avgRecent}%</strong></li>
+      <li>Most frequent weak stage recently: <strong>${escapeHtml(topWeakStage)}</strong></li>
+    </ul>
+  `;
+}
+
+function buildScaffoldComparisonHtml() {
+  const finalEntries = state.reflectionHistory.filter((entry) => entry.kind === "final");
+  if (!finalEntries.length) {
+    return "<p class=\"muted\">No scaffold comparison yet. Complete one reflected session first.</p>";
+  }
+
+  const grouped = {
+    1: [],
+    2: [],
+    3: [],
+  };
+
+  finalEntries.forEach((entry) => {
+    const level = normalizeScaffoldLevel(Number(entry.scaffoldLevel || 1));
+    grouped[level].push(entry);
+  });
+
+  const rows = [1, 2, 3]
+    .map((level) => {
+      const entries = grouped[level];
+      if (!entries.length) {
+        return null;
+      }
+      const avg = Math.round(entries.reduce((sum, item) => sum + (item.scorePercent || 0), 0) / entries.length);
+      const latest = entries[entries.length - 1]?.scorePercent || 0;
+      return {
+        level,
+        label: getScaffoldLabel(level),
+        sessions: entries.length,
+        avg,
+        latest,
+      };
+    })
+    .filter(Boolean);
+
+  const usedLevels = rows.length;
+  const note = usedLevels < 2
+    ? "Use at least two levels to compare performance trend across scaffolds."
+    : "Compare averages and latest score to decide when to fade support further.";
+
+  return `
+    <ul>
+      ${rows
+        .map((row) => `<li><strong>${escapeHtml(row.label)}</strong>: avg ${row.avg}% | latest ${row.latest}% | sessions ${row.sessions}</li>`)
+        .join("")}
+    </ul>
+    <p class="muted">${note}</p>
+  `;
+}
+
+function computeSilenceRiskMetrics(messages, scores) {
+  const userMessages = (messages || []).filter((item) => item.role === "user").map((item) => item.content || "");
+  const text = userMessages.join(" ").toLowerCase();
+  const words = text.split(/\s+/).filter(Boolean);
+  const wordCount = words.length || 1;
+
+  const countMatches = (patterns) => patterns.reduce((sum, pattern) => sum + ((text.match(pattern) || []).length), 0);
+
+  const deferenceCount = countMatches([
+    /\bwith respect\b/g,
+    /\bi understand\b/g,
+    /\bif you agree\b/g,
+    /\bif appropriate\b/g,
+    /\bwould you\b/g,
+    /\bcould we\b/g,
+  ]);
+  const softenerCount = countMatches([
+    /\bmaybe\b/g,
+    /\bperhaps\b/g,
+    /\bi think\b/g,
+    /\bi feel\b/g,
+    /\bjust\b/g,
+    /\bkind of\b/g,
+    /\bsort of\b/g,
+  ]);
+  const directCount = countMatches([
+    /\bi recommend\b/g,
+    /\bwe need\b/g,
+    /\bthe risk is\b/g,
+    /\bi noticed\b/g,
+    /\bi suggest\b/g,
+    /\blet us\b/g,
+    /\blet's\b/g,
+  ]);
+  const questionCount = (text.match(/\?/g) || []).length;
+
+  const deferenceOverload = Math.min(100, Math.round((deferenceCount / wordCount) * 900));
+  const assertivenessBalance = Math.max(0, Math.min(100, Math.round((directCount / Math.max(1, directCount + softenerCount + questionCount)) * 100)));
+  const clarityWithRespect = Math.max(
+    20,
+    Math.min(100, Math.round(((scores?.reduce((sum, item) => sum + item.score, 0) || 0) / (ILETS.length * 2)) * 70 + (100 - Math.min(45, deferenceOverload)) * 0.3))
+  );
+  const silenceToVoiceIndex = Number((directCount / Math.max(1, softenerCount + questionCount)).toFixed(2));
+  const escalationReadiness = Math.max(
+    0,
+    Math.min(
+      100,
+      Math.round(
+        ((scores?.find((item) => item.stage === "Talk")?.score || 0) * 25) +
+        ((scores?.find((item) => item.stage === "Solve")?.score || 0) * 25) +
+        assertivenessBalance * 0.5
+      )
+    )
+  );
+
+  return {
+    deferenceOverload,
+    clarityWithRespect,
+    assertivenessBalance,
+    silenceToVoiceIndex,
+    escalationReadiness,
+  };
+}
+
+function buildReflectionDraftHistoryHtml() {
+  if (!state.reflectionDrafts.length) {
+    return "<p class=\"muted\">No saved drafts yet.</p>";
+  }
+
+  const recent = state.reflectionDrafts
+    .slice()
+    .sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0))
+    .slice(0, 6);
+
+  return `
+    <ul class="reflection-draft-list">
+      ${recent
+        .map((item) => `
+          <li>
+            <div>
+              <strong>${new Date(item.savedAt).toLocaleString()}</strong>
+              <p class="muted">${escapeHtml((item.answers?.join(" | ") || "").slice(0, 110)) || "Saved reflection draft"}</p>
+            </div>
+            <button class="ghost" type="button" data-reflection-draft-load="${escapeHtml(item.id)}">Load</button>
+          </li>
+        `)
+        .join("")}
+    </ul>
+  `;
+}
+
+function setReflectionDraftLock(locked) {
+  state.finalReflectionDraftLocked = locked;
+  ["#reflectionAnswer1", "#reflectionAnswer2", "#reflectionAnswer3"].forEach((selector) => {
+    const node = finalReflectionContent?.querySelector(selector);
+    if (!node) {
+      return;
+    }
+    node.readOnly = locked;
+    node.classList.toggle("reflection-draft-saved", locked);
+  });
+
+  const saveBtn = finalReflectionContent?.querySelector("#saveReflectionDraftBtn");
+  if (saveBtn) {
+    saveBtn.disabled = locked;
+    saveBtn.textContent = locked ? "Draft Saved" : "Save Draft";
+  }
+
+  const editBtn = finalReflectionContent?.querySelector("#editReflectionDraftBtn");
+  if (editBtn) {
+    editBtn.disabled = !locked;
+  }
+}
+
+function getWeaknessLabel(score) {
+  if (score <= 0) {
+    return "Needs attention";
+  }
+  if (score === 1) {
+    return "Could improve";
+  }
+  return "Strong";
+}
+
+function buildStageFallbackDrill(stage) {
+  const guide = STAGE_GUIDE[stage] || STAGE_GUIDE.Listen;
+  const starterA = guide.starters?.[0] || "Use one clear sentence starter.";
+  const starterB = guide.starters?.[1] || "Follow with one open question.";
+  return [
+    `${stage} drill (2 minutes):`,
+    `1) Say this line once: ${starterA}`,
+    `2) Improve it once using your own words.`,
+    `3) Add this follow-up line: ${starterB}`,
+    "4) Finish with one next-step request.",
+  ].join("\n");
+}
+
+async function generateStageDrill(stage, weakStages) {
+  const promptText = [
+    "You are an expert conversation coach.",
+    `Create one short targeted drill for stage: ${stage}.`,
+    `Weak stages context: ${weakStages.join(", ") || "None"}`,
+    "Output format:",
+    "- Drill title",
+    "- 3 steps maximum",
+    "- 2 sentence starters",
+    "- 1 measurable success check",
+    "Keep it concise and practical for immediate repetition.",
+  ].join("\n");
+
+  try {
+    if (state.settings.mode === "proxy") {
+      return await callProxyAPI({
+        model: state.settings.model,
+        messages: [{ role: "user", content: promptText }],
+      });
+    }
+
+    if (!state.settings.apiKey) {
+      return buildStageFallbackDrill(stage);
+    }
+
+    return await callOpenAI([{ role: "user", content: promptText }]);
+  } catch {
+    return buildStageFallbackDrill(stage);
+  }
+}
+
+function upsertImprovementTrack({ stage, mode, status }) {
+  const now = Date.now();
+  const existing = state.improvementTrack.find((item) => item.stage === stage && item.mode === mode);
+  if (existing) {
+    existing.status = status;
+    existing.lastUpdated = now;
+    existing.attempts = (existing.attempts || 0) + (status === "started" ? 1 : 0);
+    existing.completions = (existing.completions || 0) + (status === "completed" ? 1 : 0);
+  } else {
+    state.improvementTrack.push({
+      id: `improve-${now}-${Math.random().toString(36).slice(2, 6)}`,
+      stage,
+      mode,
+      status,
+      attempts: status === "started" ? 1 : 0,
+      completions: status === "completed" ? 1 : 0,
+      createdAt: now,
+      lastUpdated: now,
+    });
+  }
+  persistImprovementTrack();
+}
+
+function buildImprovementTrackerHtml() {
+  return "";
+}
+
+function maybeQueueInMomentReflection() {
+  const userTurnCount = getUserTurnCount();
+  if (userTurnCount < 3 || state.inMomentPrompt) {
+    return;
+  }
+
+  if (userTurnCount - state.inMomentPromptAtTurn < 4) {
+    return;
+  }
+
+  const stageScores = getStageScoresFromMessages(state.messages);
+  const prompt = getInMomentPrompt(stageScores);
+  state.inMomentPrompt = {
+    ...prompt,
+    turn: userTurnCount,
+  };
+  state.inMomentPromptAtTurn = userTurnCount;
+  state.rightTab = "coach";
+}
+
+async function generateFeedback() {
+  const scores = getStageScoresFromMessages(state.messages);
+  const scenario = getScenario();
+
+  const total = scores.reduce((sum, item) => sum + item.score, 0);
+  const max = ILETS.length * 2;
+  state.latestStageScores = scores;
+  state.latestSessionScorePercent = Math.round((total / max) * 100);
+
+  const weak = scores.filter((item) => item.score === 0).map((item) => item.stage);
+  const medium = scores.filter((item) => item.score === 1).map((item) => item.stage);
+  const strong = scores.filter((item) => item.score === 2).map((item) => item.stage);
+  const targetStages = weak.length ? weak : (medium.length ? medium : [scores[0]?.stage || "Listen"]);
+  const scoreMap = Object.fromEntries(scores.map((item) => [item.stage, item.score]));
+
+  const metacognitivePrompts = buildAdaptivePrompts(scores);
+  state.activeReflectionPrompts = metacognitivePrompts;
+
+  const reflectionTitles = {
+    "emotion-awareness": "Emotion Awareness",
+    "strategy-adjustment": "Strategy Adjustment",
+    "transfer-plan": "Transfer Plan",
+  };
+
+  // Get AI-powered coaching feedback
+  let coachingFeedback = "";
+  try {
+    coachingFeedback = await generateCoachingFeedback(state.messages);
+  } catch (error) {
+    console.warn("Failed to generate coaching feedback:", error);
+    coachingFeedback = `Strong areas: ${strong.length ? strong.join(", ") : "overall engagement"}. Growth areas: ${weak.length ? weak.join(", ") : "precision and clarity"}.`;
+  }
+
+  const overviewHtml = `
+    <article class="analytics-card">
+      <h4>Strength</h4>
+      <p class="analytics-metric">${escapeHtml(coachingFeedback.split("GROWTH")[0].replace(/STRENGTH:|strength:/i, "").trim())}</p>
+      <p class="muted">Keep this behavior consistent while you focus your next practice on one weaker stage.</p>
+    </article>
+    <article class="analytics-card">
+      <h4>Growth Area</h4>
+      <p class="analytics-metric">${escapeHtml(coachingFeedback.split("GROWTH")[1]?.replace(/AREA:|area:/i, "").trim() || "Focus on your weaker ILETS stages.")}</p>
+      <p class="muted">Practice this area in your next session for meaningful improvement.</p>
+    </article>
+  `;
+
+  const reflectionHtml = `
+    <article class="analytics-card reflection-form-card">
+      <h4>Reflection</h4>
+      <p class="muted">Answer these prompts in your own words. AI feedback will adapt to weak stages: ${escapeHtml(weak.join(", ") || "None")}</p>
+
+      <section class="reflection-item">
+        <div class="reflection-item-head">
+          <strong>${reflectionTitles[metacognitivePrompts[0].id]}</strong>
+          <span class="reflection-stage-tag">${escapeHtml(metacognitivePrompts[0].stage)}</span>
+        </div>
+        <p class="reflection-question">${escapeHtml(metacognitivePrompts[0].question)}</p>
+        <textarea id="reflectionAnswer1" rows="3" placeholder="Write your reflection..."></textarea>
+      </section>
+
+      <section class="reflection-item">
+        <div class="reflection-item-head">
+          <strong>${reflectionTitles[metacognitivePrompts[1].id]}</strong>
+          <span class="reflection-stage-tag">${escapeHtml(metacognitivePrompts[1].stage)}</span>
+        </div>
+        <p class="reflection-question">${escapeHtml(metacognitivePrompts[1].question)}</p>
+        <textarea id="reflectionAnswer2" rows="3" placeholder="Write your reflection..."></textarea>
+      </section>
+
+      <section class="reflection-item">
+        <div class="reflection-item-head">
+          <strong>${reflectionTitles[metacognitivePrompts[2].id]}</strong>
+          <span class="reflection-stage-tag">Transfer</span>
+        </div>
+        <p class="reflection-question">${escapeHtml(metacognitivePrompts[2].question)}</p>
+        <textarea id="reflectionAnswer3" rows="3" placeholder="Write your reflection..."></textarea>
+      </section>
+
+      <div class="flow-actions flow-actions-wrap">
+        <button id="saveReflectionDraftBtn" class="ghost" type="button">Save Draft</button>
+        <button id="editReflectionDraftBtn" class="ghost" type="button" disabled>Edit Draft</button>
+        <button id="submitReflectionBtn" type="button">Get Adaptive Coach Feedback</button>
+      </div>
+      <p id="reflectionDraftStatus" class="muted">Draft not saved yet.</p>
+      <div id="reflectionAiFeedback" class="reflection-feedback muted"></div>
+
+      <h4>Draft History</h4>
+      <div id="reflectionDraftHistory" class="reflection-trend">${buildReflectionDraftHistoryHtml()}</div>
+    </article>
+  `;
+
+  const analytics = computeAnalytics();
+  const communicationCard = `
+    <article class="analytics-card">
+      <h4>Communication & Clarity</h4>
+      <p class="analytics-metric">Clarity Score: ${Math.max(20, 100 - analytics.fillerRate)}%</p>
+      <p class="analytics-metric">Directness Score: ${Math.round((total / max) * 100)}%</p>
+      <p class="analytics-metric">Filler Words: ${analytics.fillerCount} (${analytics.fillerRate}%)</p>
+      <p class="muted">Focus on clear, direct statements with concrete next steps. Reduce filler language.</p>
+    </article>
+  `;
+  const sessionHtml = `
+    <article class="analytics-card">
+      <h4>Analytics Overview</h4>
+      <p class="analytics-metric">Turns: ${analytics.totalTurns} | Avg words/turn: ${analytics.avgWords}</p>
+      <p class="muted">Stage coverage: ${analytics.stageCoverage}%</p>
+    </article>
+    ${communicationCard}
+    <article class="analytics-card">
+      <h4>Performance Bars</h4>
+      <div class="mini-bars">
+        <div class="mini-bar-row">
+          <span>ILETS Progress</span>
+          <div class="mini-track"><div class="mini-fill" style="width:${analytics.stageCoverage}%"></div></div>
+          <strong>${analytics.stageCoverage}%</strong>
+        </div>
+        <div class="mini-bar-row">
+          <span>Clarity Score</span>
+          <div class="mini-track"><div class="mini-fill" style="width:${Math.max(8, 100 - Math.min(90, analytics.fillerRate * 2))}%"></div></div>
+          <strong>${Math.max(8, 100 - Math.min(90, analytics.fillerRate * 2))}%</strong>
+        </div>
+        <div class="mini-bar-row">
+          <span>Structure Score</span>
+          <div class="mini-track"><div class="mini-fill" style="width:${Math.round((total / max) * 100)}%"></div></div>
+          <strong>${Math.round((total / max) * 100)}%</strong>
+        </div>
+      </div>
+    </article>
+  `;
+
+  feedbackPanel.innerHTML = overviewHtml;
+  finalFeedbackContent.innerHTML = overviewHtml;
+  if (finalReflectionContent) {
+    finalReflectionContent.innerHTML = reflectionHtml;
+  }
+  if (analyticsSummary) {
+    analyticsSummary.innerHTML = sessionHtml;
+  }
+  setReflectionDraftLock(false);
+  finalIdentity.textContent = `${getLearnerName()}, here is your latest session review.`;
+  renderDashboardTabs("overview");
+}
+
+async function handleSend(event) {
+  event.preventDefault();
+  clearScaffoldPauseTimer();
+  const userText = promptInput.value.trim();
+  if (!userText) {
+    return;
+  }
+
+  stopVoiceListening();
+
+  if (voiceSendTimer) {
+    clearTimeout(voiceSendTimer);
+    voiceSendTimer = null;
+  }
+
+  state.voice.pendingFinal = "";
+  state.voice.interim = "";
+
+  state.messages.push({ role: "user", content: userText });
+  advanceStageFromUserMessage(userText);
+  maybeQueueInMomentReflection();
+  promptInput.value = "";
+  render();
+  setPending(true);
+
+  let assistantReply = "";
+
+  try {
+    const reply = await withTimeout(generateRoleplayReply(), 15000);
+    const parsed = parseAssistantOutput(reply);
+    addHint(parsed.hint);
+    addCoachNote(userText, parsed);
+    assistantReply = personalizeReply(parsed.message);
+    state.messages.push({ role: "assistant", content: assistantReply });
+  } catch (error) {
+    void error;
+    const fallback = localFallbackReply(userText);
+    addHint(fallback.hint);
+    addCoachNote(userText, fallback);
+    assistantReply = personalizeReply(fallback.message);
+    state.messages.push({
+      role: "assistant",
+      content: assistantReply,
+    });
+  } finally {
+    setPending(false);
+    render();
+    speakAssistantReply(assistantReply);
+    if (state.voice.mode && !window.speechSynthesis) {
+      startVoiceListening();
+    }
+    promptInput.focus();
+    armScaffoldPauseTimer();
+  }
+}
+
+function switchScenario(nextScenarioId) {
+  state.selectedScenarioId = nextScenarioId;
+  applyScenarioScaffoldDefault(nextScenarioId);
+  state.briefTab = "scenario";
+  openSessionIntro();
+  render();
+}
+
+function bindScenarioPickerInteractions() {
+  if (createScenarioBriefingBtn && createScenarioBriefingBtn.dataset.bound !== "1") {
+    createScenarioBriefingBtn.addEventListener("click", () => {
+      openScenarioBuilderForCreate();
+    });
+    createScenarioBriefingBtn.dataset.bound = "1";
+  }
+
+  if (scenarioPickerGrid && scenarioPickerGrid.dataset.bound !== "1") {
+    scenarioPickerGrid.addEventListener("click", (event) => {
+      const actionButton = event.target.closest("[data-scenario-action]");
+      if (actionButton) {
+        const scenarioId = actionButton.getAttribute("data-scenario-id");
+        const action = actionButton.getAttribute("data-scenario-action");
+        if (!scenarioId || !action) {
+          return;
+        }
+        if (action === "edit") {
+          openScenarioBuilderForEdit(scenarioId);
+        }
+        if (action === "delete") {
+          deleteCustomScenario(scenarioId);
+        }
+        return;
+      }
+
+      const selectNode = event.target.closest(".picker-card-select, .scenario-picker-card");
+      if (!selectNode) {
+        return;
+      }
+      const scenarioId = selectNode.getAttribute("data-scenario-id");
+      if (scenarioId) {
+        event.preventDefault();
+        const typedName = (userNameInput?.value || "").trim();
+        if (typedName) {
+          saveUserName(typedName);
+        }
+        state.selectedScenarioId = scenarioId;
+        applyScenarioScaffoldDefault(scenarioId);
+        renderBriefingPage();
+      }
+    });
+    scenarioPickerGrid.dataset.bound = "1";
+  }
+
+  if (toggleScenarioPickerListBtn && toggleScenarioPickerListBtn.dataset.bound !== "1") {
+    toggleScenarioPickerListBtn.addEventListener("click", () => {
+      state.scenarioPickerExpanded = !state.scenarioPickerExpanded;
+      renderScenarioPicker();
+    });
+    toggleScenarioPickerListBtn.dataset.bound = "1";
+  }
+}
+
+bindScenarioPickerInteractions();
+
+scenarioList.addEventListener("click", (event) => {
+  const toggleButton = event.target.closest("[data-scenario-list-toggle]");
+  if (toggleButton) {
+    state.scenarioListExpanded = !state.scenarioListExpanded;
+    renderScenarios();
+    return;
+  }
+
+  const button = event.target.closest(".scenario-btn");
+  if (!button) {
+    return;
+  }
+  const scenarioId = button.getAttribute("data-scenario-id");
+  if (scenarioId && scenarioId !== state.selectedScenarioId) {
+    switchScenario(scenarioId);
+  }
+});
+
+chatForm.addEventListener("submit", handleSend);
+
+if (submitInMomentReflectionBtn) {
+  submitInMomentReflectionBtn.addEventListener("click", async () => {
+    if (!state.inMomentPrompt || !inMomentAnswerInput) {
+      return;
+    }
+
+    const answer = inMomentAnswerInput.value.trim();
+    if (!answer) {
+      return;
+    }
+
+    state.inMomentSubmitting = true;
+    renderInMomentReflectionCard();
+
+    const prompt = state.inMomentPrompt;
+    const feedback = await generateReflectionFeedbackText(
+      [{ id: "in-moment", stage: prompt.stage, question: prompt.question }],
+      [answer],
+      [prompt.stage]
+    );
+
+    saveReflectionEntry({
+      kind: "in-moment",
+      createdAt: Date.now(),
+      scenarioId: getScenario().id,
+      scaffoldLevel: state.scaffold.level,
+      weakStages: [prompt.stage],
+      answers: [answer],
+      feedback,
+      scorePercent: state.latestSessionScorePercent || 0,
+      turns: getUserTurnCount(),
+    });
+
+    state.inMomentSubmitting = false;
+    state.inMomentPrompt = null;
+    state.coachNote = feedback;
+    pushCoachNoteHistory(`Reflection (${prompt.stage}): ${feedback.split("\n")[0]}`);
+    render();
+  });
+}
+
+if (finalReflectionContent) {
+  finalReflectionContent.addEventListener("click", async (event) => {
+  const loadDraftButton = event.target.closest("[data-reflection-draft-load]");
+  if (loadDraftButton) {
+    const draftId = loadDraftButton.getAttribute("data-reflection-draft-load");
+    const draft = state.reflectionDrafts.find((item) => item.id === draftId);
+    if (!draft) {
+      return;
+    }
+
+    const [a1 = "", a2 = "", a3 = ""] = draft.answers || [];
+    const n1 = finalFeedbackContent.querySelector("#reflectionAnswer1");
+    const n2 = finalFeedbackContent.querySelector("#reflectionAnswer2");
+    const n3 = finalFeedbackContent.querySelector("#reflectionAnswer3");
+    if (n1) n1.value = a1;
+    if (n2) n2.value = a2;
+    if (n3) n3.value = a3;
+
+    const statusNode = finalFeedbackContent.querySelector("#reflectionDraftStatus");
+    if (statusNode) {
+      statusNode.textContent = `Draft loaded from ${new Date(draft.savedAt).toLocaleString()}.`;
+    }
+    setReflectionDraftLock(false);
+    return;
+  }
+
+  const saveDraftButton = event.target.closest("#saveReflectionDraftBtn");
+  if (saveDraftButton) {
+    const answer1 = finalFeedbackContent.querySelector("#reflectionAnswer1")?.value?.trim() || "";
+    const answer2 = finalFeedbackContent.querySelector("#reflectionAnswer2")?.value?.trim() || "";
+    const answer3 = finalFeedbackContent.querySelector("#reflectionAnswer3")?.value?.trim() || "";
+    const answers = [answer1, answer2, answer3];
+    if (!answers.some((value) => value.length)) {
+      return;
+    }
+
+    const weakStages = state.latestStageScores.filter((item) => item.score < 2).map((item) => item.stage);
+    state.reflectionDrafts.unshift({
+      id: `draft-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      savedAt: Date.now(),
+      scenarioId: getScenario().id,
+      weakStages,
+      answers,
+    });
+    state.reflectionDrafts = state.reflectionDrafts.slice(0, 40);
+    persistReflectionDrafts();
+
+    const historyNode = finalFeedbackContent.querySelector("#reflectionDraftHistory");
+    if (historyNode) {
+      historyNode.innerHTML = buildReflectionDraftHistoryHtml();
+    }
+
+    const statusNode = finalFeedbackContent.querySelector("#reflectionDraftStatus");
+    if (statusNode) {
+      statusNode.textContent = "Draft saved. Click Edit Draft to revise.";
+    }
+
+    setReflectionDraftLock(true);
+    return;
+  }
+
+  const editDraftButton = event.target.closest("#editReflectionDraftBtn");
+  if (editDraftButton) {
+    setReflectionDraftLock(false);
+    const statusNode = finalFeedbackContent.querySelector("#reflectionDraftStatus");
+    if (statusNode) {
+      statusNode.textContent = "Editing enabled. Save draft when ready.";
+    }
+    finalFeedbackContent.querySelector("#reflectionAnswer1")?.focus();
+    return;
+  }
+
+  const actionButton = event.target.closest("[data-improve-action]");
+  if (actionButton) {
+    const stage = actionButton.getAttribute("data-stage") || "Listen";
+    const action = actionButton.getAttribute("data-improve-action");
+    const weakStages = state.latestStageScores.filter((item) => item.score < 2).map((item) => item.stage);
+
+    if (action === "ai-now") {
+      upsertImprovementTrack({ stage, mode: "ai", status: "started" });
+      state.stageIndex = Math.max(0, ILETS.indexOf(stage));
+      state.rightTab = "coach";
+      openSessionIntro();
+      goToPage("practice");
+      render();
+      renderHeader();
+      promptInput.focus();
+      return;
+    }
+
+    if (action === "peer-now") {
+      upsertImprovementTrack({ stage, mode: "peer", status: "started" });
+      state.peer.activeView = "community";
+      goToPage("peerPracticum");
+      return;
+    }
+
+    if (action === "mark-done") {
+      upsertImprovementTrack({ stage, mode: "self", status: "completed" });
+      const trackerNode = document.getElementById("improvementTrackerAnalytics");
+      if (trackerNode) {
+        trackerNode.innerHTML = buildImprovementTrackerHtml();
+      }
+      return;
+    }
+
+    if (action === "drill") {
+      actionButton.disabled = true;
+      actionButton.textContent = "Generating...";
+      const targetNode = finalFeedbackContent.querySelector(`#improve-drill-${stage.toLowerCase()}`);
+      const drill = await generateStageDrill(stage, weakStages);
+      if (targetNode) {
+        targetNode.innerHTML = escapeHtml(drill).replaceAll("\n", "<br />");
+        targetNode.classList.remove("muted");
+      }
+      upsertImprovementTrack({ stage, mode: "drill", status: "started" });
+      const trackerNode = document.getElementById("improvementTrackerAnalytics");
+      if (trackerNode) {
+        trackerNode.innerHTML = buildImprovementTrackerHtml();
+      }
+      actionButton.disabled = false;
+      actionButton.textContent = "Generate AI Drill";
+      return;
+    }
+  }
+
+  const submitButton = event.target.closest("#submitReflectionBtn");
+  if (!submitButton || state.finalReflectionSubmitting) {
+    return;
+  }
+
+  const answer1 = finalReflectionContent.querySelector("#reflectionAnswer1")?.value?.trim() || "";
+  const answer2 = finalReflectionContent.querySelector("#reflectionAnswer2")?.value?.trim() || "";
+  const answer3 = finalReflectionContent.querySelector("#reflectionAnswer3")?.value?.trim() || "";
+
+  if (!answer1 || !answer2 || !answer3) {
+    return;
+  }
+
+  const answers = [answer1, answer2, answer3];
+  const weakStages = state.latestStageScores.filter((item) => item.score < 2).map((item) => item.stage);
+
+  state.finalReflectionSubmitting = true;
+  submitButton.disabled = true;
+  submitButton.textContent = "Analyzing reflections...";
+
+  const feedback = await generateReflectionFeedbackText(
+    state.activeReflectionPrompts,
+    answers,
+    weakStages
+  );
+
+  state.finalReflectionFeedback = feedback;
+
+  saveReflectionEntry({
+    kind: "final",
+    createdAt: Date.now(),
+    scenarioId: getScenario().id,
+    scaffoldLevel: state.scaffold.level,
+    weakStages,
+    answers,
+    feedback,
+    scorePercent: state.latestSessionScorePercent,
+    turns: getUserTurnCount(),
+  });
+
+  const feedbackPanelNode = finalReflectionContent.querySelector("#reflectionAiFeedback");
+  if (feedbackPanelNode) {
+    feedbackPanelNode.innerHTML = escapeHtml(feedback).replaceAll("\n", "<br />");
+    feedbackPanelNode.classList.remove("muted");
+  }
+
+  const trendNode = finalReflectionContent.querySelector("#reflectionTrend");
+  if (trendNode) {
+    trendNode.innerHTML = buildReflectionTrendHtml();
+  }
+
+  const statusNode = finalReflectionContent.querySelector("#reflectionDraftStatus");
+  if (statusNode) {
+    statusNode.textContent = "Reflection submitted and recorded.";
+  }
+
+  state.finalReflectionSubmitting = false;
+  submitButton.disabled = false;
+  submitButton.textContent = "Get Adaptive Coach Feedback";
+  });
+
+  finalReflectionContent.addEventListener("input", (event) => {
+    const reflectionInput = event.target.closest("#reflectionAnswer1, #reflectionAnswer2, #reflectionAnswer3");
+    if (!reflectionInput) {
+      return;
+    }
+
+    if (!state.finalReflectionDraftLocked) {
+      const statusNode = finalReflectionContent.querySelector("#reflectionDraftStatus");
+      if (statusNode) {
+        statusNode.textContent = "Unsaved changes.";
+      }
+    }
+  });
+}
+
+if (finalTabOverview && finalTabReflection && finalTabSession) {
+  [finalTabOverview, finalTabReflection, finalTabSession].forEach((button) => {
+    button.addEventListener("click", () => {
+      const tab = button === finalTabOverview ? "overview" : button === finalTabReflection ? "reflection" : "session";
+      renderDashboardTabs(tab);
+    });
+  });
+}
+
+analyticsSummary.addEventListener("click", (event) => {
+  const filterButton = event.target.closest("[data-improve-filter]");
+  if (!filterButton) {
+    return;
+  }
+
+  const range = filterButton.getAttribute("data-improve-filter");
+  if (range === "week" || range === "all") {
+    state.improvementTrackRange = range;
+    const trackerNode = document.getElementById("improvementTrackerAnalytics");
+    if (trackerNode) {
+      trackerNode.innerHTML = buildImprovementTrackerHtml();
+    }
+  }
+});
+
+voiceModeBtn.addEventListener("click", () => {
+  toggleVoiceMode();
+});
+
+promptInput.addEventListener("keydown", (event) => {
+  if (state.scaffold.level === 2 && !state.isTyping) {
+    armScaffoldPauseTimer();
+  }
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault();
+    chatForm.requestSubmit();
+  }
+});
+
+promptInput.addEventListener("input", () => {
+  if (state.scaffold.level === 2 && !state.isTyping) {
+    armScaffoldPauseTimer();
+  }
+});
+
+finishBtn.addEventListener("click", async () => {
+  await generateFeedback();
+  state.rightTab = "feedback";
+  renderRightPanel();
+  goToPage("final");
+});
+
+rightTabs.addEventListener("click", (event) => {
+  const button = event.target.closest(".right-tab");
+  if (!button) {
+    return;
+  }
+  const tab = button.getAttribute("data-right-tab");
+  if (!tab) {
+    return;
+  }
+  state.rightTab = tab;
+  renderRightPanel();
+});
+
+toggleFocusBtn.addEventListener("click", () => {
+  state.focusMode = !state.focusMode;
+  renderFocusMode();
+});
+
+toggleLeftColumnBtn.addEventListener("click", () => {
+  state.leftVisible = !state.leftVisible;
+  renderColumnVisibility();
+});
+
+toggleRightColumnBtn.addEventListener("click", () => {
+  state.rightVisible = !state.rightVisible;
+  renderColumnVisibility();
+});
+
+briefTabs.addEventListener("click", (event) => {
+  const button = event.target.closest(".brief-tab");
+  if (!button) {
+    return;
+  }
+  const tab = button.getAttribute("data-tab");
+  if (!tab) {
+    return;
+  }
+  state.briefTab = tab;
+  renderBrief();
+});
+
+if (toggleScenarioBriefBtn) {
+  toggleScenarioBriefBtn.addEventListener("click", () => {
+    state.scenarioBriefExpanded = !state.scenarioBriefExpanded;
+    renderScenarioBriefVisibility();
+  });
+}
+
+toggleScenariosBtn.addEventListener("click", () => {
+  state.scenariosExpanded = !state.scenariosExpanded;
+  renderScenariosVisibility();
+});
+
+toggleTipsBtn.addEventListener("click", () => {
+  state.tipsExpanded = !state.tipsExpanded;
+  renderTips();
+});
+
+if (cycleScaffoldLevelBtn) {
+  cycleScaffoldLevelBtn.addEventListener("click", () => {
+    const nextLevel = state.scaffold.level === 1 ? 2 : (state.scaffold.level === 2 ? 3 : 1);
+    setScaffoldLevel(nextLevel);
+    renderChoiceSnapshot();
+    renderBriefingPage();
+    renderPracticeStrip();
+    renderHeader();
+  });
+}
+
+if (toggleStartersBtn) {
+  toggleStartersBtn.addEventListener("click", () => {
+    if (state.scaffold.level === 1 || state.scaffold.level === 3) {
+      return;
+    }
+    state.scaffold.hintsVisible = !state.scaffold.hintsVisible;
+    renderPracticeStrip();
+  });
+}
+
+if (briefScaffoldLevelGroup) {
+  briefScaffoldLevelGroup.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-brief-scaffold]");
+    if (!button) {
+      return;
+    }
+    const level = normalizeScaffoldLevel(Number(button.getAttribute("data-brief-scaffold")));
+    setScaffoldLevel(level);
+    renderChoiceSnapshot();
+    renderBriefingPage();
+    renderPracticeStrip();
+    renderHeader();
+  });
+}
+
+if (practiceScaffoldMenuBtn && practiceScaffoldMenu) {
+  practiceScaffoldMenuBtn.addEventListener("click", () => {
+    const open = practiceScaffoldMenu.classList.contains("is-hidden");
+    setPracticeScaffoldMenuOpen(open);
+  });
+
+  practiceScaffoldMenu.addEventListener("click", (event) => {
+    const option = event.target.closest("[data-practice-scaffold]");
+    if (!option) {
+      return;
+    }
+    const level = normalizeScaffoldLevel(Number(option.getAttribute("data-practice-scaffold")));
+    setScaffoldLevel(level);
+    setPracticeScaffoldMenuOpen(false);
+    renderChoiceSnapshot();
+    renderBriefingPage();
+    renderPracticeStrip();
+    renderHeader();
+  });
+}
+
+document.addEventListener("click", (event) => {
+  if (!practiceScaffoldMenuBtn || !practiceScaffoldMenu) {
+    return;
+  }
+  const target = event.target;
+  if (!(target instanceof Element)) {
+    return;
+  }
+  if (target.closest("#practiceScaffoldMenuBtn") || target.closest("#practiceScaffoldMenu")) {
+    return;
+  }
+  setPracticeScaffoldMenuOpen(false);
+});
+
+toggleIletsBtn.addEventListener("click", () => {
+  state.iletsExpanded = !state.iletsExpanded;
+  renderIletsVisibility();
+});
+
+stageList.addEventListener("click", (event) => {
+  const button = event.target.closest(".stage-item");
+  if (!button) {
+    return;
+  }
+  const value = button.getAttribute("data-stage-index");
+  if (value === null) {
+    return;
+  }
+  state.stageIndex = Number(value);
+  promptInput.placeholder = `Respond using ${ILETS[state.stageIndex]} stage...`;
+  render();
+  promptInput.focus();
+});
+
+stageStarters.addEventListener("click", (event) => {
+  const button = event.target.closest(".starter-chip");
+  if (!button) {
+    return;
+  }
+  const starter = button.getAttribute("data-starter");
+  if (!starter) {
+    return;
+  }
+
+  const spacing = promptInput.value.trim().length ? "\n" : "";
+  promptInput.value = `${promptInput.value}${spacing}${starter}`;
+  promptInput.focus();
+});
+
+nextStageBtn.addEventListener("click", () => {
+  if (state.stageIndex < ILETS.length - 1) {
+    state.stageIndex += 1;
+    promptInput.placeholder = `Respond using ${ILETS[state.stageIndex]} stage...`;
+    render();
+    promptInput.focus();
+  }
+});
+
+openSettingsBtn.addEventListener("click", () => {
+  modeSelect.value = state.settings.mode;
+  proxyUrlInput.value = state.settings.proxyUrl;
+  apiKeyInput.value = state.settings.apiKey;
+  settingsDialog.showModal();
+});
+
+settingsForm.addEventListener("submit", () => {
+  state.settings.mode = modeSelect.value;
+  state.settings.proxyUrl = proxyUrlInput.value.trim() || "http://localhost:8787/api/chat";
+  state.settings.apiKey = apiKeyInput.value.trim();
+  saveSettings();
+  renderHeader();
+});
+
+settingsForm.addEventListener("reset", () => {
+  settingsDialog.close();
+});
+
+goToChoiceBtn.addEventListener("click", () => {
+  goToPage("choice");
+});
+
+chooseLearnBtn.addEventListener("click", () => {
+  state.moduleIndex = 0;
+  state.moduleQuizPassed = false;
+  quizResultText.textContent = "";
+  document.querySelectorAll("input[name='q1'], input[name='q2'], input[name='q3']").forEach((input) => {
+    input.checked = false;
+  });
+  goToPage("learn");
+});
+
+choosePracticeBtn.addEventListener("click", () => {
+  if (!ensureLearnerNameSet()) {
+    return;
+  }
+  goToPage("scenarioBriefing");
+});
+
+if (openDashboardBtn) {
+  openDashboardBtn.addEventListener("click", () => {
+    goToPage("dashboard");
+  });
+}
+
+if (choosePeerBtn) {
+  choosePeerBtn.addEventListener("click", () => {
+    if (!ensureLearnerNameSet()) {
+      return;
+    }
+    goToPage("peerPracticum");
+  });
+}
+
+if (dashboardBackBtn) {
+  dashboardBackBtn.addEventListener("click", () => {
+    goToPage("choice");
+  });
+}
+
+if (dashboardPracticeAiBtn) {
+  dashboardPracticeAiBtn.addEventListener("click", () => {
+    if (!ensureLearnerNameSet()) {
+      goToPage("choice");
+      return;
+    }
+    const recommendedStage = getRecommendedStartStage();
+    state.stageIndex = Math.max(0, ILETS.indexOf(recommendedStage));
+    goToPage("scenarioBriefing");
+  });
+}
+
+if (dashboardPracticePeerBtn) {
+  dashboardPracticePeerBtn.addEventListener("click", () => {
+    if (!ensureLearnerNameSet()) {
+      goToPage("choice");
+      return;
+    }
+    goToPage("peerPracticum");
+  });
+}
+
+learnBackBtn.addEventListener("click", () => {
+  goToPage("choice");
+});
+
+startPracticeBtn.addEventListener("click", () => {
+  const enteredName = (state.userName || userNameInput?.value || "").trim();
+  if (!enteredName) {
+    goToPage("choice");
+    setChoiceNameStatus("Please set your name once before starting practice.");
+    if (choiceNameInput) {
+      choiceNameInput.focus();
+      choiceNameInput.select();
+    }
+    return;
+  }
+  saveUserName(enteredName);
+  goToPage("scenarioBriefing");
+});
+
+beginPracticeBtn.addEventListener("click", () => {
+  const enteredName = (
+    state.nameEditorOpen && briefUserNameInput
+      ? briefUserNameInput.value
+      : state.userName || userNameInput.value
+  ).trim();
+  if (!enteredName) {
+    window.alert("Please set your name before starting practice.");
+    if (editUserNameBtn) {
+      state.nameEditorOpen = true;
+      renderBriefingPage();
+      briefUserNameInput.focus();
+    }
+    return;
+  }
+  saveUserName(enteredName);
+  enterPracticeCompactMode();
+  openSessionIntro();
+  goToPage("practice");
+  render();
+  renderHeader();
+  promptInput.focus();
+});
+
+cancelBriefingBtn.addEventListener("click", () => {
+  goToPage("choice");
+});
+
+backFromBriefingBtn.addEventListener("click", () => {
+  renderScenarioPicker();
+});
+
+if (editUserNameBtn && userNameEditor && briefUserNameInput) {
+  editUserNameBtn.addEventListener("click", () => {
+    state.nameEditorOpen = !state.nameEditorOpen;
+    renderBriefingPage();
+    if (state.nameEditorOpen) {
+      briefUserNameInput.value = state.userName;
+      briefUserNameInput.focus();
+      briefUserNameInput.select();
+      return;
+    }
+
+    saveUserName(briefUserNameInput.value);
+    renderUserNameSummary();
+  });
+
+  briefUserNameInput.addEventListener("input", () => {
+    saveUserName(briefUserNameInput.value);
+    renderUserNameSummary();
+  });
+
+  briefUserNameInput.addEventListener("blur", () => {
+    if (!state.nameEditorOpen) {
+      return;
+    }
+    saveUserName(briefUserNameInput.value);
+    state.nameEditorOpen = false;
+    renderBriefingPage();
+  });
+}
+
+bindScenarioPickerInteractions();
+
+if (choiceSaveNameBtn && choiceNameInput) {
+  choiceSaveNameBtn.addEventListener("click", () => {
+    const typed = choiceNameInput.value.trim();
+    if (!typed) {
+      setChoiceNameStatus("Please enter your name first.");
+      choiceNameInput.focus();
+      return;
+    }
+    saveUserName(typed);
+    renderChoiceIdentity();
+    renderUserNameSummary();
+    renderHeader();
+    if (state.page === "peerPracticum") {
+      renderPeerPracticum();
+    }
+  });
+
+  choiceNameInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      choiceSaveNameBtn.click();
+    }
+  });
+}
+
+bindScenarioPickerInteractions();
+
+modulePrevBtn.addEventListener("click", () => {
+  if (state.moduleIndex > 0) {
+    state.moduleIndex -= 1;
+    renderModule();
+  }
+});
+
+moduleNextBtn.addEventListener("click", () => {
+  if (state.moduleIndex < MODULE_SECTIONS.length - 1) {
+    state.moduleIndex += 1;
+    renderModule();
+  }
+});
+
+submitQuizBtn.addEventListener("click", () => {
+  const q1 = document.querySelector("input[name='q1']:checked")?.value;
+  const q2 = document.querySelector("input[name='q2']:checked")?.value;
+  const q3 = document.querySelector("input[name='q3']:checked")?.value;
+
+  if (!q1 || !q2 || !q3) {
+    quizResultText.textContent = "Please answer all questions before submitting.";
+    return;
+  }
+
+  const score = Number(q1 === "b") + Number(q2 === "c") + Number(q3 === "b");
+  state.moduleQuizPassed = score >= 2;
+  const misses = [];
+  if (q1 !== "b") misses.push("start with shared purpose");
+  if (q2 !== "c") misses.push("listen before pushing your point");
+  if (q3 !== "b") misses.push("close with one action, one owner, and a follow-up");
+
+  quizResultText.textContent = state.moduleQuizPassed
+    ? `Great. You scored ${score}/3. Your choices show the right sequence: purpose, curiosity, then commitment.`
+    : `You scored ${score}/3. Revisit ${misses.join(", ")} so your next response feels more grounded.`;
+
+  renderModule();
+  if (state.moduleQuizPassed) {
+    startPracticeBtn.focus();
+    startPracticeBtn.textContent = "Start Conversation Practice";
+  }
+});
+
+backToChoiceBtn.addEventListener("click", () => {
+  goToPage("choice");
+});
+
+restartPracticeBtn.addEventListener("click", () => {
+  openSessionIntro();
+  goToPage("practice");
+  render();
+  promptInput.focus();
+});
+
+goHomeBtn.addEventListener("click", () => {
+  goToPage("landing");
+});
+
+if (goLearningPathBtn) {
+  goLearningPathBtn.addEventListener("click", () => {
+    goToPage("choice");
+  });
+}
+
+if (backToBriefingBtn) {
+  backToBriefingBtn.addEventListener("click", () => {
+    goToPage("scenarioBriefing");
+  });
+}
+
+if (peerBackToChoiceBtn) {
+  peerBackToChoiceBtn.addEventListener("click", () => {
+    state.peer.nameEditorOpen = false;
+    goToPage("choice");
+  });
+}
+
+if (peerEditNameBtn && peerUserNameEditor && peerUserNameInput) {
+  peerEditNameBtn.addEventListener("click", () => {
+    state.peer.nameEditorOpen = !state.peer.nameEditorOpen;
+    if (!state.peer.nameEditorOpen) {
+      saveUserName(peerUserNameInput.value);
+      renderUserNameSummary();
+      renderHeader();
+    }
+    renderPeerPracticum();
+    if (state.peer.nameEditorOpen) {
+      peerUserNameInput.focus();
+      peerUserNameInput.select();
+    }
+  });
+
+  peerUserNameInput.addEventListener("input", () => {
+    saveUserName(peerUserNameInput.value);
+    renderUserNameSummary();
+    renderHeader();
+    if (peerIdentityName) {
+      peerIdentityName.textContent = getLearnerName();
+    }
+  });
+
+  peerUserNameInput.addEventListener("blur", () => {
+    if (!state.peer.nameEditorOpen) {
+      return;
+    }
+    saveUserName(peerUserNameInput.value);
+    state.peer.nameEditorOpen = false;
+    renderUserNameSummary();
+    renderHeader();
+    renderPeerPracticum();
+  });
+}
+
+if (peerChatForm) {
+  peerChatForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (!state.peer.activeSession) {
+      return;
+    }
+    const text = peerChatInput.value.trim();
+    if (!text) {
+      return;
+    }
+    state.peer.activeSession.messages.push({
+      id: `chat-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      author: getLearnerName(),
+      text,
+      timestamp: Date.now(),
+    });
+    state.peer.activeSession.messages = state.peer.activeSession.messages.slice(-120);
+    peerChatInput.value = "";
+    renderPeerSession();
+  });
+}
+
+if (peerVoiceModeBtn) {
+  peerVoiceModeBtn.addEventListener("click", () => {
+    togglePeerVoiceMode();
+  });
+}
+
+if (peerSharedNotes) {
+  peerSharedNotes.addEventListener("input", () => {
+    state.peer.sharedNotesSaved = false;
+    if (peerSharedNotesStatus) {
+      peerSharedNotesStatus.textContent = "Unsaved changes.";
+    }
+  });
+
+  peerSharedNotes.addEventListener("change", () => {
+    state.peer.sharedNotes = peerSharedNotes.value.trim();
+    state.peer.sharedNotesSaved = Boolean(state.peer.sharedNotes);
+    if (peerSharedNotesStatus) {
+      peerSharedNotesStatus.textContent = state.peer.sharedNotesSaved
+        ? "Saved. Click Edit to update notes."
+        : "Not saved yet.";
+    }
+    renderPeerSession();
+  });
+}
+
+if (peerSaveSharedNotesBtn) {
+  peerSaveSharedNotesBtn.addEventListener("click", () => {
+    state.peer.sharedNotes = peerSharedNotes?.value.trim() || "";
+    state.peer.sharedNotesSaved = Boolean(state.peer.sharedNotes);
+    if (peerSharedNotesStatus) {
+      peerSharedNotesStatus.textContent = state.peer.sharedNotesSaved
+        ? "Saved. Click Edit to update notes."
+        : "Not saved yet.";
+    }
+    renderPeerSession();
+  });
+}
+
+if (peerEditSharedNotesBtn) {
+  peerEditSharedNotesBtn.addEventListener("click", () => {
+    state.peer.sharedNotesSaved = false;
+    if (peerSharedNotesStatus) {
+      peerSharedNotesStatus.textContent = "Editing enabled. Save when finished.";
+    }
+    renderPeerSession();
+    peerSharedNotes?.focus();
+  });
+}
+
+document.querySelectorAll("[data-peer-stage]").forEach((checkbox) => {
+  checkbox.addEventListener("change", () => {
+    const stage = checkbox.getAttribute("data-peer-stage");
+    state.peer.sessionChecklist[stage] = checkbox.checked;
+  });
+});
+
+if (peerSubmitFeedbackBtn) {
+  peerSubmitFeedbackBtn.addEventListener("click", () => {
+    const text = peerFeedbackInput.value.trim();
+    if (!text) {
+      return;
+    }
+    state.peer.feedbackDraft = text;
+    state.peer.feedbackSent = true;
+    state.peer.feedbackNotes.push({
+      id: `feedback-${Date.now()}`,
+      author: getLearnerName(),
+      text,
+      timestamp: Date.now(),
+    });
+    state.peer.feedbackNotes = state.peer.feedbackNotes.slice(-20);
+    renderPeerSession();
+  });
+}
+
+if (peerEditFeedbackBtn) {
+  peerEditFeedbackBtn.addEventListener("click", () => {
+    state.peer.feedbackSent = false;
+    if (peerFeedbackStatus) {
+      peerFeedbackStatus.textContent = "Editing enabled. Send when ready.";
+    }
+    renderPeerSession();
+    peerFeedbackInput?.focus();
+  });
+}
+
+if (peerUserDirectory) {
+  peerUserDirectory.addEventListener("click", (event) => {
+    const requestId = event.target.closest("[data-peer-request]")?.getAttribute("data-peer-request");
+    if (!requestId) {
+      return;
+    }
+    const alreadyRequested = state.peer.requests.some((item) => item.peerId === requestId && item.status !== "completed");
+    if (alreadyRequested) {
+      return;
+    }
+    state.peer.requests.push({
+      id: `req-${Date.now()}`,
+      peerId: requestId,
+      status: "pending",
+      createdAt: Date.now(),
+    });
+    persistPeerRequests();
+    renderPeerRequests();
+  });
+}
+
+if (peerRequestList) {
+  peerRequestList.addEventListener("click", (event) => {
+    const acceptId = event.target.closest("[data-peer-accept]")?.getAttribute("data-peer-accept");
+    if (acceptId) {
+      const req = state.peer.requests.find((item) => item.id === acceptId);
+      if (req) {
+        req.status = "accepted";
+        persistPeerRequests();
+        renderPeerRequests();
+      }
+      return;
+    }
+
+    const startId = event.target.closest("[data-peer-start]")?.getAttribute("data-peer-start");
+    if (startId) {
+      startPeerSession(startId);
+    }
+  });
+}
+
+if (peerEndSessionBtn) {
+  peerEndSessionBtn.addEventListener("click", () => {
+    endPeerSession();
+  });
+}
+
+if (peerTabCommunity || peerTabSession || peerTabReflection || peerTabDashboard) {
+  document.querySelectorAll("[data-peer-view]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const view = button.getAttribute("data-peer-view");
+      if (!view) {
+        return;
+      }
+      setPeerView(view);
+    });
+  });
+}
+
+document.querySelectorAll("[data-peer-dashboard-view]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const view = button.getAttribute("data-peer-dashboard-view");
+    if (!view) {
+      return;
+    }
+    renderPeerDashboardTab(view);
+  });
+});
+
+window.addEventListener("storage", (event) => {
+  if (event.key !== PEER_REQUESTS_KEY) {
+    return;
+  }
+  state.peer.requests = loadPeerRequests();
+  renderPeerRequests();
+});
+
+openScenarioBuilderBtn.addEventListener("click", () => {
+  openScenarioBuilderForCreate();
+});
+
+scenarioBuilderForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const title = builderTitle.value.trim();
+  const aiRole = builderRole.value.trim();
+  const difficulty = builderDifficulty.value;
+  const context = builderContext.value.trim();
+  const opening = builderOpening.value.trim();
+  const scaffoldLevel = normalizeScaffoldLevel(Number(builderScaffoldLevel?.value || 1));
+  const goals = builderGoals.value
+    .split("\n")
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  if (!title || !aiRole || !context || !opening || goals.length === 0) {
+    return;
+  }
+
+  const isEditing = Boolean(state.editingScenarioId);
+  const scenarioId = state.editingScenarioId || `custom-${Date.now()}`;
+
+  if (isEditing) {
+    const index = state.scenarios.findIndex((item) => item.id === scenarioId);
+    if (index === -1) {
+      return;
+    }
+    const existing = state.scenarios[index];
+    state.scenarios[index] = {
+      ...existing,
+      title,
+      difficulty,
+      context,
+      aiRole,
+      opening,
+      scaffoldLevel,
+      goals,
+      practice: buildCustomPractice(goals, aiRole),
+    };
+  } else {
+    const customScenario = {
+      id: scenarioId,
+      title,
+      difficulty,
+      context,
+      aiRole,
+      opening,
+      scaffoldLevel,
+      goals,
+      custom: true,
+      createdAt: Date.now(),
+      practice: buildCustomPractice(goals, aiRole),
+    };
+    state.scenarios.push(customScenario);
+  }
+
+  persistScenarioState();
+  state.selectedScenarioId = scenarioId;
+  applyScenarioScaffoldDefault(scenarioId);
+  state.briefTab = "scenario";
+  state.scenarioListExpanded = false;
+  state.scenarioPickerExpanded = false;
+  state.editingScenarioId = null;
+  openSessionIntro();
+  render();
+  requestAnimationFrame(() => {
+    scenariosBody.scrollTop = 0;
+  });
+  createScenarioBtn.textContent = "Create Scenario";
+
+  if (state.page === "scenarioBriefing") {
+    renderScenarioPicker();
+  }
+
+  scenarioBuilderDialog.close();
+});
+
+scenarioBuilderForm.addEventListener("reset", () => {
+  state.editingScenarioId = null;
+  createScenarioBtn.textContent = "Create Scenario";
+  scenarioBuilderDialog.close();
+});
+
+// Goals page event listeners
+goalsBackBtn.addEventListener("click", () => {
+  goToPage("landing");
+});
+
+goalsNextBtn.addEventListener("click", () => {
+  if (state.userLearningGoals.length > 0 && state.userLearningGoals.length <= 3) {
+    goToPage("choice");
+  }
+});
+
+applyScenarioScaffoldDefault(state.selectedScenarioId);
+openSessionIntro();
+userNameInput.value = state.userName;
+render();
+renderModule();
+renderPage();
+renderVoiceUi();
