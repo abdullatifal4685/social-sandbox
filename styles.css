@@ -3071,6 +3071,21 @@ body.hide-left.hide-right .layout {
   border: 1px solid rgba(14, 76, 227, 0.2);
 }
 
+/* Tailored Scenario Styling */
+.scenario-picker-card.is-tailored {
+  border-color: rgba(14, 163, 122, 0.4);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(217, 255, 246, 0.3) 100%);
+}
+
+.scenario-picker-card.is-tailored::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(14, 163, 122, 0.08) 0%, rgba(14, 163, 122, 0.02) 100%);
+  pointer-events: none;
+}
+
 
 .brief-tab.active {
   color: #fff;

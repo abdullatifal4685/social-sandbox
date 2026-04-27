@@ -856,6 +856,8 @@ const state = {
   userName: localStorage.getItem(USER_NAME_KEY) || "",
   userLearningGoals: JSON.parse(localStorage.getItem("sandbox.userLearningGoals") || "[]"),
   userCustomGoals: JSON.parse(localStorage.getItem("sandbox.userCustomGoals") || "[]"),
+  customTailoredModules: JSON.parse(localStorage.getItem("sandbox.customTailoredModules") || "[]"),
+  customTailoredScenarios: JSON.parse(localStorage.getItem("sandbox.customTailoredScenarios") || "[]"),
   nameEditorOpen: false,
   messages: [],
   stageIndex: 0,
@@ -2022,21 +2024,26 @@ window.__ssNavigate = (targetPage) => {
 };
 
 function renderModule() {
-  const total = MODULE_SECTIONS.length;
+  // Combine custom tailored modules with standard modules
+  const allModules = [...state.customTailoredModules, ...MODULE_SECTIONS];
+  const total = allModules.length;
   const index = state.moduleIndex;
-  const section = MODULE_SECTIONS[index];
+  const section = allModules[index];
   const progress = Math.round(((index + 1) / total) * 100);
 
   moduleProgressLabel.textContent = `Module ${index + 1}/${total}`;
   moduleProgressPercent.textContent = `${progress}%`;
   moduleProgressBar.style.width = `${progress}%`;
   
-  // Check if this module is recommended for user's goals
+  // Check if this module is custom or recommended for user's goals
   const allUserGoals = [...state.userLearningGoals, ...state.userCustomGoals];
-  const isRecommendedForGoals = allUserGoals.length > 0;
+  const isCustom = section.isCustom;
+  const isRecommendedForGoals = allUserGoals.length > 0 && !isCustom;
   
   let titleHtml = section.title;
-  if (isRecommendedForGoals) {
+  if (isCustom) {
+    titleHtml = `${section.title} <span style="display: inline-block; background: rgba(14, 163, 122, 0.2); color: var(--ink-dark); padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; margin-left: 0.6rem;">Tailored for you</span>`;
+  } else if (isRecommendedForGoals) {
     titleHtml = `${section.title} <span style="display: inline-block; background: rgba(29, 95, 229, 0.15); color: var(--accent); padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; margin-left: 0.6rem;">Recommended for your goals</span>`;
   }
   
@@ -2044,7 +2051,7 @@ function renderModule() {
   moduleSummary.textContent = section.summary;
   moduleSectionCard.innerHTML = `
     <p>${section.example}</p>
-    <ul>${section.points.map((point) => `<li>${point}</li>`).join("")}</ul>
+    <ul>${section.points.map((point) => `<li>${escapeHtml(point)}</li>`).join("")}</ul>
   `;
 
   modulePrevBtn.disabled = index === 0;
@@ -2166,10 +2173,12 @@ function renderScenarioPicker() {
         })
         .join("");
       const isRecommended = state.userLearningGoals.length > 0 && scenarioGoals.some((id) => state.userLearningGoals.includes(id));
+      const isTailored = scenario.isCustom || scenario.customGoal;
 
       return `
-      <article class="scenario-picker-card ${scenario.id === state.selectedScenarioId ? "active" : ""} ${isRecommended ? "is-recommended" : ""}" data-scenario-id="${escapeHtml(scenario.id)}">
-        ${isRecommended ? '<div class="recommended-badge">Recommended for your goals</div>' : ""}
+      <article class="scenario-picker-card ${scenario.id === state.selectedScenarioId ? "active" : ""} ${isRecommended ? "is-recommended" : ""} ${isTailored ? "is-tailored" : ""}" data-scenario-id="${escapeHtml(scenario.id)}">
+        ${isTailored ? '<div class="recommended-badge" style="background: rgba(14, 163, 122, 0.9);">Tailored for you: ' + escapeHtml(scenario.customGoal || scenario.title) + '</div>' : ""}
+        ${isRecommended && !isTailored ? '<div class="recommended-badge">Recommended for your goals</div>' : ""}
         <button class="picker-card-select" data-scenario-id="${escapeHtml(scenario.id)}" type="button">
           ${scenario.imageUrl ? `<img class="picker-card-illustration" src="${escapeHtml(scenario.imageUrl)}" alt="Illustration for ${escapeHtml(scenario.title)}" />` : ""}
           <div class="picker-card-head">
@@ -2218,7 +2227,12 @@ function renderScenarioPicker() {
 }
 
 function getOrderedScenarios() {
-  const baseScenarios = state.scenarios
+  // Separate custom tailored scenarios from base scenarios
+  const tailoredScenarios = state.scenarios.filter((s) => s.isCustom || s.customGoal);
+  const baseScenarios = state.scenarios.filter((s) => !s.isCustom && !s.customGoal);
+
+  // Sort base scenarios
+  const sortedBase = baseScenarios
     .map((scenario, index) => ({ scenario, index }))
     .sort((a, b) => {
       if (a.scenario.custom !== b.scenario.custom) {
@@ -2231,12 +2245,14 @@ function getOrderedScenarios() {
     })
     .map((entry) => entry.scenario);
 
-  // If user has selected learning goals, reorder scenarios by goal relevance
+  // If user has selected learning goals, reorder by goal relevance
+  let reordered = sortedBase;
   if (state.userLearningGoals && state.userLearningGoals.length > 0) {
-    return getRecommendedScenariosForGoals(state.userLearningGoals);
+    reordered = getRecommendedScenariosForGoals(state.userLearningGoals);
   }
 
-  return baseScenarios;
+  // Prioritize custom tailored scenarios first
+  return [...tailoredScenarios, ...reordered];
 }
 
 const PEER_DIRECTORY = [
@@ -3589,6 +3605,141 @@ ${userMessages.map((m, i) => `Message ${i + 1}: ${m}`).join("\n\n")}`,
   } catch (error) {
     console.warn("Analytics generation failed:", error);
     return "Clarity Score: 75\nFiller Words: 3\nRepeated Opener: [analyzing...]\nOverview: Good conversation flow.";
+  }
+}
+
+async function generateTailoredLearningModule(customGoal) {
+  try {
+    const systemPrompt = {
+      role: "system",
+      content: `You are an expert in difficult conversations. Create a focused, short learning module for someone who wants to improve their skill in: "${customGoal}"
+      
+Return a JSON object with this exact structure:
+{
+  "title": "Short title (5-8 words) specific to the goal",
+  "summary": "One sentence explaining the learning objective",
+  "points": ["Key point 1", "Key point 2", "Key point 3"],
+  "example": "A concrete workplace example showing how to apply this skill"
+}
+
+Make it practical, actionable, and specific to the stated goal.`,
+    };
+
+    const response = await callOpenAI([systemPrompt], "gpt-4");
+    const parsed = JSON.parse(response);
+    
+    return {
+      id: `custom-module-${Date.now()}`,
+      customGoal: customGoal,
+      title: parsed.title,
+      summary: parsed.summary,
+      points: parsed.points,
+      example: parsed.example,
+      isCustom: true,
+    };
+  } catch (error) {
+    console.error("Failed to generate tailored module:", error);
+    return {
+      id: `custom-module-${Date.now()}`,
+      customGoal: customGoal,
+      title: customGoal,
+      summary: "Custom learning goal",
+      points: ["Practice the specific skill you want to improve", "Reflect on what works in your context", "Apply it in real conversations"],
+      example: "Consider a real situation where this skill would help you. Practice it in a safe environment first.",
+      isCustom: true,
+    };
+  }
+}
+
+async function generateTailoredPracticeScenario(customGoal) {
+  try {
+    const systemPrompt = {
+      role: "system",
+      content: `You are an expert in creating practice scenarios for difficult conversations. Create a realistic practice scenario for someone who wants to improve: "${customGoal}"
+      
+Return a JSON object with this exact structure:
+{
+  "title": "Scenario title (5-8 words) related to the custom goal",
+  "context": "2-3 sentence realistic scenario setup explaining the situation and why it's difficult",
+  "aiRole": "The role the AI will play (e.g., Manager, Colleague, Client)",
+  "opening": "The opening line the AI will say to start the scenario",
+  "goals": ["Practice goal 1", "Practice goal 2", "Practice goal 3"],
+  "difficulty": "Challenge type (e.g., Time pressure, Emotional tension, Power imbalance)"
+}
+
+Make the scenario realistic, relevant to the stated goal, and actionable.`,
+    };
+
+    const response = await callOpenAI([systemPrompt], "gpt-4");
+    const parsed = JSON.parse(response);
+    
+    return {
+      id: `custom-scenario-${Date.now()}`,
+      title: parsed.title,
+      context: parsed.context,
+      aiRole: parsed.aiRole,
+      opening: parsed.opening,
+      goals: parsed.goals,
+      difficulty: parsed.difficulty,
+      customGoal: customGoal,
+      custom: true,
+      scenarioType: "custom",
+      silenceMetrics: false,
+      practice: {
+        Introduce: {
+          objective: "Open the conversation in a way that applies to your goal.",
+          starters: [
+            { style: "direct", text: "Start with your main point related to: " + customGoal },
+          ],
+        },
+        Listen: {
+          objective: "Ask questions to understand the other person's perspective.",
+          starters: [
+            { style: "balanced", text: "Ask what they think about the situation." },
+          ],
+        },
+        Empathize: {
+          objective: "Acknowledge their perspective.",
+          starters: [
+            { style: "balanced", text: "Acknowledge their position or constraints." },
+          ],
+        },
+        Talk: {
+          objective: "Share your perspective clearly.",
+          starters: [
+            { style: "balanced", text: "Share your view and why it matters." },
+          ],
+        },
+        Solve: {
+          objective: "Agree on next steps.",
+          starters: [
+            { style: "balanced", text: "Propose a way forward that addresses both perspectives." },
+          ],
+        },
+      },
+    };
+  } catch (error) {
+    console.error("Failed to generate tailored scenario:", error);
+    return {
+      id: `custom-scenario-${Date.now()}`,
+      title: `Practice: ${customGoal}`,
+      context: `Practice the skill "${customGoal}" in a realistic workplace conversation.`,
+      aiRole: "Colleague",
+      opening: "I wanted to talk with you about something important. What's on your mind?",
+      goals: ["Apply your learning goal", "Stay composed", "Find a solution"],
+      difficulty: "Custom scenario",
+      customGoal: customGoal,
+      custom: true,
+      scenarioType: "custom",
+      silenceMetrics: false,
+      practice: {
+        Introduce: { objective: "Open the conversation.", starters: [{ style: "direct", text: "Begin your conversation." }] },
+        Listen: { objective: "Listen.", starters: [{ style: "direct", text: "Ask a question." }] },
+        Empathize: { objective: "Empathize.", starters: [{ style: "direct", text: "Acknowledge." }] },
+        Talk: { objective: "Talk.", starters: [{ style: "direct", text: "Share your view." }] },
+        Solve: { objective: "Solve.", starters: [{ style: "direct", text: "Propose next steps." }] },
+      },
+    };
   }
 }
 
@@ -5562,14 +5713,42 @@ goalsNextBtn.addEventListener("click", () => {
   }
 });
 
-addCustomGoalBtn.addEventListener("click", () => {
+addCustomGoalBtn.addEventListener("click", async () => {
   const customGoalText = customGoalInput.value.trim();
   if (customGoalText && !state.userCustomGoals.includes(customGoalText)) {
     const totalGoals = state.userLearningGoals.length + state.userCustomGoals.length;
     if (totalGoals < 3) {
+      // Show loading state
+      addCustomGoalBtn.disabled = true;
+      const originalText = addCustomGoalBtn.textContent;
+      addCustomGoalBtn.textContent = "Generating tailored content...";
+      
       state.userCustomGoals.push(customGoalText);
       localStorage.setItem("sandbox.userCustomGoals", JSON.stringify(state.userCustomGoals));
       customGoalInput.value = "";
+      
+      // Generate AI-tailored content
+      try {
+        const tailoredModule = await generateTailoredLearningModule(customGoalText);
+        const tailoredScenario = await generateTailoredPracticeScenario(customGoalText);
+        
+        // Store tailored module
+        state.customTailoredModules.push(tailoredModule);
+        localStorage.setItem("sandbox.customTailoredModules", JSON.stringify(state.customTailoredModules));
+        
+        // Add tailored scenario to scenarios list
+        state.scenarios.push(tailoredScenario);
+        state.customTailoredScenarios.push(tailoredScenario);
+        localStorage.setItem("sandbox.customTailoredScenarios", JSON.stringify(state.customTailoredScenarios));
+        persistCustomScenarios();
+      } catch (error) {
+        console.error("Error generating tailored content:", error);
+        alert("Could not generate personalized content. Check your API key in Settings.");
+      } finally {
+        addCustomGoalBtn.disabled = false;
+        addCustomGoalBtn.textContent = originalText;
+      }
+      
       renderCustomGoalsList();
       updateGoalsPageState();
     }
