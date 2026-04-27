@@ -6457,9 +6457,27 @@ goalsBackBtn.addEventListener("click", () => {
   goToPage("landing");
 });
 
-goalsNextBtn.addEventListener("click", () => {
+goalsNextBtn.addEventListener("click", async () => {
+  // Read checked built-in goals from the goals grid (in case UI hasn't synced state)
+  try {
+    const checked = Array.from(document.querySelectorAll('#goalsGrid input[type="checkbox"]:checked')).map((el) => el.value);
+    if (checked && checked.length >= 0) {
+      state.userLearningGoals = checked.slice(0, 3);
+      localStorage.setItem('sandbox.userLearningGoals', JSON.stringify(state.userLearningGoals));
+    }
+  } catch (err) {
+    // ignore if DOM not available
+  }
+
   const totalGoals = state.userLearningGoals.length + state.userCustomGoals.length;
   if (totalGoals > 0 && totalGoals <= 3) {
+    // Ensure goal-tailored scenarios/modules are generated before navigating
+    try {
+      await ensureGoalTailoredScenario();
+    } catch (e) {
+      // proceed anyway
+      console.warn('ensureGoalTailoredScenario failed', e);
+    }
     goToPage("choice");
   }
 });
