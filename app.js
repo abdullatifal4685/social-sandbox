@@ -3959,7 +3959,7 @@ function maybeQueueInMomentReflection() {
   state.rightTab = "coach";
 }
 
-function generateFeedback() {
+async function generateFeedback() {
   const scores = getStageScoresFromMessages(state.messages);
   const scenario = getScenario();
 
@@ -3983,41 +3983,25 @@ function generateFeedback() {
     "transfer-plan": "Transfer Plan",
   };
 
+  // Get AI-powered coaching feedback
+  let coachingFeedback = "";
+  try {
+    coachingFeedback = await generateCoachingFeedback(state.messages);
+  } catch (error) {
+    console.warn("Failed to generate coaching feedback:", error);
+    coachingFeedback = `Strong areas: ${strong.length ? strong.join(", ") : "overall engagement"}. Growth areas: ${weak.length ? weak.join(", ") : "precision and clarity"}.`;
+  }
+
   const overviewHtml = `
     <article class="analytics-card">
       <h4>Strength</h4>
-      <p class="analytics-metric">You demonstrated strength in ${strong.length ? strong.join(", ") : "conversation momentum"}.</p>
+      <p class="analytics-metric">${escapeHtml(coachingFeedback.split("GROWTH")[0].replace(/STRENGTH:|strength:/i, "").trim())}</p>
       <p class="muted">Keep this behavior consistent while you focus your next practice on one weaker stage.</p>
     </article>
     <article class="analytics-card">
       <h4>Growth Area</h4>
-      <ul>
-        <li>${weak.length ? `Prioritize ${weak.join(", ")} with one sentence template each.` : "Increase precision by using one data point in each key response."}</li>
-        <li>Reduce filler language and end with a concrete next-step request.</li>
-      </ul>
-    </article>
-    <article class="analytics-card">
-      <h4>Follow-up Improvement Plan</h4>
-      <p class="muted">Choose one weakness to work on now. Practice with AI, with a peer, or with a quick drill, then track completion.</p>
-      <div class="improvement-cards">
-        ${targetStages
-          .map((stage) => {
-            const slug = stage.toLowerCase();
-            return `
-              <section class="improvement-card">
-                <h5>${escapeHtml(stage)} <span class="improvement-stage-tag">${getWeaknessLabel(scoreMap[stage] ?? 0)}</span></h5>
-                <div class="improvement-actions">
-                  <button class="ghost" type="button" data-improve-action="ai-now" data-stage="${escapeHtml(stage)}">Practice with AI</button>
-                  <button class="ghost" type="button" data-improve-action="peer-now" data-stage="${escapeHtml(stage)}">Practice with Peer</button>
-                  <button class="ghost" type="button" data-improve-action="drill" data-stage="${escapeHtml(stage)}">Generate AI Drill</button>
-                  <button class="ghost" type="button" data-improve-action="mark-done" data-stage="${escapeHtml(stage)}">Mark Improved</button>
-                </div>
-                <div id="improve-drill-${slug}" class="improvement-drill muted">No drill generated yet.</div>
-              </section>
-            `;
-          })
-          .join("")}
-      </div>
+      <p class="analytics-metric">${escapeHtml(coachingFeedback.split("GROWTH")[1]?.replace(/AREA:|area:/i, "").trim() || "Focus on your weaker ILETS stages.")}</p>
+      <p class="muted">Practice this area in your next session for meaningful improvement.</p>
     </article>
   `;
 
@@ -4546,8 +4530,8 @@ promptInput.addEventListener("input", () => {
   }
 });
 
-finishBtn.addEventListener("click", () => {
-  generateFeedback();
+finishBtn.addEventListener("click", async () => {
+  await generateFeedback();
   state.rightTab = "feedback";
   renderRightPanel();
   goToPage("final");
