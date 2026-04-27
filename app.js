@@ -2214,6 +2214,11 @@ function renderModule() {
 }
 
 function getLearningModules() {
+  // If we have a full tailored learning path (7+ modules), use only that
+  if (state.customTailoredModules.length >= 7) {
+    return state.customTailoredModules;
+  }
+  // Otherwise mix any partial tailored modules with defaults
   return [...state.customTailoredModules, ...MODULE_SECTIONS];
 }
 
@@ -4153,6 +4158,102 @@ Be specific, practical, and actionable. Avoid generic advice. Reference specific
       ],
       isCustom: true,
     };
+  }
+}
+
+async function generateTailoredLearningPath(goalDescription) {
+  try {
+    const systemPrompt = {
+      role: "system",
+      content: `You are an expert in workplace communication and the ILETS framework (Introduce, Listen, Empathize, Talk, Solve).
+
+Create a COMPLETE 7-MODULE LEARNING PATH tailored to help someone improve: "${goalDescription}"
+
+Each module should:
+- Be specific to the learner's goal (not generic)
+- Build progressively (module 1 → module 7)
+- Include ILETS-aligned frameworks and techniques
+- Be practical, actionable, and workplace-relevant
+- Include real examples and specific phrases they can use
+
+Return a JSON array with 7 objects. EACH module must have this exact structure:
+{
+  "title": "Module title (5-8 words) specific to the goal",
+  "summary": "1-2 sentence summary of what this module teaches",
+  "objective": "One sentence: what learner can do after this module",
+  "overview": "2-3 sentences explaining the module and why it matters",
+  "keyPrinciples": [
+    {"name": "Principle", "description": "Specific explanation"},
+    {"name": "Principle", "description": "Specific explanation"},
+    {"name": "Principle", "description": "Specific explanation"}
+  ],
+  "commonMistakes": [
+    {"mistake": "What people do", "why": "Why it backfires", "better": "What to do instead"},
+    {"mistake": "Common error", "why": "Why it fails", "better": "Better approach"}
+  ],
+  "framework": "Step-by-step technique aligned with ILETS when relevant | Use pipe-separated steps",
+  "concreteExample": "3+ sentence detailed workplace scenario with dialogue showing the skill",
+  "tips": ["Tip 1", "Tip 2", "Tip 3"]
+}
+
+PROGRESSION EXAMPLE:
+- Module 1: Foundation (prepare, self-awareness)
+- Module 2-3: Early stages (Introduce, Listen skills)
+- Module 4-5: Middle stages (Empathize, Talk skills)
+- Module 6-7: Advanced (Solve, handling resistance, long-term success)
+
+Be specific, practical, and avoid generic placeholders. Reference specific phrases and techniques.
+
+Return as a valid JSON array ONLY, no extra text.`,
+    };
+
+    const response = await callOpenAI([systemPrompt], "gpt-4");
+    const parsed = JSON.parse(response);
+    
+    if (!Array.isArray(parsed)) {
+      throw new Error("Response is not an array");
+    }
+
+    return parsed.map((module, index) => ({
+      id: `tailored-module-${Date.now()}-${index}`,
+      ...module,
+      customGoal: goalDescription,
+      isCustom: true,
+      isTailored: true,
+      moduleSequenceIndex: index,
+    }));
+  } catch (error) {
+    console.error("Failed to generate tailored learning path:", error);
+    // Return default fallback path
+    return [
+      {
+        id: `fallback-module-${Date.now()}-0`,
+        title: `1. Prepare for ${goalDescription}`,
+        summary: "Foundation and self-awareness",
+        objective: `Understand how to approach ${goalDescription} effectively`,
+        overview: `This module helps you prepare mentally and strategically for ${goalDescription}. You'll set a clear intention and understand the stakes.`,
+        keyPrinciples: [
+          { name: "Intention Setting", description: "Be clear about what you want to accomplish" },
+          { name: "Self-Awareness", description: "Understand your triggers and default reactions" },
+          { name: "Strategic Planning", description: "Prepare key messages and questions in advance" },
+        ],
+        commonMistakes: [
+          { mistake: "Going in unprepared", why: "Leads to reactive, defensive responses", better: "Take 5-10 minutes to plan your opening and intent" },
+          { mistake: "Focusing only on your point", why: "Misses the other person's needs", better: "Plan what you want to understand about their perspective" },
+        ],
+        framework: "Step 1: Set one clear intention | Step 2: List 2-3 key points | Step 3: Prepare one open question | Step 4: Identify your emotional triggers | Step 5: Commit to one behavior",
+        concreteExample: `You need to raise a concern about a colleague's work. Instead of rushing in frustrated, pause and think: "I want to understand what they're facing AND help them improve. I'll open by asking what's driving their approach, then share my concern. I'll stay calm even if they get defensive."`,
+        tips: [
+          "Write down your intention in one sentence",
+          "Plan your opening sentence before the conversation",
+          "Identify one thing you want to learn from them",
+        ],
+        customGoal: goalDescription,
+        isCustom: true,
+        isTailored: true,
+        moduleSequenceIndex: 0,
+      },
+    ];
   }
 }
 
@@ -6475,20 +6576,20 @@ goalsNextBtn.addEventListener("click", async () => {
 
   const totalGoals = state.userLearningGoals.length + state.userCustomGoals.length;
   if (totalGoals > 0 && totalGoals <= 3) {
-    // Generate tailored module and scenario based on selected goals
+    // Generate full tailored learning path (7 modules) and scenario based on selected goals
     try {
-      // Get goal labels for module generation
+      // Get goal labels for path generation
       const allGoalLabels = [];
       state.userLearningGoals.forEach((goalId) => {
         const goal = LEARNING_GOALS.find((g) => g.id === goalId);
         if (goal) allGoalLabels.push(goal.title);
       });
       
-      // If there are built-in goals selected and no existing tailored modules, generate one
-      if (allGoalLabels.length > 0 && state.customTailoredModules.length === 0) {
+      // If there are built-in goals selected, generate a full tailored path (7 modules)
+      if (allGoalLabels.length > 0) {
         const goalDescription = allGoalLabels.join(" + ");
-        const tailoredModule = await generateTailoredLearningModule(goalDescription);
-        state.customTailoredModules.push(tailoredModule);
+        const tailoredPath = await generateTailoredLearningPath(goalDescription);
+        state.customTailoredModules = tailoredPath; // Replace with full path, not append
         state.moduleIndex = 0;
         localStorage.setItem("sandbox.customTailoredModules", JSON.stringify(state.customTailoredModules));
       }
@@ -6515,19 +6616,19 @@ addCustomGoalBtn.addEventListener("click", async () => {
       // Show loading state
       addCustomGoalBtn.disabled = true;
       const originalText = addCustomGoalBtn.textContent;
-      addCustomGoalBtn.textContent = "Generating tailored content...";
+      addCustomGoalBtn.textContent = "Generating tailored learning path...";
       
       state.userCustomGoals.push(customGoalText);
       localStorage.setItem("sandbox.userCustomGoals", JSON.stringify(state.userCustomGoals));
       customGoalInput.value = "";
       
-      // Generate AI-tailored content
+      // Generate AI-tailored full learning path (7 modules) and scenario
       try {
-        const tailoredModule = await generateTailoredLearningModule(customGoalText);
+        const tailoredPath = await generateTailoredLearningPath(customGoalText);
         const tailoredScenario = await generateTailoredPracticeScenario(customGoalText);
         
-        // Store tailored module
-        state.customTailoredModules.push(tailoredModule);
+        // Store tailored modules (full path)
+        state.customTailoredModules = tailoredPath;
         state.moduleIndex = 0;
         localStorage.setItem("sandbox.customTailoredModules", JSON.stringify(state.customTailoredModules));
         
