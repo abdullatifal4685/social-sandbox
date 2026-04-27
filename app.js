@@ -2020,6 +2020,7 @@ function goToPage(page) {
   }
   if (page === "goals") {
     renderGoalsPage();
+    recoverGoalsGridIfMissing();
   }
   if (page === "choice") {
     renderChoiceIdentity();
@@ -3653,6 +3654,77 @@ function renderGoalsPage() {
   updateGoalsPageState();
 }
 
+function recoverGoalsGridIfMissing() {
+  if (!goalsGrid) {
+    return;
+  }
+
+  const hasRenderedGoals = Boolean(goalsGrid.querySelector('input[type="checkbox"]'));
+  if (hasRenderedGoals) {
+    return;
+  }
+
+  goalsGrid.innerHTML = "";
+  LEARNING_GOALS.forEach((goal) => {
+    const isChecked = state.userLearningGoals.includes(goal.id);
+    const goalCheckbox = document.createElement("label");
+    goalCheckbox.className = "goal-checkbox";
+    goalCheckbox.setAttribute("data-goal-id", goal.id);
+
+    goalCheckbox.innerHTML = `
+      <input type="checkbox" value="${goal.id}" ${isChecked ? "checked" : ""} />
+      <div class="goal-checkbox-content">
+        <strong>${escapeHtml(goal.title)}</strong>
+        <p class="muted">${escapeHtml(goal.description)}</p>
+      </div>
+    `;
+
+    const checkbox = goalCheckbox.querySelector("input");
+    checkbox.addEventListener("change", (event) => {
+      const checked = Boolean(event.target?.checked);
+      if (checked) {
+        if (!state.userLearningGoals.includes(goal.id)) {
+          state.userLearningGoals.push(goal.id);
+        }
+      } else {
+        state.userLearningGoals = state.userLearningGoals.filter((id) => id !== goal.id);
+      }
+      localStorage.setItem("sandbox.userLearningGoals", JSON.stringify(state.userLearningGoals));
+      updateGoalsPageState();
+    });
+
+    goalsGrid.appendChild(goalCheckbox);
+  });
+
+  renderCustomGoalsList();
+  updateGoalsPageState();
+  console.warn("Social Sandbox recovery: goals grid was empty and has been rebuilt.");
+}
+
+function runStartupSanityChecks() {
+  const missingElements = [];
+  const requiredElements = [
+    { key: "goalsGrid", value: goalsGrid },
+    { key: "goalsNextBtn", value: goalsNextBtn },
+    { key: "customGoalInput", value: customGoalInput },
+    { key: "addCustomGoalBtn", value: addCustomGoalBtn },
+  ];
+
+  requiredElements.forEach((item) => {
+    if (!item.value) {
+      missingElements.push(item.key);
+    }
+  });
+
+  if (missingElements.length > 0) {
+    console.error(`Startup sanity check failed. Missing required elements: ${missingElements.join(", ")}`);
+  }
+
+  if (state.page === "goals") {
+    recoverGoalsGridIfMissing();
+  }
+}
+
 function renderCustomGoalsList() {
   customGoalsList.innerHTML = "";
   state.userCustomGoals.forEach((customGoal, index) => {
@@ -4208,7 +4280,7 @@ Return ONLY this JSON:
     "Write your intention in one sentence: 'When I ${goalDescription}, I want to...'",
     "Identify the one behavior you'll change: 'Instead of X, I'll Y when ${goalDescription}.'"
   ]
-}`,
+}`),
     };
     
     // Module 2: Introduce Stage
@@ -4251,7 +4323,7 @@ Return ONLY this JSON:
     "Never open with emotion or blame. Open with curiosity or shared stakes.",
     "Always ask permission before diving into ${goalDescription}."
   ]
-}`,
+}`),
     };
     
     // Module 3: Listen Stage
@@ -4294,7 +4366,7 @@ Return ONLY this JSON:
     "When listening about ${goalDescription}, focus on understanding their constraints, not rebutting.",
     "Use 'Tell me more about that' often when they discuss ${goalDescription}."
   ]
-}`,
+}`),
     };
     
     // Module 4: Empathize Stage
@@ -4337,7 +4409,7 @@ Return ONLY this JSON:
     "Use 'and' not 'but' - 'I get your concern AND here's what I'm seeing...'",
     "Name something they said in your empathy about ${goalDescription}. Shows you actually listened."
   ]
-}`,
+}`),
     };
     
     // Module 5: Talk Stage
@@ -4380,7 +4452,7 @@ Return ONLY this JSON:
     "Use their language from Module 3 when making your case about ${goalDescription}.",
     "End with a question, not a demand: 'Does that make sense about ${goalDescription}?' not 'So we'll ${goalDescription}, right?'"
   ]
-}`,
+}`),
     };
     
     // Module 6: Solve Stage
@@ -4423,7 +4495,7 @@ Return ONLY this JSON:
     "For ${goalDescription}, always name a checkpoint date.",
     "Check: 'Are we clear on how you'll ${goalDescription}?' If they hesitate, you need more clarity."
   ]
-}`,
+}`),
     };
     
     // Module 7: Mastery
@@ -4466,7 +4538,7 @@ Return ONLY this JSON:
     "Track: Do you tend to push too hard on ${goalDescription}? Too soft? That's your pattern.",
     "Use escalation for ${goalDescription} sparingly - it's nuclear. Use it when you've tried everything else."
   ]
-}`,
+}`),
     };
 
     // Generate each module
@@ -6887,15 +6959,6 @@ addCustomGoalBtn.addEventListener("click", async () => {
       
       renderCustomGoalsList();
       updateGoalsPageState();
-      
-      // Hide custom goal input section when max goals reached
-      const newTotal = state.userLearningGoals.length + state.userCustomGoals.length;
-      if (newTotal >= 3) {
-        const customGoalsSection = document.getElementById("customGoalsSection");
-        if (customGoalsSection) {
-          customGoalsSection.classList.add("is-hidden");
-        }
-      }
     }
   }
 });
@@ -6910,6 +6973,7 @@ customGoalInput.addEventListener("keypress", (e) => {
 applyScenarioScaffoldDefault(state.selectedScenarioId);
 openSessionIntro();
 userNameInput.value = state.userName;
+runStartupSanityChecks();
 render();
 renderModule();
 renderPage();
