@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./styles.css?v=20260427-3" />
+  <link rel="stylesheet" href="./styles.css?v=20260427-032200" />
 </head>
 <body>
   <div class="page-glow page-glow-a"></div>
@@ -32,10 +32,20 @@
   <section id="pageGoals" class="flow-page flow-page-goals is-hidden">
     <div class="flow-card flow-card-goals">
       <h2>What do you want to learn?</h2>
-      <p class="muted">Select 2-3 learning goals that matter to you. These will guide which scenarios we recommend.</p>
+      <p class="muted">Select 2-3 learning goals regarding difficult conversations that matter to you. These will guide which learning materials and practice scenarios we recommend.</p>
 
       <div class="goals-grid" id="goalsGrid">
         <!-- Goals will be populated by JavaScript -->
+      </div>
+
+      <div class="custom-goal-input-section">
+        <label class="flow-label" for="customGoalInput">Or write your own learning goal</label>
+        <p class="muted" style="font-size: 0.85rem; margin-bottom: 0.5rem;">Describe a specific aspect of difficult conversations you want to improve (e.g., "how to apologize without making excuses")</p>
+        <div class="custom-goal-input-wrap">
+          <input id="customGoalInput" type="text" placeholder="e.g., How to deliver bad news without hurting relationships" maxlength="100" />
+          <button id="addCustomGoalBtn" class="ghost" type="button">Add</button>
+        </div>
+        <div id="customGoalsList" class="custom-goals-list"></div>
       </div>
 
       <div class="flow-actions flow-actions-wrap">
@@ -124,6 +134,10 @@
           <button id="openDashboardBtn" class="ghost" type="button">Open Practice Hub</button>
         </div>
       </section>
+
+      <div class="flow-actions flow-actions-wrap">
+        <button id="choiceBackBtn" class="ghost" type="button">Back</button>
+      </div>
     </div>
   </section>
 
@@ -426,6 +440,7 @@
 
       <!-- Scenario picker (shown first) -->
       <div id="scenarioPickerSection" class="scenario-picker">
+        <div id="scenarioPickerGoalsHeading" class="is-hidden"></div>
         <div id="scenarioNameSetup" class="scenario-name-setup">
           <label class="flow-label" for="userNameInput">Your name</label>
           <input id="userNameInput" type="text" maxlength="40" placeholder="for example: Aulia" />
@@ -496,7 +511,10 @@
 
         <div class="flow-actions flow-actions-spread">
           <button id="backFromBriefingBtn" class="ghost" type="button">Back</button>
-          <button id="beginPracticeBtn" type="button">Begin Practice</button>
+          <div style="display: flex; gap: 0.75rem;">
+            <button id="editScenarioBriefingBtn" class="ghost" type="button">✏️ Edit Scenario</button>
+            <button id="beginPracticeBtn" type="button">Begin Practice</button>
+          </div>
         </div>
       </div>
 
@@ -777,6 +795,8 @@ Agree on next step" required></textarea>
     </form>
   </dialog>
 
-  <script src="./app.js?v=20260427-3" defer></script>
+  <script src="./app.js?v=20260427-032200" defer></script>
 </body>
 </html>
+
+<!-- Rebuild force: 20260427-031958 -->
