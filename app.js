@@ -2834,7 +2834,7 @@ function renderHeader() {
   const scenario = getScenario();
   const scaffold = getScaffoldLevelConfig();
   scenarioTitle.textContent = scenario.title;
-  scenarioContext.textContent = scenario.context;
+  scenarioContext.textContent = "Review the brief below, then start your first response.";
   roleBadge.textContent = `AI Role: ${scenario.aiRole}`;
   practiceIdentity.textContent = `Practicing as: ${getLearnerName()}`;
   if (practiceScaffoldMenuBtn) {
@@ -2875,10 +2875,22 @@ function renderBrief() {
   const scenario = getScenario();
 
   scenarioBriefContent.innerHTML = `
-    <p>${escapeHtml(scenario.context)}</p>
-    <p><strong>Session cue:</strong> ${escapeHtml(scenario.opening)}</p>
-    <p><strong>Goal focus:</strong></p>
-    <ul>${scenario.goals.map((goal) => `<li>${escapeHtml(goal)}</li>`).join("")}</ul>
+    <section class="briefing-section">
+      <h4 class="briefing-label">Your Situation</h4>
+      <p class="briefing-text">${escapeHtml(scenario.context)}</p>
+    </section>
+    <section class="briefing-section">
+      <h4 class="briefing-label">Your Role</h4>
+      <p class="briefing-role"><span class="role-badge">Talking with: ${escapeHtml(scenario.aiRole)}</span></p>
+    </section>
+    <section class="briefing-section">
+      <h4 class="briefing-label">What You're Aiming For</h4>
+      <ul class="briefing-goals">${scenario.goals.map((goal) => `<li>${escapeHtml(goal)}</li>`).join("")}</ul>
+    </section>
+    <section class="briefing-section">
+      <h4 class="briefing-label">Scenario Catalyst</h4>
+      <blockquote class="briefing-quote">${escapeHtml(scenario.opening)}</blockquote>
+    </section>
   `;
 }
 
