@@ -4163,116 +4163,298 @@ Be specific, practical, and actionable. Avoid generic advice. Reference specific
 
 async function generateTailoredLearningPath(goalDescription) {
   try {
-    const systemPrompt = {
+    const modules = [];
+    
+    // Module 1: Foundation & Preparation
+    const module1Prompt = {
       role: "system",
-      content: `You are an expert in workplace communication and the ILETS framework (Introduce, Listen, Empathize, Talk, Solve).
+      content: `You are an expert communication coach. Create Module 1 (Foundation) for someone learning: "${goalDescription}"
 
-Your task: Create a COMPLETE 7-MODULE LEARNING PATH that is DEEPLY AND SPECIFICALLY TAILORED to: "${goalDescription}"
+This module is about PREPARATION - self-awareness, planning, and mindset before attempting the goal.
 
-CRITICAL: Every single module must:
-- Have a title that references the user's specific goal (not generic titles like "Listening Skills")
-- Include frameworks, examples, and tips that are SPECIFIC to "${goalDescription}"
-- Use real workplace language and scenarios relevant to "${goalDescription}"
-- Build on the previous module to create a coherent learning journey
-- Reference "${goalDescription}" explicitly in the framework and examples
+Focus on:
+- Identifying personal triggers and patterns when facing this goal
+- Preparing mentally and strategically
+- Setting clear intention specific to "${goalDescription}"
+- Recognizing why this goal matters
 
-EXAMPLE: If goal is "Surface Risks & Bad News", modules should be:
-1. "Prepare to Surface Risks: Self-Awareness for Difficult News"
-2. "Opening with Risk: Introducing Bad News Without Defensiveness"
-3. "Understanding Their Concern: Listening Before Defending"
-4. "Showing You Get It: Empathy When Delivering Bad News"
-5. "Being Clear on Risk: Talking About Consequences and Impact"
-6. "Moving Forward: Solving Beyond the Bad News"
-7. "Mastering Risk Conversations: Advanced Patterns for Repeated Difficult Discussions"
-
-Each module should explicitly reference the goal. For example, in frameworks use:
-- "Step 1: Prepare your risk message by..."
-- "Step 2: Surface the risk by opening with..."
-- NOT generic "Step 1: Open the conversation by..."
-
-Return a JSON array with 7 objects. EACH module must have this EXACT structure:
+Return ONLY this JSON:
 {
-  "title": "Module title (8-12 words) that includes the goal",
-  "summary": "1-2 sentences specific to achieving this goal",
-  "objective": "One sentence: what learner can do to accomplish the goal after this module",
-  "overview": "2-3 sentences explaining how this module helps achieve the goal",
+  "title": "Module 1: Prepare for ${goalDescription} - Self-Awareness & Planning",
+  "summary": "Foundation: Understand yourself before attempting ${goalDescription}",
+  "objective": "Identify your triggers and prepare a clear strategy for ${goalDescription}",
+  "overview": "Before ${goalDescription}, you need self-awareness. This module helps you recognize your patterns, triggers, and default reactions so you can show up intentionally.",
   "keyPrinciples": [
-    {"name": "Principle", "description": "Specific explanation for achieving the goal"},
-    {"name": "Principle", "description": "Specific explanation for achieving the goal"},
-    {"name": "Principle", "description": "Specific explanation for achieving the goal"}
+    {"name": "Self-Awareness", "description": "Recognize how you typically react when needing to ${goalDescription}. What emotions arise? What are your triggers?"},
+    {"name": "Strategic Intention", "description": "Define exactly what you want to accomplish when ${goalDescription}. Not just 'I need to do it', but 'I want to achieve X outcome while maintaining Y relationship'."},
+    {"name": "Mental Preparation", "description": "Prepare for resistance, defensiveness, or emotions. When ${goalDescription}, what's the hardest part? Plan for it."}
   ],
   "commonMistakes": [
-    {"mistake": "What people do that prevents achieving the goal", "why": "Why it fails for this goal", "better": "How to succeed at this goal"},
-    {"mistake": "Common error when working on this goal", "why": "Why it backfires", "better": "Better approach for this goal"}
+    {"mistake": "Skipping preparation and jumping straight into ${goalDescription}", "why": "Without clarity, you default to old patterns and react defensively", "better": "Take 10 minutes to clarify your intention and identify your triggers"},
+    {"mistake": "Setting outcome-only goals ('I need to convince them')", "why": "This leads to pushiness when ${goalDescription}", "better": "Set relational goals too: 'I want to ${goalDescription} while respecting them'"}
   ],
-  "framework": "Step-by-step technique directly applying to the goal | Use pipe-separated steps",
-  "concreteExample": "3+ sentence detailed workplace scenario with dialogue showing how to achieve the goal",
-  "tips": ["Specific tip for this goal", "Specific tip for this goal", "Specific tip for this goal"]
-}
+  "framework": "Step 1: Identify YOUR pattern - How do you usually react when facing this goal? | Step 2: Name your trigger - What emotion or situation makes this hardest? | Step 3: Clarify intention - What's the relationship you want after ${goalDescription}? | Step 4: Plan for resistance - What pushback might you face? How will you stay calm?",
+  "concreteExample": "You need to ${goalDescription} with your manager. Before the conversation, pause. Notice: 'I get defensive when criticized' or 'I soften too much.' Clarify your real goal: 'I want to ${goalDescription} AND keep their respect.' Plan for their reaction: 'They might push back because X. I'll respond with Y.' This prep takes 10 minutes but transforms the conversation.",
+  "tips": [
+    "Journal one specific situation where you struggled with ${goalDescription}. What triggered you?",
+    "Write your intention in one sentence: 'When I ${goalDescription}, I want to...'",
+    "Identify the one behavior you'll change: 'Instead of X, I'll Y when ${goalDescription}.'"
+  ]
+}`,
+    };
+    
+    // Module 2: Introduce Stage
+    const module2Prompt = {
+      role: "system",
+      content: `You are an expert communication coach. Create Module 2 (Introduce Stage) for someone learning: "${goalDescription}"
 
-CRITICAL REQUIREMENTS:
-1. Every module title MUST mention the goal
-2. Every framework step MUST reference how to apply it to the goal
-3. Every example MUST show someone doing this exact goal
-4. Every tip MUST be actionable for this specific goal
+This module teaches the INTRODUCE stage - how to OPEN the conversation around this goal without triggering defensiveness.
 
-PROGRESSION FOR MODULES 1-7:
-1. Foundation: Prepare & self-awareness specific to the goal
-2. Introduce stage: How to open conversations around this goal
-3. Listen stage: How to listen when this goal is at stake
-4. Empathize stage: How to show empathy while pursuing this goal
-5. Talk stage: How to communicate your perspective on this goal
-6. Solve stage: How to find solutions that achieve this goal
-7. Mastery: Handling edge cases, resistance, and complexity for this goal
+Focus on:
+- Opening with shared purpose, not blame
+- Setting tone that makes ${goalDescription} easier to hear
+- Specific phrases for opening about this goal
+- How to avoid common openers that backfire
 
-Return ONLY a valid JSON array, no extra text.`,
+Return ONLY this JSON:
+{
+  "title": "Module 2: Opening Around ${goalDescription} - The Introduce Stage",
+  "summary": "How to open a conversation about ${goalDescription} in a way that reduces defensiveness",
+  "objective": "Craft an opening for ${goalDescription} that establishes shared purpose and respect",
+  "overview": "The opening determines everything. This module teaches you how to introduce ${goalDescription} in a way that makes the other person listen instead of defend.",
+  "keyPrinciples": [
+    {"name": "Shared Purpose", "description": "Don't lead with 'I need to tell you something hard about ${goalDescription}.' Lead with what you both want: 'I want us to ${goalDescription} successfully together.'"},
+    {"name": "Specificity", "description": "Be clear about what you mean by '${goalDescription}'. Don't vague it up. Vague leads to them guessing wrong and getting defensive."},
+    {"name": "Permission", "description": "Ask before diving in: 'I'd like to discuss ${goalDescription}. Is now a good time?' This gives them control and reduces defensiveness."}
+  ],
+  "commonMistakes": [
+    {"mistake": "Starting with emotion: 'I'm frustrated about ${goalDescription}' or 'I'm worried about ${goalDescription}'", "why": "They hear criticism and immediately defend", "better": "Start with shared goal: 'I want to discuss how we handle ${goalDescription}'"},
+    {"mistake": "Starting with the problem: 'The issue is ${goalDescription}'", "why": "They feel blamed before understanding", "better": "Start with purpose: 'I want to get your perspective on ${goalDescription}'"}
+  ],
+  "framework": "Step 1: Ask permission - 'I'd like to discuss ${goalDescription}. Do you have time?' | Step 2: Name the shared stakes - 'I think how we handle ${goalDescription} affects both of us' | Step 3: Be specific - 'I want to talk about [specific situation related to goalDescription]' | Step 4: Signal respect - 'I value your perspective and want to hear how you see this'",
+  "concreteExample": "You need to ${goalDescription} with a colleague. Bad opening: 'We need to talk about your ${goalDescription}. It's a problem.' Good opening: 'I want to discuss how we're handling ${goalDescription}. I've noticed X, and I want to understand your perspective. I think we both care about getting this right. Do you have 15 minutes?' The second opening makes them curious instead of defensive.",
+  "tips": [
+    "Practice this one sentence: 'I want to [discuss/understand/explore] ${goalDescription} with you because it matters to both of us.'",
+    "Never open with emotion or blame. Open with curiosity or shared stakes.",
+    "Always ask permission before diving into ${goalDescription}."
+  ]
+}`,
+    };
+    
+    // Module 3: Listen Stage
+    const module3Prompt = {
+      role: "system",
+      content: `You are an expert communication coach. Create Module 3 (Listen Stage) for someone learning: "${goalDescription}"
+
+This module teaches the LISTEN stage - asking genuine questions and understanding their perspective on this goal.
+
+Focus on:
+- What to ask when discussing ${goalDescription}
+- How to listen without planning your rebuttal
+- What their perspective reveals
+- Questions that get beneath surface answers
+
+Return ONLY this JSON:
+{
+  "title": "Module 3: Understanding Their Perspective on ${goalDescription} - The Listen Stage",
+  "summary": "Ask powerful questions to understand their view on ${goalDescription}",
+  "objective": "Learn their perspective on ${goalDescription} before pushing your viewpoint",
+  "overview": "Most people jump straight to persuading. This module teaches you to listen first. When you understand THEIR stakes in ${goalDescription}, your response becomes smarter and more credible.",
+  "keyPrinciples": [
+    {"name": "Genuine Curiosity", "description": "When discussing ${goalDescription}, your first job is to understand, not convince. Ask questions where you actually want to know the answer."},
+    {"name": "Below-Surface Questions", "description": "Don't just ask 'What do you think about ${goalDescription}?' Ask 'What concerns do you have about ${goalDescription}? What would need to be true for you to support ${goalDescription}?'"},
+    {"name": "Reflect Back", "description": "When they share their view on ${goalDescription}, repeat it back: 'So you're saying... ' This shows you heard and helps them feel understood."}
+  ],
+  "commonMistakes": [
+    {"mistake": "Asking questions while planning your rebuttal", "why": "They sense you're not really listening about ${goalDescription}, just waiting to argue", "better": "Take notes. Actually listen to understand their constraints on ${goalDescription}."},
+    {"mistake": "Asking yes/no questions about ${goalDescription}. 'Do you agree we need to ${goalDescription}?'", "why": "They just say no. Conversation over.", "better": "Ask open questions: 'What's your biggest concern about ${goalDescription}?'"}
+  ],
+  "framework": "Step 1: Ask open questions about ${goalDescription} - 'What's your perspective on ${goalDescription}?' | Step 2: Go deeper - 'What concerns come up for you with ${goalDescription}?' | Step 3: Understand constraints - 'What would need to be true for ${goalDescription} to work?' | Step 4: Reflect back - 'So what I hear is...' | Step 5: Acknowledge valid points - 'That's a good point about ${goalDescription}.'",
+  "concreteExample": "You need to discuss ${goalDescription} with your manager. Bad listening: You ask 'Thoughts on ${goalDescription}?' and while they talk, you think about your counter-argument. Good listening: You ask 'What are your concerns about ${goalDescription}? What would success look like to you?' You take notes. You actually hear that they're worried about X. That changes how you approach ${goalDescription} next.",
+  "tips": [
+    "Write down 3 genuine questions about ${goalDescription} before the conversation.",
+    "When listening about ${goalDescription}, focus on understanding their constraints, not rebutting.",
+    "Use 'Tell me more about that' often when they discuss ${goalDescription}."
+  ]
+}`,
+    };
+    
+    // Module 4: Empathize Stage
+    const module4Prompt = {
+      role: "system",
+      content: `You are an expert communication coach. Create Module 4 (Empathize Stage) for someone learning: "${goalDescription}"
+
+This module teaches the EMPATHIZE stage - showing genuine understanding of their position on this goal.
+
+Focus on:
+- Finding what's valid in their perspective about ${goalDescription}
+- Acknowledging their constraints or concerns
+- Building connection while pursuing the goal
+- What to do when you disagree about ${goalDescription}
+
+Return ONLY this JSON:
+{
+  "title": "Module 4: Showing Understanding of ${goalDescription} - The Empathize Stage",
+  "summary": "Acknowledge what's valid in their perspective even when pursuing ${goalDescription}",
+  "objective": "Build connection and credibility by showing you understand their view on ${goalDescription}",
+  "overview": "People don't hear you until they feel understood. This module teaches you to empathize with their position on ${goalDescription} while staying committed to your goal.",
+  "keyPrinciples": [
+    {"name": "Find What's Valid", "description": "Even if you disagree on ${goalDescription}, find something valid in their perspective. 'Your concern about [X aspect of goalDescription] is real and I get why that worries you.'"},
+    {"name": "Name Their Stakes", "description": "Show you understand what's at stake for THEM regarding ${goalDescription}. 'I see ${goalDescription} affects your X. That matters.'"},
+    {"name": "Empathy ≠ Agreement", "description": "You can understand their position on ${goalDescription} without agreeing with it. 'I get why you'd want to avoid ${goalDescription}. AND I think we need to.'"}
+  ],
+  "commonMistakes": [
+    {"mistake": "Fake empathy - 'I understand your concern about ${goalDescription}' (but you don't, really)", "why": "They sense the fake and trust you less", "better": "Genuine empathy: Name specifically what makes ${goalDescription} hard for them"},
+    {"mistake": "Empathizing but then dismissing - 'I get it, but we still need to ${goalDescription} anyway'", "why": "Feels like you weren't really listening", "better": "Empathize deeply, then introduce your perspective: 'I hear you. AND here's what I'm seeing...'"}
+  ],
+  "framework": "Step 1: Name what's valid - 'Your concern about [specific aspect of goalDescription] makes sense.' | Step 2: Show you understand stakes - 'I see this affects [what matters to them].' | Step 3: Acknowledge difficulty - 'I know ${goalDescription} feels [hard/risky/annoying] to you.' | Step 4: Find common ground - 'We both want [what you both want].' | Step 5: Move forward while honoring their view - 'Given that, here's how I think we can ${goalDescription}...'",
+  "concreteExample": "You need to discuss ${goalDescription} with a colleague who's resistant. Bad empathy: 'I understand you're worried, but we need to ${goalDescription}.' Good empathy: 'I hear that ${goalDescription} creates risk for you because of X. That's real. I also see that NOT ${goalDescription} creates risk for Y. Here's how I think we can ${goalDescription} while protecting what matters to you...' They feel heard. Now they listen.",
+  "tips": [
+    "Before empathizing about ${goalDescription}, actually understand their view from Module 3.",
+    "Use 'and' not 'but' - 'I get your concern AND here's what I'm seeing...'",
+    "Name something they said in your empathy about ${goalDescription}. Shows you actually listened."
+  ]
+}`,
+    };
+    
+    // Module 5: Talk Stage
+    const module5Prompt = {
+      role: "system",
+      content: `You are an expert communication coach. Create Module 5 (Talk Stage) for someone learning: "${goalDescription}"
+
+This module teaches the TALK stage - sharing your perspective on this goal clearly and persuasively.
+
+Focus on:
+- How to present your view on ${goalDescription} after listening
+- Using evidence, not emotion
+- Addressing their specific concerns about ${goalDescription}
+- Being clear about why this goal matters
+
+Return ONLY this JSON:
+{
+  "title": "Module 5: Making Your Case for ${goalDescription} - The Talk Stage",
+  "summary": "Share your perspective on ${goalDescription} in a way they can hear",
+  "objective": "Explain why ${goalDescription} matters and address their specific concerns",
+  "overview": "Now you understand them. Now share YOUR perspective on ${goalDescription} - but do it in a way that lands because you've listened first.",
+  "keyPrinciples": [
+    {"name": "Evidence Over Emotion", "description": "Don't say 'I feel like we need to ${goalDescription}.' Say 'Here's what I've observed about ${goalDescription}: [specific evidence].'"},
+    {"name": "Address Their Specific Concerns", "description": "Because you listened in Module 3, you know their concern about ${goalDescription}. Address it directly: 'I heard you worried about X. Here's how ${goalDescription} actually handles X...'"},
+    {"name": "Frame Around Shared Values", "description": "Connect why ${goalDescription} matters to something they care about, not just what you care about."}
+  ],
+  "commonMistakes": [
+    {"mistake": "Repeating your position about ${goalDescription} louder or different times", "why": "They didn't hear you because they don't feel understood. Volume doesn't change that.", "better": "They feel understood. Now they're actually listening to your case for ${goalDescription}."},
+    {"mistake": "Generic arguments about ${goalDescription}. 'It's important. We should do it.'", "why": "Doesn't land because it's not personalized to their situation", "better": "Specific argument about ${goalDescription} that addresses their constraints: 'Given that you're worried about X, here's why ${goalDescription} actually solves that...'"}
+  ],
+  "framework": "Step 1: Acknowledge what you heard about ${goalDescription} - 'I heard you say...' | Step 2: Present your observation - 'Here's what I see about ${goalDescription}...' | Step 3: Address their specific concern - 'I know you worried about X. Here's how ${goalDescription} handles that...' | Step 4: State the consequence - 'If we don't ${goalDescription}, I'm concerned that...' | Step 5: Focus on shared outcome - 'I think if we ${goalDescription}, we get to [shared value].'",
+  "concreteExample": "You're discussing ${goalDescription}. They said they're worried about [specific concern]. Bad Talk: 'Look, ${goalDescription} is the right thing to do. Trust me.' Good Talk: 'You said you're concerned about [their concern regarding goalDescription]. I get that. Here's what I've observed: [specific evidence about goalDescription]. That's why I think if we ${goalDescription}, it actually protects [what matters to them]. Does that address your concern?'",
+  "tips": [
+    "Lead with evidence, not opinion, about ${goalDescription}.",
+    "Use their language from Module 3 when making your case about ${goalDescription}.",
+    "End with a question, not a demand: 'Does that make sense about ${goalDescription}?' not 'So we'll ${goalDescription}, right?'"
+  ]
+}`,
+    };
+    
+    // Module 6: Solve Stage
+    const module6Prompt = {
+      role: "system",
+      content: `You are an expert communication coach. Create Module 6 (Solve Stage) for someone learning: "${goalDescription}"
+
+This module teaches the SOLVE stage - finding concrete agreement on how to actually ${goalDescription}.
+
+Focus on:
+- Moving from agreement to action on ${goalDescription}
+- Handling remaining objections about ${goalDescription}
+- Creating specific next steps for ${goalDescription}
+- Holding commitment on ${goalDescription}
+
+Return ONLY this JSON:
+{
+  "title": "Module 6: Moving to Action on ${goalDescription} - The Solve Stage",
+  "summary": "Turn agreement on ${goalDescription} into concrete next steps",
+  "objective": "Define specific actions and timeline for ${goalDescription}",
+  "overview": "Agreement doesn't mean ${goalDescription} happens. This module teaches you to move from 'I understand the need to ${goalDescription}' to 'Here's exactly how and when we ${goalDescription}.'",
+  "keyPrinciples": [
+    {"name": "Specificity", "description": "Don't end with 'We'll ${goalDescription}.' End with 'By Friday, X will ${goalDescription} using Y approach.' Specific beats vague."},
+    {"name": "Ownership", "description": "Be clear who does what: 'I'll ${goalDescription} by X date. You'll handle Y by Z date.'"},
+    {"name": "Checkpoints", "description": "For important ${goalDescription}, plan follow-up: 'We'll check in Thursday on how the ${goalDescription} is going. Adjust if needed.'"}
+  ],
+  "commonMistakes": [
+    {"mistake": "Ending the conversation when they say 'OK, we'll ${goalDescription}.'", "why": "Without specifics, ${goalDescription} doesn't actually happen", "better": "Get specific: 'OK, so you'll ${goalDescription} by [date] using [method]. I'll [support action]. We'll check in [date].'"},
+    {"mistake": "Agreeing on what to ${goalDescription} but not how", "why": "${goalDescription} gets done half-way or the wrong way", "better": "Discuss the actual method of ${goalDescription}, not just the goal"}
+  ],
+  "framework": "Step 1: Test agreement - 'Are you willing to ${goalDescription}?' | Step 2: Discuss method - 'How do you think we should approach ${goalDescription}?' | Step 3: Define specific actions - 'So you'll ${goalDescription} by [date] using [specific approach].' | Step 4: Clarify your role - 'I'll support by...' | Step 5: Set checkpoint - 'Let's check in [date] on how ${goalDescription} is going.'",
+  "concreteExample": "You've aligned on needing to ${goalDescription}. Bad Solve: 'Great, let's ${goalDescription}.' (Nothing happens.) Good Solve: 'So you'll ${goalDescription} by Friday using this approach [specific]. I'll check in Thursday to see if you need anything. If it's not working, we'll adjust Friday. Does that work?'",
+  "tips": [
+    "Write down the specific action for ${goalDescription}. Who, what, when.",
+    "For ${goalDescription}, always name a checkpoint date.",
+    "Check: 'Are we clear on how you'll ${goalDescription}?' If they hesitate, you need more clarity."
+  ]
+}`,
+    };
+    
+    // Module 7: Mastery
+    const module7Prompt = {
+      role: "system",
+      content: `You are an expert communication coach. Create Module 7 (Mastery) for someone learning: "${goalDescription}"
+
+This module teaches advanced patterns - what to do when ${goalDescription} gets complicated, resisted, or happens repeatedly.
+
+Focus on:
+- Handling resistance or pushback on ${goalDescription}
+- Recognizing patterns in how you approach ${goalDescription}
+- Advanced strategies for recurring ${goalDescription}
+- Knowing when to escalate beyond ${goalDescription}
+
+Return ONLY this JSON:
+{
+  "title": "Module 7: Mastering ${goalDescription} - Handling Complexity & Resistance",
+  "summary": "Advanced strategies for when ${goalDescription} gets difficult, resisted, or recurring",
+  "objective": "Handle resistance to ${goalDescription} and navigate complex situations around this goal",
+  "overview": "Real ${goalDescription} isn't always smooth. This module teaches you what to do when they push back, when patterns repeat, and when you need advanced tactics.",
+  "keyPrinciples": [
+    {"name": "Resistance Is Information", "description": "When they resist ${goalDescription}, it's not a personal rejection. It's information: 'There's something about ${goalDescription} I don't understand or that feels unsafe.' Get curious."},
+    {"name": "Patterns Over Events", "description": "If ${goalDescription} keeps failing, it's rarely about one conversation. It's about a pattern. Identify it: Are you always too soft on ${goalDescription}? Too hard? Missing their real concern?"},
+    {"name": "Escalation vs. Pressure", "description": "Know the difference. Escalation is bringing in someone else because ${goalDescription} needs authority. Pressure is repeating the same argument louder. Use escalation rarely, pressure never."}
+  ],
+  "commonMistakes": [
+    {"mistake": "When they push back on ${goalDescription}, repeating your case louder", "why": "They heard you. They disagree. Repeating doesn't change that.", "better": "When resistance appears on ${goalDescription}, get curious: 'What's the real concern?' Then solve that."},
+    {"mistake": "Giving up on ${goalDescription} after one difficult conversation", "why": "Some ${goalDescription} requires multiple touches and different approaches", "better": "Recognize this needs patience. Plan second attempt differently if first doesn't stick on ${goalDescription}."}
+  ],
+  "framework": "Step 1: Anticipate resistance about ${goalDescription} - What's the hardest part for them? | Step 2: When they push back on ${goalDescription}, name what you hear - 'I hear you saying we can't ${goalDescription} because...' | Step 3: Explore the real concern - 'Tell me more about that worry regarding ${goalDescription}.' | Step 4: Problem-solve together - 'Given that concern about ${goalDescription}, what would work?' | Step 5: Know when to escalate - 'This needs input from [authority]. Let me bring them in on ${goalDescription}.'",
+  "concreteExample": "You've pushed for ${goalDescription} multiple times, each time hitting resistance. Module 7 approach: Stop repeating. Instead, one-on-one with them: 'It seems like ${goalDescription} keeps being an issue. I want to understand what's really going on. Is it [concern A]? [concern B]? Let's solve the actual blocker so ${goalDescription} can happen.' Then listen for the REAL concern. That's what changes the pattern.",
+  "tips": [
+    "If ${goalDescription} fails once, diagnose why before trying again differently.",
+    "Track: Do you tend to push too hard on ${goalDescription}? Too soft? That's your pattern.",
+    "Use escalation for ${goalDescription} sparingly - it's nuclear. Use it when you've tried everything else."
+  ]
+}`,
     };
 
-    const response = await callOpenAI([systemPrompt], "gpt-4");
-    const parsed = JSON.parse(response);
+    // Generate each module
+    const prompts = [module1Prompt, module2Prompt, module3Prompt, module4Prompt, module5Prompt, module6Prompt, module7Prompt];
     
-    if (!Array.isArray(parsed)) {
-      throw new Error("Response is not an array");
+    for (let i = 0; i < prompts.length; i++) {
+      try {
+        const response = await callOpenAI([prompts[i]], "gpt-4");
+        const parsed = JSON.parse(response);
+        modules.push({
+          id: `tailored-module-${Date.now()}-${i}`,
+          ...parsed,
+          customGoal: goalDescription,
+          isCustom: true,
+          isTailored: true,
+          moduleSequenceIndex: i,
+        });
+      } catch (error) {
+        console.warn(`Failed to generate module ${i + 1}:`, error);
+      }
     }
-
-    return parsed.map((module, index) => ({
-      id: `tailored-module-${Date.now()}-${index}`,
-      ...module,
-      customGoal: goalDescription,
-      isCustom: true,
-      isTailored: true,
-      moduleSequenceIndex: index,
-    }));
+    
+    return modules.length === 7 ? modules : [];
   } catch (error) {
     console.error("Failed to generate tailored learning path:", error);
-    // Return a basic fallback that's still tailored to the goal
-    return Array.from({ length: 7 }, (_, i) => ({
-      id: `fallback-module-${Date.now()}-${i}`,
-      title: `${i + 1}. ${goalDescription} - Stage ${i + 1}`,
-      summary: `Step ${i + 1} in mastering ${goalDescription}`,
-      objective: `Apply the techniques of stage ${i + 1} to successfully ${goalDescription}`,
-      overview: `This module teaches you how to use ${ILETS[Math.min(i, ILETS.length - 1)]} stage principles when ${goalDescription}.`,
-      keyPrinciples: [
-        { name: "Intention", description: `Be clear about your goal when ${goalDescription}.` },
-        { name: "Authenticity", description: `Be genuine when attempting to ${goalDescription}.` },
-        { name: "Respect", description: `Honor the other person while ${goalDescription}.` },
-      ],
-      commonMistakes: [
-        { mistake: `Not preparing before ${goalDescription}`, why: "Leads to reactive and ineffective communication", better: `Take time to prepare how you'll ${goalDescription}` },
-        { mistake: `Only focusing on your needs when ${goalDescription}`, why: "Ignores the other person's perspective", better: `Balance your goal with understanding their viewpoint` },
-      ],
-      framework: `Step 1: Prepare for ${goalDescription} | Step 2: Open clearly about ${goalDescription} | Step 3: Listen to their view | Step 4: Show you understand | Step 5: Share your perspective on ${goalDescription} | Step 6: Find solutions that work`,
-      concreteExample: `Imagine you need to ${goalDescription}. Start by preparing what you'll say and why it matters. Open with shared purpose: "I want us to..." Then listen to their perspective before making your case. Acknowledge what's valid, share your view clearly, and finish with specific next steps.`,
-      tips: [
-        `Start with intention: why does ${goalDescription} matter?`,
-        `Ask genuine questions to understand before advocating`,
-        `Close with one clear action and timeline for ${goalDescription}`,
-      ],
-      customGoal: goalDescription,
-      isCustom: true,
-      isTailored: true,
-      moduleSequenceIndex: i,
-    }));
+    return [];
   }
 }
 
