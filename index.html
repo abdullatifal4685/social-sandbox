@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./styles.css?v=20260426-4" />
+  <link rel="stylesheet" href="./styles.css?v=20260427-2" />
 </head>
 <body>
   <div class="page-glow page-glow-a"></div>
@@ -23,8 +23,24 @@
         <p class="muted landing-subtitle">A guided simulator for difficult conversations at work, school, and leadership settings.</p>
         <p class="muted landing-note">Learn the concept first, then practice with AI coaching and reflection.</p>
         <div class="flow-actions landing-actions">
-          <button id="goToChoiceBtn" type="button" onclick="if(window.__ssNavigate){window.__ssNavigate('choice')}else{document.getElementById('pageLanding')?.classList.add('is-hidden');document.getElementById('pageChoice')?.classList.remove('is-hidden');window.scrollTo(0,0);}">Start Learning Journey</button>
+          <button id="goToChoiceBtn" type="button" onclick="if(window.__ssNavigate){window.__ssNavigate('goals')}else{document.getElementById('pageLanding')?.classList.add('is-hidden');document.getElementById('pageGoals')?.classList.remove('is-hidden');window.scrollTo(0,0);}">Start Learning Journey</button>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pageGoals" class="flow-page flow-page-goals is-hidden">
+    <div class="flow-card flow-card-goals">
+      <h2>What do you want to learn?</h2>
+      <p class="muted">Select 2-3 learning goals that matter to you. These will guide which scenarios we recommend.</p>
+
+      <div class="goals-grid" id="goalsGrid">
+        <!-- Goals will be populated by JavaScript -->
+      </div>
+
+      <div class="flow-actions flow-actions-wrap">
+        <button id="goalsBackBtn" class="ghost" type="button">Back</button>
+        <button id="goalsNextBtn" type="button" disabled>Continue</button>
       </div>
     </div>
   </section>
@@ -454,6 +470,12 @@
             <ul id="briefGoals" class="briefing-goals"></ul>
           </div>
 
+          <!-- User Learning Goals -->
+          <div class="briefing-section" id="userLearningGoalsSection">
+            <h4 class="briefing-label">Your Learning Goals</h4>
+            <div id="userLearningGoalsList" class="user-learning-goals">No goals selected yet.</div>
+          </div>
+
           <!-- AI Opening -->
           <div class="briefing-section">
             <h4 class="briefing-label">Scenario Catalyst</h4>
@@ -755,6 +777,6 @@ Agree on next step" required></textarea>
     </form>
   </dialog>
 
-  <script src="./app.js?v=20260426-4" defer></script>
+  <script src="./app.js?v=20260427-2" defer></script>
 </body>
 </html>

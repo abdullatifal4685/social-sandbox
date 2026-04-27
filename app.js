@@ -1,4 +1,42 @@
 const ILETS = ["Introduce", "Listen", "Empathize", "Talk", "Solve"];
+const LEARNING_GOALS = [
+  {
+    id: "surface-risks",
+    title: "Surface Risks & Bad News",
+    description: "Learn to deliver difficult information, raise concerns, and surface risks diplomatically",
+    scenarios: ["failing-project", "quality-vs-speed"],
+  },
+  {
+    id: "peer-feedback",
+    title: "Give Peer Feedback",
+    description: "Address behavior, performance, or interpersonal issues with peers without defensiveness",
+    scenarios: ["dominance-in-meetings", "unsafe-shortcut"],
+  },
+  {
+    id: "navigate-authority",
+    title: "Navigate Authority Relationships",
+    description: "Communicate effectively with people above or below you in hierarchy, manage scope and decisions",
+    scenarios: ["failing-project", "resource-priority-conflict", "quality-vs-speed"],
+  },
+  {
+    id: "handle-pressure",
+    title: "Handle Pressure & Conflict",
+    description: "Stay composed when stressed, acknowledge constraints, find solutions in tight situations",
+    scenarios: ["unsafe-shortcut", "resource-priority-conflict"],
+  },
+  {
+    id: "listen-empathize",
+    title: "Improve Listening & Empathy",
+    description: "Ask better questions, understand others' perspectives, acknowledge emotion and pressure",
+    scenarios: ["failing-project", "dominance-in-meetings", "unsafe-shortcut"],
+  },
+  {
+    id: "provide-options",
+    title: "Provide Options & Solutions",
+    description: "Propose trade-offs, offer choices, co-create solutions instead of just saying no",
+    scenarios: ["resource-priority-conflict", "quality-vs-speed"],
+  },
+];
 const CUSTOM_SCENARIOS_KEY = "sandbox.customScenarios.v1";
 const USER_NAME_KEY = "sandbox.userName";
 const SCENARIO_OVERRIDES_KEY = "sandbox.scenarioOverrides.v1";
@@ -141,6 +179,12 @@ const DEFAULT_SCENARIOS = [
     scenarioType: "hierarchical",
     authorityGap: 3,
     difficulty: "High authority gradient",
+    learningObjectives: [
+      "Surface risks diplomatically to authority figures",
+      "Present data without blame",
+      "Maintain credibility while raising concerns",
+      "Navigate power dynamics respectfully"
+    ],
     context:
       "You are a junior analyst on a 6-month IT modernization project. When the project kicked off three months ago, your senior manager was confident. But behind the scenes, technical debt is worse than expected. Two key milestones have slipped: your integration work is delayed, and the testing phase is now compressed into half the planned time. Your manager still believes the project can deliver on time and has not flagged issues to leadership yet. You have noticed stress rising in the team, and if risks are not surfaced now, delivery quality and team capacity are both at risk. You have a 10-minute sync to raise this carefully.",
     imageUrl: "./assets/scenarios/failing-project.svg",
@@ -247,6 +291,12 @@ const DEFAULT_SCENARIOS = [
     title: "Challenge an Unsafe Shortcut",
     scenarioType: "general",
     difficulty: "Time pressure and blame culture",
+    learningObjectives: [
+      "Address problems without blame",
+      "Acknowledge pressure and constraints",
+      "Protect standards while staying empathetic",
+      "Collaborate on solutions under stress"
+    ],
     context:
       "Your engineering team is racing to hit a quarterly release deadline. A teammate just committed code that bypasses a critical data validation step—a step that catches errors before they reach production. When you ask why, they say, 'We're already late. I'll add it back after launch.' You know this is risky. If bad data slips through, it will create downstream data corruption that's expensive to fix. The team is already stressed, and you don't want to trigger a blame conversation. But you also can't let this pass. You need to address it without making your teammate defensive.",
     imageUrl: "./assets/scenarios/unsafe-shortcut.svg",
@@ -308,6 +358,12 @@ const DEFAULT_SCENARIOS = [
     title: "Address Meeting Dominance Respectfully",
     scenarioType: "general",
     difficulty: "Cross-team sensitivity",
+    learningObjectives: [
+      "Give feedback to peers without defensiveness",
+      "Name specific behaviors clearly",
+      "Preserve relationships while raising concerns",
+      "Invite shared ownership of change"
+    ],
     context: `You work with a senior peer from another department who regularly dominates meetings. They interrupt people, jump to conclusions quickly, and shut down ideas from junior team members. In the last three meetings, you've watched your team's junior analysts stop offering input. You're not their manager, so you can't direct them. But you can talk to your senior peer. The challenge: they might get defensive, or worse, they might not even realize they're doing it. You want to name the behavior, show respect for their role, and invite them to co-own a solution without making it awkward.`,
     imageUrl: "./assets/scenarios/meeting-dominance.svg",
     aiRole: "Senior Peer",
@@ -414,6 +470,12 @@ const DEFAULT_SCENARIOS = [
     scenarioType: "hierarchical",
     authorityGap: 2,
     difficulty: "Competing loyalties and scope creep",
+    learningObjectives: [
+      "Manage scope creep diplomatically",
+      "Present capacity constraints clearly",
+      "Offer options instead of just saying no",
+      "Align priorities across stakeholders"
+    ],
     context: `You're a project lead working across two business units. Your primary sponsor told you a month ago that delivery date was fixed. But six weeks in, a more senior leader (not your direct manager) has been requesting increasing scope—new features, reports, data integrations. The problem: each addition adds 1-2 weeks to the timeline, and your team is already stretched. Your original sponsor is now asking why feature X isn't done yet, unaware that the scope has expanded. You need to have a conversation with the senior leader about timeline vs. scope trade-offs. But they outrank you, and you don't want to seem uncooperative or like you're refusing work. How do you raise this without appearing to say no?`,
     imageUrl: "./assets/scenarios/resource-priority.svg",
     aiRole: "Senior Leader (Different Unit)",
@@ -519,6 +581,12 @@ const DEFAULT_SCENARIOS = [
     scenarioType: "hierarchical",
     authorityGap: 2,
     difficulty: "Authority and standards tension",
+    learningObjectives: [
+      "Advocate for quality without blocking progress",
+      "Use data to support difficult positions",
+      "Find middle-ground solutions",
+      "Balance business pressure with standards"
+    ],
     context: `You're a QA lead on a product launch. Your test plan includes three rounds of testing—unit, integration, and user acceptance. Today, your product manager informed you that to hit the market window, testing needs to be compressed to one week (originally two weeks) and only cover "critical path" functionality. They're feeling pressure from executives to get to market fast. But you know that skipping integration testing has historically led to 10-15% of bugs reaching production. That's not acceptable for this product category. You need to push back—but respectfully, because your manager agrees with the compressed timeline, and you don't want to be seen as slowing the company down. How do you advocate for quality without sounding obstructionist?`,
     imageUrl: "./assets/scenarios/quality-vs-speed.svg",
     aiRole: "Product Manager",
@@ -786,6 +854,7 @@ const state = {
   moduleIndex: 0,
   moduleQuizPassed: false,
   userName: localStorage.getItem(USER_NAME_KEY) || "",
+  userLearningGoals: JSON.parse(localStorage.getItem("sandbox.userLearningGoals") || "[]"),
   nameEditorOpen: false,
   messages: [],
   stageIndex: 0,
@@ -921,8 +990,8 @@ function persistImprovementTrack() {
   localStorage.setItem(IMPROVEMENT_TRACK_KEY, JSON.stringify(trimmed));
 }
 
-const scenarioList = document.getElementById("scenarioList");
 const pageLanding = document.getElementById("pageLanding");
+const pageGoals = document.getElementById("pageGoals");
 const pageChoice = document.getElementById("pageChoice");
 const pageLearn = document.getElementById("pageLearn");
 const pagePeerPracticum = document.getElementById("pagePeerPracticum");
@@ -930,6 +999,11 @@ const pageScenarioBriefing = document.getElementById("pageScenarioBriefing");
 const pageDashboard = document.getElementById("pageDashboard");
 const pageFinal = document.getElementById("pageFinal");
 const practiceShell = document.getElementById("practiceShell");
+
+// Goal selection page elements
+const goalsGrid = document.getElementById("goalsGrid");
+const goalsBackBtn = document.getElementById("goalsBackBtn");
+const goalsNextBtn = document.getElementById("goalsNextBtn");
 
 const briefingTitle = document.getElementById("briefingTitle");
 const briefingSubtitle = document.getElementById("briefingSubtitle");
@@ -1650,6 +1724,7 @@ function renderUserNameSummary() {
 function renderPage() {
   const map = {
     landing: pageLanding,
+    goals: pageGoals,
     choice: pageChoice,
     learn: pageLearn,
     dashboard: pageDashboard,
@@ -1877,6 +1952,9 @@ function goToPage(page) {
   if (page === "learn") {
     renderModule();
   }
+  if (page === "goals") {
+    renderGoalsPage();
+  }
   if (page === "choice") {
     renderChoiceIdentity();
     renderChoiceSnapshot();
@@ -1896,6 +1974,12 @@ function goToPage(page) {
 }
 
 window.__ssNavigate = (targetPage) => {
+  if (targetPage === "goals") {
+    renderGoalsPage();
+    goToPage("goals");
+    return;
+  }
+
   if (targetPage === "choice") {
     goToPage("choice");
     return;
@@ -1994,6 +2078,24 @@ function renderBriefingPage() {
     .map((goal) => `<li>${escapeHtml(goal)}</li>`)
     .join("");
   
+  // Render user's selected learning goals
+  const userLearningGoalsList = document.getElementById("userLearningGoalsList");
+  const userLearningGoalsSection = document.getElementById("userLearningGoalsSection");
+  if (userLearningGoalsList && userLearningGoalsSection) {
+    if (state.userLearningGoals && state.userLearningGoals.length > 0) {
+      const goalsHtml = state.userLearningGoals
+        .map((goalId) => {
+          const goal = LEARNING_GOALS.find((g) => g.id === goalId);
+          return goal ? `<div class="user-goal-badge">${escapeHtml(goal.title)}</div>` : "";
+        })
+        .join("");
+      userLearningGoalsList.innerHTML = goalsHtml;
+      userLearningGoalsSection.classList.remove("is-hidden");
+    } else {
+      userLearningGoalsSection.classList.add("is-hidden");
+    }
+  }
+  
   briefOpening.innerHTML = `<em>${escapeHtml(scenario.opening)}</em>`;
 
   if (briefScaffoldHint) {
@@ -2037,8 +2139,19 @@ function renderScenarioPicker() {
   }
 
   scenarioPickerGrid.innerHTML = visibleScenarios
-    .map((scenario) => `
-      <article class="scenario-picker-card ${scenario.id === state.selectedScenarioId ? "active" : ""}" data-scenario-id="${escapeHtml(scenario.id)}">
+    .map((scenario) => {
+      const scenarioGoals = getScenarioGoalMatch(scenario.id);
+      const goalBadges = scenarioGoals
+        .map((goalId) => {
+          const goal = LEARNING_GOALS.find((g) => g.id === goalId);
+          return goal ? `<span class="goal-badge" title="${escapeHtml(goal.title)}">${escapeHtml(goal.title)}</span>` : "";
+        })
+        .join("");
+      const isRecommended = state.userLearningGoals.length > 0 && scenarioGoals.some((id) => state.userLearningGoals.includes(id));
+
+      return `
+      <article class="scenario-picker-card ${scenario.id === state.selectedScenarioId ? "active" : ""} ${isRecommended ? "is-recommended" : ""}" data-scenario-id="${escapeHtml(scenario.id)}">
+        ${isRecommended ? '<div class="recommended-badge">Recommended for your goals</div>' : ""}
         <button class="picker-card-select" data-scenario-id="${escapeHtml(scenario.id)}" type="button">
           ${scenario.imageUrl ? `<img class="picker-card-illustration" src="${escapeHtml(scenario.imageUrl)}" alt="Illustration for ${escapeHtml(scenario.title)}" />` : ""}
           <div class="picker-card-head">
@@ -2047,6 +2160,7 @@ function renderScenarioPicker() {
           </div>
           <p class="picker-card-text">${escapeHtml(scenario.context.substring(0, 80))}...</p>
           <p class="picker-card-role">Partner: ${escapeHtml(scenario.aiRole)}</p>
+          ${goalBadges ? `<div class="picker-card-goals">${goalBadges}</div>` : ""}
         </button>
         <div class="picker-card-actions">
           <button class="picker-card-choose-btn picker-card-select" data-scenario-id="${escapeHtml(scenario.id)}" type="button">
@@ -2066,7 +2180,8 @@ function renderScenarioPicker() {
           </div>
         </div>
       </article>
-    `)
+    `;
+    })
     .join("");
 
   if (orderedScenarios.length > previewCount) {
@@ -2085,7 +2200,7 @@ function renderScenarioPicker() {
 }
 
 function getOrderedScenarios() {
-  return state.scenarios
+  const baseScenarios = state.scenarios
     .map((scenario, index) => ({ scenario, index }))
     .sort((a, b) => {
       if (a.scenario.custom !== b.scenario.custom) {
@@ -2097,6 +2212,13 @@ function getOrderedScenarios() {
       return a.index - b.index;
     })
     .map((entry) => entry.scenario);
+
+  // If user has selected learning goals, reorder scenarios by goal relevance
+  if (state.userLearningGoals && state.userLearningGoals.length > 0) {
+    return getRecommendedScenariosForGoals(state.userLearningGoals);
+  }
+
+  return baseScenarios;
 }
 
 const PEER_DIRECTORY = [
@@ -2985,6 +3107,85 @@ function renderTips() {
 
   const tips = state.hintHistory?.length ? state.hintHistory : Object.values(stageDefaults);
   tipsList.innerHTML = tips.map((tip) => `<li>${escapeHtml(tip)}</li>`).join("");
+}
+
+function renderGoalsPage() {
+  // Clear previous state
+  goalsGrid.innerHTML = "";
+  
+  // Create checkboxes for each learning goal
+  LEARNING_GOALS.forEach((goal) => {
+    const isChecked = state.userLearningGoals.includes(goal.id);
+    const goalCheckbox = document.createElement("label");
+    goalCheckbox.className = "goal-checkbox";
+    goalCheckbox.setAttribute("data-goal-id", goal.id);
+    
+    goalCheckbox.innerHTML = `
+      <input type="checkbox" value="${goal.id}" ${isChecked ? "checked" : ""} />
+      <div class="goal-checkbox-content">
+        <strong>${escapeHtml(goal.title)}</strong>
+        <p class="muted">${escapeHtml(goal.description)}</p>
+      </div>
+    `;
+    
+    const checkbox = goalCheckbox.querySelector("input");
+    checkbox.addEventListener("change", (e) => {
+      if (e.target.checked) {
+        if (!state.userLearningGoals.includes(goal.id)) {
+          state.userLearningGoals.push(goal.id);
+        }
+      } else {
+        state.userLearningGoals = state.userLearningGoals.filter((id) => id !== goal.id);
+      }
+      localStorage.setItem("sandbox.userLearningGoals", JSON.stringify(state.userLearningGoals));
+      updateGoalsPageState();
+    });
+    
+    goalsGrid.appendChild(goalCheckbox);
+  });
+  
+  updateGoalsPageState();
+}
+
+function updateGoalsPageState() {
+  // Enable "Continue" button only if 1-3 goals are selected
+  const goalsSelected = state.userLearningGoals.length;
+  goalsNextBtn.disabled = goalsSelected === 0 || goalsSelected > 3;
+  
+  if (goalsSelected === 1) {
+    goalsNextBtn.textContent = "Continue";
+  } else if (goalsSelected === 2 || goalsSelected === 3) {
+    goalsNextBtn.textContent = `Continue (${goalsSelected} goals)`;
+  } else if (goalsSelected === 0) {
+    goalsNextBtn.textContent = "Select at least 1 goal";
+  } else {
+    goalsNextBtn.textContent = "Select up to 3 goals";
+  }
+}
+
+function getScenarioGoalMatch(scenarioId) {
+  // Returns which learning goals this scenario addresses
+  const matchedGoals = LEARNING_GOALS.filter((goal) =>
+    goal.scenarios.includes(scenarioId)
+  ).map((goal) => goal.id);
+  return matchedGoals;
+}
+
+function getRecommendedScenariosForGoals(goalIds) {
+  // Returns scenarios that match the selected learning goals, sorted by relevance
+  if (!goalIds || goalIds.length === 0) {
+    return state.scenarios;
+  }
+
+  // Score each scenario based on how many selected goals it addresses
+  const scored = state.scenarios.map((scenario) => {
+    const scenarioGoals = getScenarioGoalMatch(scenario.id);
+    const matchCount = scenarioGoals.filter((goal) => goalIds.includes(goal)).length;
+    return { scenario, matchCount };
+  });
+
+  // Sort by match count (descending), then by original order
+  return scored.sort((a, b) => b.matchCount - a.matchCount).map((item) => item.scenario);
 }
 
 function render() {
@@ -5285,6 +5486,17 @@ scenarioBuilderForm.addEventListener("reset", () => {
   state.editingScenarioId = null;
   createScenarioBtn.textContent = "Create Scenario";
   scenarioBuilderDialog.close();
+});
+
+// Goals page event listeners
+goalsBackBtn.addEventListener("click", () => {
+  goToPage("landing");
+});
+
+goalsNextBtn.addEventListener("click", () => {
+  if (state.userLearningGoals.length > 0 && state.userLearningGoals.length <= 3) {
+    goToPage("choice");
+  }
 });
 
 applyScenarioScaffoldDefault(state.selectedScenarioId);
