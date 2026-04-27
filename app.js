@@ -3626,7 +3626,7 @@ function renderGoalsPage() {
     goalCheckbox.setAttribute("data-goal-id", goal.id);
     
     goalCheckbox.innerHTML = `
-      <input type="radio" name="learningGoal" value="${goal.id}" ${isChecked ? "checked" : ""} />
+      <input type="checkbox" value="${goal.id}" ${isChecked ? "checked" : ""} />
       <div class="goal-checkbox-content">
         <strong>${escapeHtml(goal.title)}</strong>
         <p class="muted">${escapeHtml(goal.description)}</p>
@@ -3635,17 +3635,17 @@ function renderGoalsPage() {
     
     const checkbox = goalCheckbox.querySelector("input");
     checkbox.addEventListener("change", (e) => {
+      const goalId = goal.id;
       if (e.target.checked) {
-        // Single-goal mode: picking a preset goal replaces any previous preset/custom goal.
-        state.userLearningGoals = [goal.id];
-        state.userCustomGoals = [];
-        localStorage.setItem("sandbox.userCustomGoals", JSON.stringify(state.userCustomGoals));
+        // Add goal to selected goals (if not already there)
+        if (!state.userLearningGoals.includes(goalId)) {
+          state.userLearningGoals.push(goalId);
+        }
       } else {
-        state.userLearningGoals = [];
+        // Remove goal from selected goals
+        state.userLearningGoals = state.userLearningGoals.filter((id) => id !== goalId);
       }
       localStorage.setItem("sandbox.userLearningGoals", JSON.stringify(state.userLearningGoals));
-      renderCustomGoalsList();
-      renderGoalsPage();
       updateGoalsPageState();
     });
     
@@ -3675,7 +3675,7 @@ function recoverGoalsGridIfMissing() {
     goalCheckbox.setAttribute("data-goal-id", goal.id);
 
     goalCheckbox.innerHTML = `
-      <input type="radio" name="learningGoal" value="${goal.id}" ${isChecked ? "checked" : ""} />
+      <input type="checkbox" value="${goal.id}" ${isChecked ? "checked" : ""} />
       <div class="goal-checkbox-content">
         <strong>${escapeHtml(goal.title)}</strong>
         <p class="muted">${escapeHtml(goal.description)}</p>
@@ -3684,11 +3684,15 @@ function recoverGoalsGridIfMissing() {
 
     const checkbox = goalCheckbox.querySelector("input");
     checkbox.addEventListener("change", (event) => {
-      const checked = Boolean(event.target?.checked);
-      if (checked) {
-        state.userLearningGoals = [goal.id];
+      const goalId = goal.id;
+      if (event.target?.checked) {
+        // Add goal to selected goals (if not already there)
+        if (!state.userLearningGoals.includes(goalId)) {
+          state.userLearningGoals.push(goalId);
+        }
       } else {
-        state.userLearningGoals = [];
+        // Remove goal from selected goals
+        state.userLearningGoals = state.userLearningGoals.filter((id) => id !== goalId);
       }
       localStorage.setItem("sandbox.userLearningGoals", JSON.stringify(state.userLearningGoals));
       updateGoalsPageState();
@@ -3768,11 +3772,11 @@ function renderCustomGoalsList() {
 }
 
 function updateGoalsPageState() {
-  // Single-goal mode: exactly one total goal (preset or custom) is required.
+  // Multiple-goal mode: at least one goal (preset or custom) is required.
   const totalGoals = state.userLearningGoals.length + state.userCustomGoals.length;
-  goalsNextBtn.disabled = totalGoals !== 1;
+  goalsNextBtn.disabled = totalGoals === 0;
   
-  goalsNextBtn.textContent = totalGoals === 1 ? "Continue" : "Select one goal";
+  goalsNextBtn.textContent = totalGoals > 0 ? "Continue" : "Select a goal";
 }
 
 function getScenarioGoalMatch(scenarioId) {
