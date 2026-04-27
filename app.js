@@ -4103,10 +4103,6 @@ function generateFeedback() {
         </div>
       </div>
     </article>
-    <article class="analytics-card">
-      <h4>Improvement Tracker</h4>
-      <p class="muted">Focus on practicing the identified growth areas in your next session.</p>
-    </article>
   `;
 
   feedbackPanel.innerHTML = overviewHtml;
