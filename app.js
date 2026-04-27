@@ -49,6 +49,8 @@ const PEER_ROOM_PREFIX = "sandbox.peer.room.";
 const PEER_USER_ID_KEY = "sandbox.peer.userId";
 const PEER_REQUESTS_KEY = "sandbox.peer.requests.v1";
 const PEER_SESSION_HISTORY_KEY = "sandbox.peer.sessionHistory.v1";
+const PRACTICE_SESSIONS_KEY = "sandbox.practiceSessions.v1";
+const CURRENT_SESSION_ANALYSIS_KEY = "sandbox.currentSessionAnalysis.v1";
 
 const SCAFFOLD_LEVELS = {
   1: {
@@ -828,6 +830,50 @@ function persistScaffoldLevel() {
   localStorage.setItem(SCAFFOLD_LEVEL_KEY, String(state.scaffold.level));
 }
 
+function loadPracticeSessions() {
+  try {
+    const raw = localStorage.getItem(PRACTICE_SESSIONS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (err) {
+    console.warn("Failed to load practice sessions:", err);
+    return [];
+  }
+}
+
+function savePracticeSessions(sessions) {
+  localStorage.setItem(PRACTICE_SESSIONS_KEY, JSON.stringify(sessions));
+}
+
+function savePracticeSessionResult(result) {
+  const sessions = loadPracticeSessions();
+  sessions.push({
+    ...result,
+    timestamp: new Date().toISOString(),
+    id: `session-${Date.now()}`,
+  });
+  savePracticeSessions(sessions);
+  return sessions;
+}
+
+function getPreviousSessions(limit = 5) {
+  const sessions = loadPracticeSessions();
+  return sessions.slice(-limit).reverse();
+}
+
+function getSessionAnalysisData(sessionId) {
+  try {
+    const raw = localStorage.getItem(CURRENT_SESSION_ANALYSIS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (err) {
+    console.warn("Failed to load session analysis:", err);
+    return {};
+  }
+}
+
+function saveSessionAnalysis(analysis) {
+  localStorage.setItem(CURRENT_SESSION_ANALYSIS_KEY, JSON.stringify(analysis));
+}
+
 function buildInitialScenarios() {
   const overrides = loadScenarioOverrides();
   const hiddenIds = new Set(loadHiddenScenarioIds());
@@ -920,6 +966,15 @@ const state = {
     feedbackDraft: "",
     feedbackSent: false,
     feedbackNotes: [],
+  },
+  currentSessionAnalysis: {
+    transcript: [], // {role: 'user'|'ai', content: string, stage: string}
+    userQuotes: [], // [{quote: string, context: string, stage: string}]
+    stagePerformance: {}, // {Introduce: score, Listen: score, ...}
+    strengths: [], // [{behavior: string, evidence: string}]
+    growthAreas: [], // [{area: string, suggestion: string}]
+    previousSessionComparison: null, // comparison to last session
+    isAnalyzing: false,
   },
 };
 
@@ -3753,6 +3808,146 @@ Make the scenario realistic, relevant to the stated goal, and actionable.`,
   }
 }
 
+async function analyzeSessionTranscript(transcript, scenarioTitle, userGoals) {
+  if (transcript.length < 2) {
+    return { userQuotes: [], stagePerformance: {}, strengths: [], growthAreas: [] };
+  }
+
+  try {
+    const userMessages = transcript.filter((m) => m.role === "user").map((m) => m.content);
+    const analysis = {
+      role: "system",
+      content: `You are an expert conversation coach analyzing a practice session transcript.
+
+User's learning goals: ${userGoals.join(", ")}
+Scenario: ${scenarioTitle}
+
+USER'S MESSAGES:
+${userMessages.map((msg, i) => `${i + 1}. "${msg}"`).join("\n")}
+
+Analyze the user's performance and return a JSON object:
+{
+  "userQuotes": [
+    {"quote": "exact word from user", "context": "what stage this happened in", "stage": "Introduce|Listen|Empathize|Talk|Solve", "analysis": "why this quote matters"}
+  ],
+  "strengths": [
+    {"behavior": "what they did well", "evidence": "quote or example from transcript"}
+  ],
+  "growthAreas": [
+    {"area": "skill to improve", "suggestion": "specific actionable suggestion", "exampleStage": "which stage to practice"}
+  ],
+  "stagePerformance": {
+    "Introduce": 0-100,
+    "Listen": 0-100,
+    "Empathize": 0-100,
+    "Talk": 0-100,
+    "Solve": 0-100
+  }
+}
+
+Be specific and reference actual quotes from their messages.`,
+    };
+
+    const response = await callOpenAI([analysis], "gpt-4");
+    const parsed = JSON.parse(response);
+    
+    state.currentSessionAnalysis.userQuotes = parsed.userQuotes || [];
+    state.currentSessionAnalysis.strengths = parsed.strengths || [];
+    state.currentSessionAnalysis.growthAreas = parsed.growthAreas || [];
+    state.currentSessionAnalysis.stagePerformance = parsed.stagePerformance || {};
+    
+    // Compare to previous session if exists
+    const previousSessions = getPreviousSessions(1);
+    if (previousSessions.length > 0) {
+      const lastSession = previousSessions[0];
+      state.currentSessionAnalysis.previousSessionComparison = {
+        previousDate: lastSession.timestamp,
+        previousScores: lastSession.stagePerformance,
+        improvements: Object.keys(parsed.stagePerformance || {}).map((stage) => ({
+          stage,
+          current: parsed.stagePerformance[stage],
+          previous: lastSession.stagePerformance?.[stage] || 0,
+          improved: (parsed.stagePerformance[stage] || 0) > (lastSession.stagePerformance?.[stage] || 0),
+        })),
+      };
+    }
+
+    saveSessionAnalysis(state.currentSessionAnalysis);
+    return state.currentSessionAnalysis;
+  } catch (error) {
+    console.error("Failed to analyze session:", error);
+    return { userQuotes: [], stagePerformance: {}, strengths: [], growthAreas: [] };
+  }
+}
+
+async function generateAdaptiveCoachFeedback(analysis, scenarioTitle) {
+  if (!analysis.userQuotes || analysis.userQuotes.length === 0) {
+    return "Great practice session! Continue building on your foundation.";
+  }
+
+  try {
+    const feedback = {
+      role: "system",
+      content: `You are a supportive conversation coach providing personalized feedback.
+
+Based on this analysis of their practice session:
+Strengths: ${analysis.strengths.map((s) => s.behavior).join("; ")}
+Growth areas: ${analysis.growthAreas.map((a) => a.area).join("; ")}
+
+User quotes from the conversation:
+${analysis.userQuotes.map((q) => `- "${q.quote}" (during ${q.stage}): ${q.analysis}`).join("\n")}
+
+Generate 3-4 sentences of coaching feedback that:
+1. Specifically references their actual quotes
+2. Acknowledges one strength
+3. Offers ONE concrete next-step improvement
+4. Is encouraging and actionable
+
+Keep it warm, specific, and focused on their learning goals.`,
+    };
+
+    return await callOpenAI([feedback], "gpt-4");
+  } catch (error) {
+    console.error("Failed to generate adaptive feedback:", error);
+    return "Good effort in your practice! Keep building these skills with each scenario.";
+  }
+}
+
+async function generateScenarioRecommendations(userGoals) {
+  if (!userGoals || userGoals.length === 0) {
+    return [];
+  }
+
+  try {
+    const recommendations = {
+      role: "system",
+      content: `You are an expert in creating practice scenarios for skill development.
+
+User's learning goals: ${userGoals.join(", ")}
+
+Generate 3 different scenario variations that would help practice these goals.
+Return a JSON array:
+[
+  {
+    "title": "Scenario title",
+    "context": "Why this scenario practices their goal",
+    "difficulty": "easy|medium|hard",
+    "whyItMatters": "How this connects to their goals"
+  }
+]
+
+Make each scenario realistic, progressively challenging, and directly tied to their goals.`,
+    };
+
+    const response = await callOpenAI([recommendations], "gpt-4");
+    const parsed = JSON.parse(response);
+    return parsed || [];
+  } catch (error) {
+    console.error("Failed to generate scenario recommendations:", error);
+    return [];
+  }
+}
+
 function localFallbackReply(userText) {
   const stage = ILETS[state.stageIndex];
   const text = userText.toLowerCase();
@@ -4407,24 +4602,61 @@ async function generateFeedback() {
     "transfer-plan": "Transfer Plan",
   };
 
-  // Get AI-powered coaching feedback
+  // Get AI-powered analysis of actual chat transcript
   let coachingFeedback = "";
+  let analysisData = null;
   try {
-    coachingFeedback = await generateCoachingFeedback(state.messages);
+    const userGoals = [...state.userLearningGoals.map((id) => {
+      const goal = LEARNING_GOALS.find((g) => g.id === id);
+      return goal?.title || id;
+    }), ...state.userCustomGoals];
+    
+    state.currentSessionAnalysis.isAnalyzing = true;
+    analysisData = await analyzeSessionTranscript(
+      state.messages,
+      scenario.title,
+      userGoals
+    );
+    state.currentSessionAnalysis.isAnalyzing = false;
+
+    // Generate coaching feedback based on actual analysis
+    coachingFeedback = await generateAdaptiveCoachFeedback(analysisData, scenario.title);
+    
+    // Save this session result for future comparison
+    savePracticeSessionResult({
+      scenarioId: scenario.id,
+      scenarioTitle: scenario.title,
+      userGoals: state.userLearningGoals,
+      customGoals: state.userCustomGoals,
+      messageCount: state.messages.length,
+      stagePerformance: analysisData.stagePerformance,
+      strengths: analysisData.strengths,
+      growthAreas: analysisData.growthAreas,
+      userQuotes: analysisData.userQuotes,
+    });
   } catch (error) {
     console.warn("Failed to generate coaching feedback:", error);
     coachingFeedback = `Strong areas: ${strong.length ? strong.join(", ") : "overall engagement"}. Growth areas: ${weak.length ? weak.join(", ") : "precision and clarity"}.`;
+    analysisData = { userQuotes: [], strengths: [], growthAreas: [] };
   }
 
   const overviewHtml = `
     <article class="analytics-card">
       <h4>Strength</h4>
-      <p class="analytics-metric">${escapeHtml(coachingFeedback.split("GROWTH")[0].replace(/STRENGTH:|strength:/i, "").trim())}</p>
+      <p class="analytics-metric">${
+        analysisData?.strengths?.[0]
+          ? `${escapeHtml(analysisData.strengths[0].behavior)}<br><span class="strength-evidence" style="display:block; font-size:0.85em; color:#666; margin-top:0.5rem; font-style:italic; border-left:3px solid #0fa37a; padding-left:0.75rem;">"${escapeHtml(analysisData.strengths[0].evidence)}"</span>`
+          : escapeHtml(coachingFeedback.split("GROWTH")[0].replace(/STRENGTH:|strength:/i, "").trim())
+      }</p>
       <p class="muted">Keep this behavior consistent while you focus your next practice on one weaker stage.</p>
     </article>
     <article class="analytics-card">
       <h4>Growth Area</h4>
-      <p class="analytics-metric">${escapeHtml(coachingFeedback.split("GROWTH")[1]?.replace(/AREA:|area:/i, "").trim() || "Focus on your weaker ILETS stages.")}</p>
+      <p class="analytics-metric">${
+        analysisData?.growthAreas?.[0]
+          ? `${escapeHtml(analysisData.growthAreas[0].area)}<br><span class="growth-suggestion" style="display:block; font-size:0.85em; color:#666; margin-top:0.5rem; border-left:3px solid #d9751e; padding-left:0.75rem;">${escapeHtml(analysisData.growthAreas[0].suggestion)}</span>`
+          : escapeHtml(coachingFeedback.split("GROWTH")[1]?.replace(/AREA:|area:/i, "").trim() || "Focus on your weaker ILETS stages.")
+      }</p>
       <p class="muted">Practice this area in your next session for meaningful improvement.</p>
     </article>
   `;
