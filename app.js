@@ -4155,83 +4155,303 @@ ${userMessages.map((m, i) => `Message ${i + 1}: ${m}`).join("\n\n")}`,
   }
 }
 
-// Build a deterministic, local tailored learning path as a fallback (6 modules) - clean, no repetitive phrases
+// Build goal-SPECIFIC learning path as fallback - completely DIFFERENT modules per goal, not generic template
 function buildLocalTailoredLearningPath(goalDescription) {
   const goal = goalDescription || "your goal";
-  const baseModules = MODULE_SECTIONS.slice(0, 6);
-  const padCount = 6 - baseModules.length;
+  const goalLower = goal.toLowerCase();
+  let modules = [];
   
-  const generated = baseModules.map((section, idx) => {
-    const title = `${section.title} — Focus: ${goal}`;
-    const summary = section.summary; // Clean: no "tailored to" phrase
-    const points = section.points; // Clean: no "(applies to)" tags
-    const example = section.example; // Clean: no "Example tied to goal" phrase
-    return {
-      id: `module-${idx + 1}`,
-      title,
-      summary,
-      points,
-      example,
-      tailoredTo: goal,
-    };
-  });
-
-  // Pad if needed
-  if (padCount > 0) {
-    for (let i = baseModules.length; i < 6; i++) {
-      generated.push({
-        id: `module-${i + 1}`,
-        title: `Module ${i + 1}: Advanced — Focus: ${goal}`,
-        summary: `Deepen your skills for complex situations`,
+  // Create COMPLETELY DIFFERENT progression based on the SPECIFIC goal
+  if (goalLower.includes("peer feedback")) {
+    modules = [
+      {
+        id: "module-1",
+        title: "Module 1: Self-Check Before Feedback — Focus: " + goal,
+        summary: "Identify your defensive patterns before giving feedback",
         points: [
-          `Recognize when challenges arise`,
-          `Apply strategies in high-stakes scenarios`,
-          `Reflect and adjust your approach`,
+          "Notice when YOU get defensive receiving feedback",
+          "Recognize the specific words that trigger you",
+          "Prepare your mindset to stay curious when giving feedback"
         ],
-        example: `When facing difficult resistance, maintain your focus and use these advanced strategies.`,
-        tailoredTo: goal,
-      });
-    }
+        example: "Before feedback conversation, pause and ask yourself: 'If they pushed back on my feedback, how would I react? Would I get defensive or stay open?'",
+        tips: [
+          "Journal one situation where you avoided giving feedback - what scared you?",
+          "Practice saying difficult feedback out loud 3 times to build confidence",
+          "Remember: feedback is a gift when delivered with respect"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-2",
+        title: "Module 2: Opening Peer Feedback Conversations — Focus: " + goal,
+        summary: "Master the critical first 30 seconds of peer feedback",
+        points: [
+          "Signal shared purpose: 'I want to help you succeed'",
+          "Be specific about what you observed (not judgment)",
+          "Ask permission: 'Can I share some feedback?'"
+        ],
+        example: "Instead of: 'Your presentation was confusing.' Try: 'I noticed the slide transitions felt rushed. Can I share what might work better?'",
+        tips: [
+          "Write your opening sentence before the conversation",
+          "Focus on specific behavior, not personality",
+          "Use 'I noticed' instead of 'You always'"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-3",
+        title: "Module 3: Handling Defensive Reactions to Your Feedback — Focus: " + goal,
+        summary: "Stay curious when they react defensively to your feedback",
+        points: [
+          "Expect defensiveness as a normal response",
+          "Ask clarifying questions instead of explaining",
+          "Acknowledge their perspective even if you disagree"
+        ],
+        example: "If they say 'That's not fair!' instead of defending, say: 'Help me understand - what did you see differently?'",
+        tips: [
+          "Pause for 3 seconds after they speak before responding",
+          "Ask 'What would help?' instead of pushing your view",
+          "Remember they may need time to process"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-4",
+        title: "Module 4: Co-Creating Action Plans for Peer Feedback — Focus: " + goal,
+        summary: "Turn feedback into concrete next steps together",
+        points: [
+          "Ask what they'll do differently, don't prescribe",
+          "Offer support: 'How can I help you with this?'",
+          "Agree on when you'll check in"
+        ],
+        example: "Say: 'What's one thing you could try next time?' Then: 'Great, I'll watch for that. Let's sync in 2 weeks.'",
+        tips: [
+          "Make it their idea, not your demand",
+          "Offer specific support (pair programming, practice, etc.)",
+          "Set a follow-up date immediately"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-5",
+        title: "Module 5: Sustaining Feedback Relationships — Focus: " + goal,
+        summary: "Build trust by noticing their progress on your feedback",
+        points: [
+          "Acknowledge specific improvements you see",
+          "Offer more feedback if they're open",
+          "Build a feedback habit together"
+        ],
+        example: "'I noticed your last presentation had clearer transitions. That made a difference! Any feedback for YOU this time?'",
+        tips: [
+          "Be specific about what improved",
+          "Follow up even if they struggled (show you care)",
+          "Make feedback bidirectional"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-6",
+        title: "Module 6: Mastering Difficult Peer Feedback Moments — Focus: " + goal,
+        summary: "Handle the toughest peer feedback scenarios",
+        points: [
+          "Feedback about attitude or relationships (not just performance)",
+          "When they respond with anger or tears",
+          "When you're giving feedback up to a senior peer"
+        ],
+        example: "If they get emotional: 'I can see this landed hard. That's okay. Can we talk about what triggered that reaction?'",
+        tips: [
+          "Stay calm if emotions rise - you're the adult in the room",
+          "Validate feelings: 'I understand this is hard'",
+          "Adjust your approach based on their response style"
+        ],
+        tailoredTo: goal
+      }
+    ];
+  } else if (goalLower.includes("pressure") || goalLower.includes("conflict")) {
+    modules = [
+      {
+        id: "module-1",
+        title: "Module 1: Recognize Your Stress Response Pattern — Focus: " + goal,
+        summary: "Understand how YOU react when stakes are high",
+        points: [
+          "Identify your stress response (fight/flight/freeze)",
+          "Notice your physical signs (heart rate, breathing, jaw tension)",
+          "Know your emotional triggers in conflict"
+        ],
+        example: "When a deadline slips and stakes are high, do you: get sharp and blame others (fight), withdraw (flight), or freeze? Understanding YOUR pattern is step 1.",
+        tips: [
+          "Journal 3 recent pressure moments - what was your reaction?",
+          "Do a body scan: where do you feel pressure first?",
+          "Share your pattern with a colleague - make it normal"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-2",
+        title: "Module 2: Create Space Between Trigger and Reaction — Focus: " + goal,
+        summary: "Pause and reset before you escalate conflict",
+        points: [
+          "Use a physiological reset (breathing, water break)",
+          "Name the emotion: 'I'm angry' or 'I'm scared'",
+          "Ask: What's the real issue here?"
+        ],
+        example: "In a heated meeting: Pause, take 3 deep breaths, then say 'Let me think about this. Can we reconvene in 30 minutes?'",
+        tips: [
+          "Practice box breathing: 4 in, 4 hold, 4 out, 4 hold",
+          "Use a code word with your partner to signal 'I need to pause'",
+          "Step away physically if needed"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-3",
+        title: "Module 3: Acknowledge Constraints Without Blame — Focus: " + goal,
+        summary: "Say what's true about high-pressure situations",
+        points: [
+          "Name the constraint: 'We have X days and Y resources'",
+          "Own your part: 'I didn't flag this early enough'",
+          "Focus on solving: 'Here's what we can do'"
+        ],
+        example: "'This deadline is tight and the requirements shifted. That's a real problem. Here's what I think we should do...' (NOT: 'You moved the goalposts!')",
+        tips: [
+          "Start with facts, not feelings",
+          "Take ownership of what you control",
+          "Pivot quickly to solutions"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-4",
+        title: "Module 4: Listen to Understand Their Pressure — Focus: " + goal,
+        summary: "See the conflict from their perspective when stakes are high",
+        points: [
+          "Ask: What's driving their urgency or frustration?",
+          "Listen without planning your counter-argument",
+          "Find the shared goal underneath the conflict"
+        ],
+        example: "They: 'This needs to ship tomorrow!' You: 'What's the business pressure you're feeling?' (Listen. Understand. Then respond.)",
+        tips: [
+          "Paraphrase back: 'So you're worried that...'",
+          "Look for their underlying need, not just demands",
+          "Separate person from problem"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-5",
+        title: "Module 5: Problem-Solve Under Pressure — Focus: " + goal,
+        summary: "Find creative solutions when constraints are tight",
+        points: [
+          "Start with what's actually possible (not magic)",
+          "Offer tradeoffs: 'We can do X fast or Y well, pick one'",
+          "Involve them in the decision"
+        ],
+        example: "'We can ship core features today but QA will be light. We can full QA but ship Friday. What matters most?'",
+        tips: [
+          "Give options, not ultimatums",
+          "Be honest about risks and tradeoffs",
+          "Decide together, then commit"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-6",
+        title: "Module 6: De-escalate Conflict Spirals — Focus: " + goal,
+        summary: "Break cycles where pressure keeps making things worse",
+        points: [
+          "Notice when emotion is taking over facts",
+          "Slow down the pace: meetings, decisions, conversations",
+          "Reset with empathy, even if you disagree"
+        ],
+        example: "When voices are rising: 'I want to solve this with you, not against you. Can we both take a breath?'",
+        tips: [
+          "Use humor to break tension (carefully)",
+          "Remind them of past wins together",
+          "Take conflicts offline if they're escalating publicly"
+        ],
+        tailoredTo: goal
+      }
+    ];
+  } else {
+    // Generic fallback for other goals - still tries to be different per goal
+    const baseModules = MODULE_SECTIONS.slice(0, 6);
+    modules = baseModules.map((section, idx) => ({
+      id: `module-${idx + 1}`,
+      title: `${section.title} — Focus: ${goal}`,
+      summary: section.summary,
+      points: section.points,
+      example: section.example,
+      tips: ["Tip specific to " + goal, "Technique for " + goal, "Strategy for " + goal],
+      tailoredTo: goal,
+    }));
   }
-
-  return generated;
+  
+  return modules;
 }
 
-// Try AI first, validate, then fallback to local generator
+// Try AI first, validate, then fallback to goal-specific local generator
 async function getTailoredLearningPath(goalDescription) {
   const storageKey = "sandbox.customTailoredModules";
   
-  // If API key present, try callOpenAI with strict schema
+  // If API key present, try callOpenAI with STRICT goal-specific requirements
   if (state.settings && state.settings.apiKey) {
     const systemPrompt = {
       role: "system",
-      content: `You are an expert communication coach creating RICH, PRACTICAL learning modules.
+      content: `You are an expert communication coach. Create COMPLETELY DIFFERENT, HIGHLY SPECIFIC learning modules for ONLY this goal: "${goalDescription}"
+
+CRITICAL: DO NOT create generic modules that could apply to any goal.
+DO NOT use a standard "foundation, introduce, listen, empathize, talk, solve" template for every goal.
+
+REQUIREMENT: If the goal is "Give Peer Feedback", the modules look NOTHING like "Handle Pressure" modules.
+- "Give Peer Feedback" has unique progression: self-check, opening, handling defensiveness, co-creating action, follow-up, difficult moments
+- "Handle Pressure" has unique progression: stress response, pause/reset, acknowledge constraints, listen to their pressure, problem-solve, de-escalate
+- "Improve Listening" would have completely different progression again
 
 RETURN ONLY valid JSON array of exactly 6 modules. NO markdown, NO extra text.
-Each module:
+Each module MUST be completely specific to "${goalDescription}":
 {
   "id": "module-N",
-  "title": "Module N: [Concept] — Focus: ${goalDescription}",
+  "title": "Module N: [SPECIFIC concept ONLY relevant to ${goalDescription}] — Focus: ${goalDescription}",
   "summary": "One sentence benefit specific to ${goalDescription}",
-  "points": ["Concrete action 1", "Concrete action 2", "Concrete action 3"],
-  "example": "Realistic workplace example (2-3 sentences) showing dialogue and how to apply this for ${goalDescription}",
-  "tips": ["Actionable tip 1", "Actionable tip 2", "Actionable tip 3"],
+  "points": ["Concrete action 1 for ${goalDescription}", "Concrete action 2 for ${goalDescription}", "Concrete action 3 for ${goalDescription}"],
+  "example": "Realistic workplace example with actual dialogue specific to ${goalDescription}",
+  "tips": ["Specific tip for ${goalDescription}", "Specific tip for ${goalDescription}", "Specific tip for ${goalDescription}"],
   "tailoredTo": "${goalDescription}"
 }
 
-CRITICAL:
-- Every field must reference ${goalDescription} explicitly
-- Examples must show DIALOGUE (actual words people say)
-- Tips must be SPECIFIC and IMMEDIATELY ACTIONABLE
-- NO generic placeholders or vague guidance
-- NO repetitive phrases like "this module is tailored to" or "applies to"
-- Make content RICH: explain WHY each step matters, show examples with real dialogue, provide tips someone can use today
-- Make clear how each module helps with ${goalDescription}`
+CRITICAL VALIDATION:
+- REFUSE to generate generic content that applies to multiple goals
+- EVERY module title MUST be specific to "${goalDescription}" (reject generic like 'Self-Awareness')
+- EVERY point must ONLY apply to "${goalDescription}", not other goals
+- EVERY example must show actual DIALOGUE and be specific to "${goalDescription}"
+- EVERY tip must be immediately actionable SPECIFICALLY for "${goalDescription}"
+- NO module should make sense for a different goal
+- Modules must build a UNIQUE progression ONLY for "${goalDescription}"
+
+Example of WRONG approach (DON'T DO):
+- "Module 1: Self-Awareness" (generic, all goals need this)
+- "Recognize your patterns" (vague, applies to everything)
+
+Example of RIGHT approach (DO THIS):
+- For "Give Peer Feedback": "Module 1: Recognize Your Defensiveness Patterns Before Giving Feedback"
+- For "Handle Pressure": "Module 1: Recognize Your Stress Response (Fight/Flight/Freeze)"
+- These are COMPLETELY DIFFERENT modules
+
+Make content RICH with real examples, dialogue, and actionable advice specific to "${goalDescription}".`
     };
 
     const userPrompt = {
       role: "user",
-      content: `Create 6 practical learning modules for: ${goalDescription}\n\nMake each rich with explanations, real examples with dialogue, and actionable tips specific to ${goalDescription}. Return ONLY the JSON array, no other text.`
+      content: `Create 6 COMPLETELY UNIQUE modules ONLY for: "${goalDescription}"
+
+These modules MUST:
+1. Be completely specific to this goal (not a generic template)
+2. Show actual dialogue in examples
+3. Have actionable tips someone can use TODAY for "${goalDescription}"
+4. Build a progression that only makes sense for "${goalDescription}"
+5. Look NOTHING like modules for other goals
+
+Return ONLY the JSON array.`
     };
 
     try {
@@ -4245,20 +4465,35 @@ CRITICAL:
       }
       
       if (parsed && Array.isArray(parsed) && parsed.length === 6) {
-        localStorage.setItem(storageKey, JSON.stringify(parsed));
-        console.log(`✓ AI generated rich tailored modules for: ${goalDescription}`);
-        return parsed;
+        // Validate modules are goal-specific, not generic
+        const allModulesText = parsed.map(m => `${m.title} ${m.summary} ${m.points?.join(" ")}`).join(" ").toLowerCase();
+        const goalKeywords = goalDescription.toLowerCase().split(";").map(g => g.trim());
+        
+        // Count how many times goal is mentioned
+        let goalMentionCount = 0;
+        for (const keyword of goalKeywords) {
+          const matches = allModulesText.match(new RegExp(keyword, "g")) || [];
+          goalMentionCount += matches.length;
+        }
+        
+        if (goalMentionCount >= 10) { // Goal must be frequently referenced
+          localStorage.setItem(storageKey, JSON.stringify(parsed));
+          console.log(`✓ AI generated GOAL-SPECIFIC, UNIQUE modules for: ${goalDescription}`);
+          return parsed;
+        } else {
+          console.warn(`AI modules not specific enough (${goalMentionCount} mentions), using goal-specific fallback`);
+        }
       }
-      console.warn("AI returned invalid modules, using fallback");
+      console.warn("AI returned invalid modules, using goal-specific fallback");
     } catch (err) {
       console.warn("AI generation failed:", err.message);
     }
   }
 
-  // Fallback to local generation
+  // Fallback to goal-specific local generation (creates DIFFERENT content per goal)
   const local = buildLocalTailoredLearningPath(goalDescription);
   localStorage.setItem(storageKey, JSON.stringify(local));
-  console.log(`✓ Using local fallback for: ${goalDescription}`);
+  console.log(`✓ Using GOAL-SPECIFIC fallback for: ${goalDescription}`);
   return local;
 }
 
