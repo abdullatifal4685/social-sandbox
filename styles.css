@@ -337,12 +337,9 @@ h2 {
   width: 62px;
   height: 62px;
   margin-bottom: 0.75rem;
-  border-radius: 20px;
-  background: linear-gradient(160deg, #183f8a, #2a63db);
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  color: #ffffff;
-  box-shadow: 0 12px 26px rgba(24, 63, 138, 0.22);
-  font-size: 1.3rem;
+  border-radius: 16px;
+  display: block;
+  box-shadow: 0 12px 28px rgba(24, 63, 138, 0.30);
 }
 
 .landing-eyebrow {
