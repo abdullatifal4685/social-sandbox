@@ -920,7 +920,7 @@ const state = {
   stageIndex: 0,
   isTyping: false,
   briefTab: "scenario",
-  scenarioBriefExpanded: false,
+  scenarioBriefExpanded: true,
   scenariosExpanded: true,
   scenarioListExpanded: false,
   scenarioPickerExpanded: false,
@@ -3145,7 +3145,7 @@ function renderPeerPracticum() {
 function enterPracticeCompactMode() {
   state.leftVisible = true;
   state.rightVisible = false;
-  state.scenarioBriefExpanded = false;
+  state.scenarioBriefExpanded = true;  // expanded by default; auto-collapses after first exchange
   state.scenariosExpanded = true;
   state.iletsExpanded = true;
   state.rightTab = "practice";
@@ -6993,6 +6993,12 @@ async function handleSend(event) {
     void refreshDynamicPracticeHints();
   } finally {
     setPending(false);
+    // Auto-collapse the practice brief after the first full exchange so the chat has more room
+    const userTurns = state.messages.filter((m) => m.role === "user").length;
+    if (userTurns >= 1 && state.scenarioBriefExpanded) {
+      state.scenarioBriefExpanded = false;
+      renderScenarioBriefVisibility();
+    }
     render();
     speakAssistantReply(assistantReply);
     if (state.voice.mode && !window.speechSynthesis) {
@@ -7586,9 +7592,6 @@ chooseLearnBtn.addEventListener("click", () => {
 });
 
 choosePracticeBtn.addEventListener("click", () => {
-  if (!ensureLearnerNameSet()) {
-    return;
-  }
   goToPage("scenarioBriefing");
 });
 
