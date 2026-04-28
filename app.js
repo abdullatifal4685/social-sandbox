@@ -140,36 +140,41 @@ const STAGE_GUIDE = {
   Introduce: {
     objective: "Set purpose and psychological safety in one calm sentence.",
     starters: [
-      "Thanks for meeting with me. I want to discuss a risk I am seeing.",
-      "My goal is to solve this early and keep the project on track.",
+      { style: "direct",     text: "I want to raise something important before it becomes harder to address.", example: "e.g., \"I asked for this time because I've noticed a pattern that's affecting our work together.\"" },
+      { style: "balanced",   text: "My goal here is to solve this together, not to assign blame.",             example: "e.g., \"I wanted to talk so we can get ahead of this before it escalates.\"" },
+      { style: "empathetic", text: "I appreciate you making time — I know this is a busy period.",             example: "e.g., \"Before I get into it, I want you to know my intention is to find a path forward, not to criticize.\"" },
     ],
   },
   Listen: {
     objective: "Ask questions first so you understand constraints before arguing.",
     starters: [
-      "Can you share what trade-offs led to this decision?",
-      "What pressure are you managing right now from your side?",
+      { style: "direct",     text: "Before I share my view, can you walk me through your thinking?",           example: "e.g., \"What led to this decision — what were the main factors?\"" },
+      { style: "balanced",   text: "Help me understand the pressure you're working with right now.",            example: "e.g., \"What constraints are you dealing with that I might not be seeing?\"" },
+      { style: "empathetic", text: "I want to make sure I understand your side fully before responding.",       example: "e.g., \"What would need to be true for this to work from your perspective?\"" },
     ],
   },
   Empathize: {
     objective: "Acknowledge pressure and emotion without dropping the core issue.",
     starters: [
-      "I understand this deadline puts a lot of pressure on your team.",
-      "I can see why this is frustrating, and I appreciate your openness.",
+      { style: "direct",     text: "I can see why this is a tough spot — I want to work through it with you.",  example: "e.g., \"I hear the pressure you're under, and I still think we need to address this.\"" },
+      { style: "balanced",   text: "I appreciate your honesty — that helps me understand where you're coming from.", example: "e.g., \"That makes sense given what you're managing. Here's what I'm seeing on my end.\"" },
+      { style: "empathetic", text: "It sounds like this situation is putting real strain on you.",               example: "e.g., \"I didn't realize how much pressure was there — thank you for telling me that.\"" },
     ],
   },
   Talk: {
     objective: "State behavior and impact with specific evidence.",
     starters: [
-      "I noticed we missed two milestones, which increases client risk.",
-      "If this continues, we may face rework and delayed delivery.",
+      { style: "direct",     text: "Here's what I've observed, and why it matters for the outcome.",            example: "e.g., \"On Tuesday, X happened. The impact was Y. I want to address it now.\"" },
+      { style: "balanced",   text: "I want to share a specific example so this doesn't feel abstract.",          example: "e.g., \"Let me give you a concrete instance — this happened last week and here's the effect.\"" },
+      { style: "empathetic", text: "I'm raising this because I care about the outcome for both of us.",          example: "e.g., \"I wouldn't bring this up if I didn't think it was fixable — here's what I noticed.\"" },
     ],
   },
   Solve: {
     objective: "Agree on actions with owner and follow-up date.",
     starters: [
-      "Can we agree on one recovery action for this week and an owner?",
-      "Let us set a checkpoint on Friday to review progress together.",
+      { style: "direct",     text: "Let's agree on one concrete next step — who owns it and by when.",          example: "e.g., \"I'll handle X by Friday. Can you take care of Y by Thursday?\"" },
+      { style: "balanced",   text: "What would a reasonable next step look like to you?",                        example: "e.g., \"If we both commit to [action], do you think that addresses the core concern?\"" },
+      { style: "empathetic", text: "I want to make sure we both leave feeling like we have a clear path forward.", example: "e.g., \"Let's check in after [time] to see if this is working for both of us.\"" },
     ],
   },
 };
@@ -2340,7 +2345,7 @@ Example: ["Question 1?", "Question 2?", "Question 3?"]`
   };
 
   try {
-    const response = await callProxyAPI({ model: state.settings.model || "gpt-4", messages: [systemPrompt, userPrompt] });
+    const response = await callProxyAPI({ model: "gpt-4o-mini", messages: [systemPrompt, userPrompt] });
     const cleaned = response.replace(/^```json\s*/i, "").replace(/\s*```$/, "").trim();
     const parsed = JSON.parse(cleaned);
     if (Array.isArray(parsed) && parsed.length > 0) {
@@ -2409,7 +2414,7 @@ Return ONLY JSON:
 }`,
       };
 
-      const response = await callProxyAPI({ model: state.settings.model || "gpt-4", messages: [prompt] });
+      const response = await callProxyAPI({ model: "gpt-4o-mini", messages: [prompt] });
       const parsed = JSON.parse(response);
       hintsCache[stage] = parsed.starters || [];
     } catch (error) {
@@ -3388,26 +3393,31 @@ async function generateDynamicHintsFromConversation(scenario, stage, messages) {
     role: "system",
     content: `You are a conversation coach. Generate 3 short sentence starters for the ${stage} stage.
 
-Use the recent conversation to make them feel immediate and specific.
-Scenario title: ${scenario?.title || "Unknown"}
-Scenario context: ${scenario?.context || "Unknown"}
+Use the recent conversation to make them feel IMMEDIATELY useful and specific to what was just said.
+Scenario: ${scenario?.title || "Unknown"} — ${scenario?.context || ""}
 User goals: ${userGoals.length > 0 ? userGoals.join(", ") : "general communication"}
 
 Recent conversation:
 ${transcript || "No conversation yet."}
 
-Return ONLY JSON in this format:
+Return ONLY valid JSON — no markdown, no text outside the JSON:
 {
   "starters": [
-    {"text": "...", "style": "direct"},
-    {"text": "...", "style": "balanced"},
-    {"text": "...", "style": "empathetic"}
+    {"text": "Short suggestion phrase (what to do)", "style": "direct",     "example": "e.g., a realistic sentence the learner could actually say"},
+    {"text": "Short suggestion phrase (what to do)", "style": "balanced",   "example": "e.g., a realistic sentence the learner could actually say"},
+    {"text": "Short suggestion phrase (what to do)", "style": "empathetic", "example": "e.g., a realistic sentence the learner could actually say"}
   ]
-}`,
+}
+
+Rules:
+- "text" is a short coaching instruction (10-15 words max)
+- "example" starts with 'e.g., ' and shows a realistic thing the learner could say (in quotes)
+- Reference specific words or ideas from the recent conversation`,
   };
 
   try {
-    const response = await callProxyAPI({ model: state.settings.model, messages: [prompt] });
+    // Use gpt-4o-mini for hints — much cheaper, fast enough for suggestions
+    const response = await callProxyAPI({ model: "gpt-4o-mini", messages: [prompt] });
     const parsed = JSON.parse(response);
     return Array.isArray(parsed?.starters) ? parsed.starters.filter((item) => item && item.text) : [];
   } catch (error) {
@@ -4232,7 +4242,7 @@ Be specific to the actual conversation content.`,
   };
 
   try {
-    const feedback = await callProxyAPI({ model: state.settings.model || "gpt-4", messages: [systemPrompt, conversationSummary] });
+    const feedback = await callProxyAPI({ model: "gpt-4o-mini", messages: [systemPrompt, conversationSummary] });
     return feedback;
   } catch (error) {
     console.warn("Coach feedback generation failed:", error);
@@ -4267,7 +4277,7 @@ Please provide adaptive feedback.`,
   };
 
   try {
-    const feedback = await callProxyAPI({ model: state.settings.model || "gpt-4", messages: [systemPrompt, reflectionContext] });
+    const feedback = await callProxyAPI({ model: "gpt-4o-mini", messages: [systemPrompt, reflectionContext] });
     return feedback;
   } catch (error) {
     console.warn("Reflection feedback generation failed:", error);
@@ -4303,7 +4313,7 @@ ${userMessages.map((m, i) => `Message ${i + 1}: ${m}`).join("\n\n")}`,
   };
 
   try {
-    const analysis = await callProxyAPI({ model: state.settings.model || "gpt-4", messages: [systemPrompt, analyticsQuery] });
+    const analysis = await callProxyAPI({ model: "gpt-4o-mini", messages: [systemPrompt, analyticsQuery] });
     return analysis;
   } catch (error) {
     console.warn("Analytics generation failed:", error);
@@ -5180,7 +5190,7 @@ Return ONLY the JSON array.`
     };
 
     try {
-      const responseText = await callProxyAPI({ model: state.settings.model || "gpt-4", messages: [systemPrompt, userPrompt] });
+      const responseText = await callProxyAPI({ model: "gpt-4o-mini", messages: [systemPrompt, userPrompt] });
       let parsed;
       try {
         const cleaned = responseText.replace(/^```json\s*/, "").replace(/\s*```$/, "").trim();
@@ -5308,7 +5318,7 @@ Return ONLY the JSON array, no other text.`
     };
 
     try {
-      const responseText = await callProxyAPI({ model: state.settings.model || "gpt-4", messages: [systemPrompt, userPrompt] });
+      const responseText = await callProxyAPI({ model: "gpt-4o-mini", messages: [systemPrompt, userPrompt] });
       let parsed;
       try {
         // Clean response in case AI added markdown code fence
@@ -5365,7 +5375,7 @@ Return a JSON object with this EXACT structure:
 Be specific, practical, and actionable. Avoid generic advice. Reference specific phrases and techniques.`,
     };
 
-    const response = await callProxyAPI({ model: state.settings.model || "gpt-4", messages: [systemPrompt] });
+    const response = await callProxyAPI({ model: "gpt-4o-mini", messages: [systemPrompt] });
     const parsed = JSON.parse(response);
     
     return {
@@ -5723,7 +5733,7 @@ Return ONLY this JSON:
     
     for (let i = 0; i < prompts.length; i++) {
       try {
-        const response = await callProxyAPI({ model: state.settings.model || "gpt-4", messages: [prompts[i]] });
+        const response = await callProxyAPI({ model: "gpt-4o-mini", messages: [prompts[i]] });
         const parsed = JSON.parse(response);
         modules.push({
           id: `tailored-module-${Date.now()}-${i}`,
@@ -5764,7 +5774,7 @@ Return a JSON object with this exact structure:
 Make the scenario realistic, relevant to the stated goal, and actionable.`,
     };
 
-    const response = await callProxyAPI({ model: state.settings.model || "gpt-4", messages: [systemPrompt] });
+    const response = await callProxyAPI({ model: "gpt-4o-mini", messages: [systemPrompt] });
     const parsed = JSON.parse(response);
     
     return {
@@ -5877,7 +5887,7 @@ Analyze the user's performance and return a JSON object:
 Be specific and reference actual quotes from their messages.`,
     };
 
-    const response = await callProxyAPI({ model: state.settings.model || "gpt-4", messages: [analysis] });
+    const response = await callProxyAPI({ model: "gpt-4o-mini", messages: [analysis] });
     const parsed = JSON.parse(response);
     
     state.currentSessionAnalysis.userQuotes = parsed.userQuotes || [];
@@ -5935,7 +5945,7 @@ Generate 3-4 sentences of coaching feedback that:
 Keep it warm, specific, and focused on their learning goals.`,
     };
 
-    return await callProxyAPI({ model: state.settings.model || "gpt-4", messages: [feedback] });
+    return await callProxyAPI({ model: "gpt-4o-mini", messages: [feedback] });
   } catch (error) {
     console.error("Failed to generate adaptive feedback:", error);
     return "Good effort in your practice! Keep building these skills with each scenario.";
@@ -5968,7 +5978,7 @@ Return a JSON array:
 Make each scenario realistic, progressively challenging, and directly tied to their goals.`,
     };
 
-    const response = await callProxyAPI({ model: state.settings.model || "gpt-4", messages: [recommendations] });
+    const response = await callProxyAPI({ model: "gpt-4o-mini", messages: [recommendations] });
     const parsed = JSON.parse(response);
     return parsed || [];
   } catch (error) {
@@ -6319,28 +6329,35 @@ function saveReflectionEntry(entry) {
   if (!btn) return;
 
   btn.addEventListener("click", async () => {
-    // Determine the single active goal (preset id or custom string)
     const selectedPresetId = state.userLearningGoals && state.userLearningGoals[0];
     const selectedCustom = state.userCustomGoals && state.userCustomGoals[0];
-    const goalText = (LEARNING_GOALS.find((g) => g.id === selectedPresetId)?.title) || selectedCustom || selectedPresetId || "your goal";
+    const hasCustomGoal = state.userCustomGoals.length > 0;
 
-    try {
-      btn.disabled = true;
-      btn.textContent = "Personalizing your modules...";
-
-      const modules = await getTailoredLearningPath(goalText);
-      state.customTailoredModules = Array.isArray(modules) ? modules : [];
-      localStorage.setItem("sandbox.customTailoredModules", JSON.stringify(state.customTailoredModules));
-
-      // Navigate to next page in flow
-      goToPage("choice");
-    } catch (err) {
-      console.error("Failed to generate tailored learning path on Continue:", err);
-      goToPage("choice");
-    } finally {
-      btn.disabled = false;
-      btn.textContent = state.userLearningGoals.length + state.userCustomGoals.length === 1 ? "Continue" : "Select one goal";
+    // BUDGET GATE: Only call AI for user-typed custom goals.
+    // Preset checkbox goals use built-in static modules — no API call needed.
+    if (hasCustomGoal) {
+      const goalText = selectedCustom || "your goal";
+      try {
+        btn.disabled = true;
+        btn.textContent = "Building your custom modules…";
+        const modules = await getTailoredLearningPath(goalText);
+        state.customTailoredModules = Array.isArray(modules) ? modules : [];
+        localStorage.setItem("sandbox.customTailoredModules", JSON.stringify(state.customTailoredModules));
+      } catch (err) {
+        console.error("Failed to generate tailored learning path:", err);
+        state.customTailoredModules = [];
+        localStorage.setItem("sandbox.customTailoredModules", "[]");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Continue";
+      }
+    } else {
+      // Preset goal selected — use static modules instantly, no AI cost
+      state.customTailoredModules = [];
+      localStorage.setItem("sandbox.customTailoredModules", "[]");
     }
+
+    goToPage("choice");
   });
 })();
 
@@ -6891,17 +6908,31 @@ async function handleSend(event) {
   state.voice.pendingFinal = "";
   state.voice.interim = "";
 
+  // Push user message and render it IMMEDIATELY so it always appears
   state.messages.push({ role: "user", content: userText });
-  advanceStageFromUserMessage(userText);
-  maybeQueueInMomentReflection();
   promptInput.value = "";
-  render();
+  renderChat(); // show user's message right away before anything else can fail
+
+  // Stage advance is secondary — don't let it block or hide the user's message
+  try {
+    advanceStageFromUserMessage(userText);
+    maybeQueueInMomentReflection();
+  } catch (stageErr) {
+    console.warn("Stage advance failed (non-critical):", stageErr);
+  }
+
+  try {
+    render();
+  } catch (renderErr) {
+    console.warn("Render failed (non-critical):", renderErr);
+  }
   setPending(true);
 
   let assistantReply = "";
 
   try {
-    const reply = await withTimeout(generateRoleplayReply(), 40000);
+    // 30s timeout — Render.com free tier can take 20-25s to cold-start
+    const reply = await withTimeout(generateRoleplayReply(), 30000);
     const parsed = parseAssistantOutput(reply);
     addHint(parsed.hint);
     addCoachNote(userText, parsed);
@@ -6909,7 +6940,7 @@ async function handleSend(event) {
     state.messages.push({ role: "assistant", content: assistantReply });
     void refreshDynamicPracticeHints();
   } catch (error) {
-    void error;
+    console.warn("AI reply failed, using local fallback:", error.message || error);
     const fallback = localFallbackReply(userText);
     addHint(fallback.hint);
     addCoachNote(userText, fallback);
@@ -7754,7 +7785,7 @@ Be direct and warm. No bullet points — just natural, thoughtful prose.`
   };
 
   try {
-    const feedback = await callProxyAPI({ model: state.settings.model || "gpt-4", messages: [systemPrompt, userPrompt] });
+    const feedback = await callProxyAPI({ model: "gpt-4o-mini", messages: [systemPrompt, userPrompt] });
     if (quizResultText) {
       quizResultText.innerHTML = `<p style="font-weight:600;margin:0 0 0.4rem;">Feedback on your reflection</p><p style="margin:0;line-height:1.7;">${escapeHtml(feedback)}</p>`;
       quizResultText.classList.remove("is-hidden");
