@@ -2143,17 +2143,31 @@ function renderModule() {
   const isInTailoredSection = tailoredCount > 0 && index < tailoredCount;
 
   const moduleSectionBanner = document.getElementById("moduleSectionBanner");
+  const moduleTransitionCard = document.getElementById("moduleTransitionCard");
   if (moduleSectionBanner) {
     if (isInTailoredSection) {
-      moduleSectionBanner.innerHTML = `<span class="msb-badge msb-badge-tailored">Your Goal Modules</span><span class="msb-label">Personalized learning path · Module ${index + 1} of ${tailoredCount}</span>`;
+      moduleSectionBanner.innerHTML = `<span class="msb-badge msb-badge-tailored">Your Focus Area</span><span class="msb-label">Skills specific to your learning goal · Module ${index + 1} of ${tailoredCount}</span>`;
       moduleSectionBanner.className = "module-section-banner msb-tailored";
     } else if (isInILETSSection && hasILETSSection) {
       const iletsStep = index - tailoredCount + 1;
-      moduleSectionBanner.innerHTML = `<span class="msb-badge msb-badge-ilets">ILETS Framework</span><span class="msb-label">Difficult Conversation Framework · Step ${iletsStep} of 6</span>`;
+      moduleSectionBanner.innerHTML = `<span class="msb-badge msb-badge-ilets">The Method Behind the Practice</span><span class="msb-label">A step-by-step structure for any difficult conversation · Step ${iletsStep} of 6</span>`;
       moduleSectionBanner.className = "module-section-banner msb-ilets";
     } else {
-      moduleSectionBanner.innerHTML = `<span class="msb-badge msb-badge-ilets">ILETS Framework</span><span class="msb-label">Difficult Conversation Framework</span>`;
+      moduleSectionBanner.innerHTML = `<span class="msb-badge msb-badge-ilets">The Method Behind the Practice</span><span class="msb-label">A step-by-step structure for any difficult conversation</span>`;
       moduleSectionBanner.className = "module-section-banner msb-ilets";
+    }
+  }
+
+  // Transition card: shown only on the first ILETS module when there are tailored modules before it
+  if (moduleTransitionCard) {
+    if (hasILETSSection && index === tailoredCount) {
+      moduleTransitionCard.innerHTML = `
+        <p style="margin:0 0 0.4rem; font-weight:700; color:var(--ink-dark);">Now for the framework that ties it all together.</p>
+        <p style="margin:0; line-height:1.6; color:var(--ink-muted);">Your previous modules focused on skills specific to your goal. The <strong>ILETS Framework</strong> is the step-by-step conversation structure you'll actually use during practice — it works in any difficult conversation, not just yours. Think of it as the engine; your goal modules were the fuel.</p>
+      `;
+      moduleTransitionCard.classList.remove("is-hidden");
+    } else {
+      moduleTransitionCard.classList.add("is-hidden");
     }
   }
 
