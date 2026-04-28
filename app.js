@@ -2133,7 +2133,30 @@ function renderModule() {
   moduleProgressLabel.textContent = `Module ${index + 1}/${total}`;
   moduleProgressPercent.textContent = `${progress}%`;
   moduleProgressBar.style.width = `${progress}%`;
-  
+
+  // Section banner: tailored vs ILETS framework
+  const tailoredCount = state.customTailoredModules.length >= 7
+    ? total
+    : state.customTailoredModules.length;
+  const hasILETSSection = tailoredCount < total;
+  const isInILETSSection = index >= tailoredCount;
+  const isInTailoredSection = tailoredCount > 0 && index < tailoredCount;
+
+  const moduleSectionBanner = document.getElementById("moduleSectionBanner");
+  if (moduleSectionBanner) {
+    if (isInTailoredSection) {
+      moduleSectionBanner.innerHTML = `<span class="msb-badge msb-badge-tailored">Your Goal Modules</span><span class="msb-label">Personalized learning path · Module ${index + 1} of ${tailoredCount}</span>`;
+      moduleSectionBanner.className = "module-section-banner msb-tailored";
+    } else if (isInILETSSection && hasILETSSection) {
+      const iletsStep = index - tailoredCount + 1;
+      moduleSectionBanner.innerHTML = `<span class="msb-badge msb-badge-ilets">ILETS Framework</span><span class="msb-label">Difficult Conversation Framework · Step ${iletsStep} of 6</span>`;
+      moduleSectionBanner.className = "module-section-banner msb-ilets";
+    } else {
+      moduleSectionBanner.innerHTML = `<span class="msb-badge msb-badge-ilets">ILETS Framework</span><span class="msb-label">Difficult Conversation Framework</span>`;
+      moduleSectionBanner.className = "module-section-banner msb-ilets";
+    }
+  }
+
   // Display user goal at the top if they have selected goals
   const allUserGoals = [...state.userLearningGoals, ...state.userCustomGoals];
   const userGoalDisplay = document.getElementById("userGoalDisplay");
