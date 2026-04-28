@@ -9,13 +9,13 @@ const LEARNING_GOALS = [
   {
     id: "peer-feedback",
     title: "Give Difficult Feedback",
-    description: "Address behavior, performance, or attitude issues directly — with a colleague, manager, or direct report — without triggering defensiveness",
+    description: "Address behavior and performance issues directly with colleagues, managers, and direct reports. Learn to be honest without making people defensive.",
     scenarios: ["dominance-in-meetings", "unsafe-shortcut"],
   },
   {
     id: "navigate-authority",
     title: "Speak Up Across Power Levels",
-    description: "Communicate confidently with people above or below you — push back on decisions, set expectations, and be heard without overstepping",
+    description: "Communicate confidently across power levels. Push back on decisions, set clear expectations, and be heard without overstepping.",
     scenarios: ["failing-project", "resource-priority-conflict", "quality-vs-speed"],
   },
   {
@@ -27,13 +27,13 @@ const LEARNING_GOALS = [
   {
     id: "listen-empathize",
     title: "Listen to Understand, Not Just to Reply",
-    description: "Ask the right questions, reflect back what you hear, and acknowledge emotion — so the other person feels understood before you make your case",
+    description: "Ask the right questions, reflect what you hear, and acknowledge emotion so the other person feels genuinely understood before you make your case.",
     scenarios: ["failing-project", "dominance-in-meetings", "unsafe-shortcut"],
   },
   {
     id: "provide-options",
     title: "Say No Without Closing the Door",
-    description: "Move beyond a flat refusal by offering trade-offs, alternatives, and co-created solutions — keeping momentum even when you can't say yes",
+    description: "Move beyond saying no by offering trade-offs, alternatives, and solutions you build together. Keep conversations moving even when you cannot give a straight yes.",
     scenarios: ["resource-priority-conflict", "quality-vs-speed"],
   },
 ];
@@ -142,13 +142,13 @@ const STAGE_GUIDE = {
     starters: [
       { style: "direct",     text: "I want to raise something important before it becomes harder to address.", example: "e.g., \"I asked for this time because I've noticed a pattern that's affecting our work together.\"" },
       { style: "balanced",   text: "My goal here is to solve this together, not to assign blame.",             example: "e.g., \"I wanted to talk so we can get ahead of this before it escalates.\"" },
-      { style: "empathetic", text: "I appreciate you making time — I know this is a busy period.",             example: "e.g., \"Before I get into it, I want you to know my intention is to find a path forward, not to criticize.\"" },
+      { style: "empathetic", text: "I appreciate you making time. I know things are busy right now.",             example: "e.g., \"Before I get into it, I want you to know my intention is to find a path forward, not to criticize.\"" },
     ],
   },
   Listen: {
     objective: "Ask questions first so you understand constraints before arguing.",
     starters: [
-      { style: "direct",     text: "Before I share my view, can you walk me through your thinking?",           example: "e.g., \"What led to this decision — what were the main factors?\"" },
+      { style: "direct",     text: "Before I share my view, can you walk me through your thinking?",           example: "e.g., \"What led to this decision? I want to understand the main factors before I respond.\"" },
       { style: "balanced",   text: "Help me understand the pressure you're working with right now.",            example: "e.g., \"What constraints are you dealing with that I might not be seeing?\"" },
       { style: "empathetic", text: "I want to make sure I understand your side fully before responding.",       example: "e.g., \"What would need to be true for this to work from your perspective?\"" },
     ],
@@ -156,23 +156,23 @@ const STAGE_GUIDE = {
   Empathize: {
     objective: "Acknowledge pressure and emotion without dropping the core issue.",
     starters: [
-      { style: "direct",     text: "I can see why this is a tough spot — I want to work through it with you.",  example: "e.g., \"I hear the pressure you're under, and I still think we need to address this.\"" },
-      { style: "balanced",   text: "I appreciate your honesty — that helps me understand where you're coming from.", example: "e.g., \"That makes sense given what you're managing. Here's what I'm seeing on my end.\"" },
-      { style: "empathetic", text: "It sounds like this situation is putting real strain on you.",               example: "e.g., \"I didn't realize how much pressure was there — thank you for telling me that.\"" },
+      { style: "direct",     text: "I can see why this is a tough spot. I want to work through it with you.",  example: "e.g., \"I hear the pressure you're under. I still think we need to address this together.\"" },
+      { style: "balanced",   text: "I appreciate your honesty. That helps me understand where you're coming from.", example: "e.g., \"That makes sense given what you're managing. Here's what I'm seeing on my end.\"" },
+      { style: "empathetic", text: "It sounds like this situation is putting real strain on you.",               example: "e.g., \"I didn't realize how much pressure was there. Thank you for telling me that.\"" },
     ],
   },
   Talk: {
     objective: "State behavior and impact with specific evidence.",
     starters: [
       { style: "direct",     text: "Here's what I've observed, and why it matters for the outcome.",            example: "e.g., \"On Tuesday, X happened. The impact was Y. I want to address it now.\"" },
-      { style: "balanced",   text: "I want to share a specific example so this doesn't feel abstract.",          example: "e.g., \"Let me give you a concrete instance — this happened last week and here's the effect.\"" },
-      { style: "empathetic", text: "I'm raising this because I care about the outcome for both of us.",          example: "e.g., \"I wouldn't bring this up if I didn't think it was fixable — here's what I noticed.\"" },
+      { style: "balanced",   text: "I want to share a specific example so this doesn't feel abstract.",          example: "e.g., \"Let me give you a concrete instance. This happened last week and here is what the effect was.\"" },
+      { style: "empathetic", text: "I'm raising this because I care about the outcome for both of us.",          example: "e.g., \"I wouldn't bring this up if I didn't think it was fixable. Here's what I noticed.\"" },
     ],
   },
   Solve: {
     objective: "Agree on actions with owner and follow-up date.",
     starters: [
-      { style: "direct",     text: "Let's agree on one concrete next step — who owns it and by when.",          example: "e.g., \"I'll handle X by Friday. Can you take care of Y by Thursday?\"" },
+      { style: "direct",     text: "Let's agree on one concrete next step, who owns it, and by when.",          example: "e.g., \"I'll handle X by Friday. Can you take care of Y by Thursday?\"" },
       { style: "balanced",   text: "What would a reasonable next step look like to you?",                        example: "e.g., \"If we both commit to [action], do you think that addresses the core concern?\"" },
       { style: "empathetic", text: "I want to make sure we both leave feeling like we have a clear path forward.", example: "e.g., \"Let's check in after [time] to see if this is working for both of us.\"" },
     ],
@@ -3350,33 +3350,33 @@ function buildConversationGuidedHints(stage, scenario, messages) {
   switch (stage) {
     case "Introduce":
       return [
-        { style: "direct", text: `Name your purpose right away, referencing what the AI just said.`, example: `"I want to address what you mentioned about ${focus30} — here's my concern."` },
+        { style: "direct", text: `Name your purpose right away, referencing what the AI just said.`, example: `"I want to address what you raised about ${focus30}. Here is my concern."` },
         { style: "balanced", text: `State your goal and link it to what was just discussed.`, example: `"My goal today is [X], especially given what you raised about ${focus30}."` },
-        { style: "empathetic", text: `Acknowledge their concern first, then introduce your point.`, example: `"I hear you on ${focus30} — can I share what I'm seeing from my side?"` },
+        { style: "empathetic", text: `Acknowledge their concern first, then introduce your point.`, example: `"I hear you on ${focus30}. Can I share what I am seeing from my side?"` },
       ];
     case "Listen":
       return [
-        { style: "direct", text: `Ask a specific question about what they just said.`, example: `"When you said '${focus30}' — what exactly do you mean by that?"` },
-        { style: "balanced", text: `Invite them to say more before you respond.`, example: `"Help me understand your side better before I respond — what happened first?"` },
-        { style: "empathetic", text: `Reflect back the emotion you heard in their reply.`, example: `"It sounds like ${focus30} is putting real pressure on you — is that right?"` },
+        { style: "direct", text: `Ask a specific question about what they just said.`, example: `"When you mentioned ${focus30}, what exactly do you mean? I want to make sure I understand."` },
+        { style: "balanced", text: `Invite them to say more before you respond.`, example: `"Help me understand your side fully before I respond. What happened first?"` },
+        { style: "empathetic", text: `Reflect back the emotion you heard in their reply.`, example: `"It sounds like ${focus30} is putting real pressure on you. Is that right?"` },
       ];
     case "Empathize":
       return [
-        { style: "direct", text: `Name one valid point from their message, then add yours.`, example: `"You're right that ${focus30} is a real issue — here's where I see it differently."` },
-        { style: "balanced", text: `Show you understand why this feels hard for them.`, example: `"I can see why ${focus30} feels frustrating, and I want to work through it together."` },
-        { style: "empathetic", text: `Validate the feeling, then stay on point.`, example: `"That's a tough spot — I appreciate you being honest about it."` },
+        { style: "direct", text: `Name one valid point from their message, then add yours.`, example: `"You're right that ${focus30} is a real issue. Here is where I see it differently."` },
+        { style: "balanced", text: `Show you understand why this feels hard for them.`, example: `"I can see why ${focus30} feels frustrating. I want to work through it together."` },
+        { style: "empathetic", text: `Validate the feeling, then stay on point.`, example: `"That's a tough spot. I appreciate you being honest about it."` },
       ];
     case "Talk":
       return [
-        { style: "direct", text: `State one concrete fact or example to back your concern.`, example: `"Here's a specific instance: ${focus30} — this happened on [date] and the impact was..."` },
-        { style: "balanced", text: `Explain the impact and why it matters to you.`, example: `"When ${focus30}, it affects [X] because... and that's why I'm raising it now."` },
-        { style: "empathetic", text: `Keep it firm but respectful, then say what you need.`, example: `"I want to be direct without putting you on the spot — what I need is..."` },
+        { style: "direct", text: `State one concrete fact or example to back your concern.`, example: `"Here's a specific instance: ${focus30}. This happened on [date] and the impact was..."` },
+        { style: "balanced", text: `Explain the impact and why it matters to you.`, example: `"When ${focus30}, it affects [X] because... and that is why I am raising it now."` },
+        { style: "empathetic", text: `Keep it firm but respectful, then say what you need.`, example: `"I want to be direct without putting you on the spot. What I need is..."` },
       ];
     case "Solve":
       return [
-        { style: "direct", text: `Propose one specific action with an owner and timeline.`, example: `"Let's agree on [action] — you handle [X] by [date], I'll follow up on [Y]."` },
-        { style: "balanced", text: `Suggest an action tied to the concern they just voiced.`, example: `"Given what you said about ${focus30}, what if we... and check in on Friday?"` },
-        { style: "empathetic", text: `Close with a shared next step that addresses both sides.`, example: `"So we both agree on [X] — and if ${focus30} comes up again, we'll..."` },
+        { style: "direct", text: `Propose one specific action with an owner and a timeline.`, example: `"Let's agree on [action]. You handle [X] by [date], and I will follow up on [Y]."` },
+        { style: "balanced", text: `Suggest an action tied to the concern they just voiced.`, example: `"Given what you said about ${focus30}, what if we tried... and checked in on Friday?"` },
+        { style: "empathetic", text: `Close with a shared next step that addresses both sides.`, example: `"So we both agree on [X]. If ${focus30} comes up again, we can revisit this together."` },
       ];
     default:
       return [];
@@ -4341,9 +4341,9 @@ function buildLocalTailoredLearningPath(goalDescription) {
         ],
         example: "Before feedback conversation, pause and ask yourself: 'If they pushed back on my feedback, how would I react? Would I get defensive or stay open?'",
         tips: [
-          "Journal one situation where you avoided giving feedback - what scared you?",
-          "Practice saying difficult feedback out loud 3 times to build confidence",
-          "Remember: feedback is a gift when delivered with respect"
+          "Write about one situation where you avoided giving feedback and reflect on what held you back.",
+          "Practice saying difficult feedback out loud a few times before the real conversation.",
+          "Feedback delivered with respect is one of the most useful things you can give someone."
         ],
         tailoredTo: goal
       },
@@ -4373,11 +4373,11 @@ function buildLocalTailoredLearningPath(goalDescription) {
           "Ask clarifying questions instead of explaining",
           "Acknowledge their perspective even if you disagree"
         ],
-        example: "If they say 'That's not fair!' instead of defending, say: 'Help me understand - what did you see differently?'",
+        example: "If they say 'That's not fair!' instead of getting defensive, say: 'Help me understand. What did you see differently?'",
         tips: [
-          "Pause for 3 seconds after they speak before responding",
-          "Ask 'What would help?' instead of pushing your view",
-          "Remember they may need time to process"
+          "Pause after they speak before you respond. Give yourself a moment to think.",
+          "Ask what would help them rather than pushing your point again.",
+          "People often need a little time to sit with feedback before they can engage with it."
         ],
         tailoredTo: goal
       },
@@ -4426,9 +4426,9 @@ function buildLocalTailoredLearningPath(goalDescription) {
         ],
         example: "If they get emotional: 'I can see this landed hard. That's okay. Can we talk about what triggered that reaction?'",
         tips: [
-          "Stay calm if emotions rise - you're the adult in the room",
-          "Validate feelings: 'I understand this is hard'",
-          "Adjust your approach based on their response style"
+          "Stay calm if emotions rise. You set the tone for the conversation.",
+          "Validate feelings with something simple like: 'I understand this is hard to hear.'",
+          "Pay attention to how they respond and be willing to adjust your approach."
         ],
         tailoredTo: goal
       }
@@ -4446,9 +4446,9 @@ function buildLocalTailoredLearningPath(goalDescription) {
         ],
         example: "When a deadline slips and stakes are high, do you: get sharp and blame others (fight), withdraw (flight), or freeze? Understanding YOUR pattern is step 1.",
         tips: [
-          "Journal 3 recent pressure moments - what was your reaction?",
-          "Do a body scan: where do you feel pressure first?",
-          "Share your pattern with a colleague - make it normal"
+          "Think back on three recent pressure moments and notice what your reaction was.",
+          "Pay attention to where you physically feel stress first. That awareness is useful.",
+          "Sharing your pattern with a trusted colleague can normalize it and reduce shame."
         ],
         tailoredTo: goal
       },
@@ -4551,9 +4551,9 @@ function buildLocalTailoredLearningPath(goalDescription) {
         ],
         example: "You see a project timeline slipping by 4 weeks but don't flag it yet. Ask: 'What am I afraid will happen if I raise this now? Will they think I'm incompetent or that I failed to plan?'",
         tips: [
-          "List 3 risks you've held back - what were your fears?",
-          "Talk to trusted colleagues - they likely have similar fears",
-          "Remember: surfacing risk early is valued, not punished"
+          "List three risks you have held back recently and write down what you were afraid would happen.",
+          "Talk to a trusted colleague about this. They likely have the same fears.",
+          "Most leaders genuinely want to hear about risks early. Silence usually makes things worse."
         ],
         tailoredTo: goal
       },
@@ -4602,9 +4602,9 @@ function buildLocalTailoredLearningPath(goalDescription) {
         ],
         example: "You: 'Security team flagged a risk in our API.' Them: 'Can it be hacked right now?' You: 'Not immediately, but within 2 weeks if unfixed. What are YOUR concerns about fixing it now?'",
         tips: [
-          "Pause after you share the risk - let them react",
-          "Ask 'What's your concern?' not 'Do you understand?'",
-          "They may have context that changes urgency"
+          "After sharing the risk, stop talking. Give them space to react before you explain further.",
+          "Ask what their concern is rather than checking if they understood you.",
+          "They may have context you don't. Their reaction might actually shift the urgency."
         ],
         tailoredTo: goal
       },
@@ -4634,11 +4634,11 @@ function buildLocalTailoredLearningPath(goalDescription) {
           "Celebrate quick decisions on bad news (even if hard)",
           "Never punish the messenger for raising problems"
         ],
-        example: "Someone flags a risk: 'Thank you for bringing this early - that gave us time to respond. I want to keep this culture where we all flag issues ASAP.'",
+        example: "Someone flags a risk: 'Thank you for bringing this up early. That gave us time to respond. This is exactly the culture I want us to build.'",
         tips: [
-          "Model surfacing your own risks and mistakes",
-          "Explicitly say: 'Bad news is better early than late'",
-          "Track which risks you surfaced and what happened - build evidence"
+          "Model the behavior yourself by surfacing your own risks and mistakes openly.",
+          "Say out loud that bad news is better early. People need to hear it explicitly.",
+          "Keep track of which risks you raised and what happened. Build your own record of it working."
         ],
         tailoredTo: goal
       }
@@ -4673,9 +4673,9 @@ function buildLocalTailoredLearningPath(goalDescription) {
         ],
         example: "Before asking your boss for flexibility on a deadline, show you've shipped reliably. Before challenging a peer above you, show you understand their constraints.",
         tips: [
-          "Credibility buys you permission to be direct later",
-          "It's not about agreeing with everything - it's about being reliable",
-          "Watch how they handle disagreement - that's where trust shows"
+          "Credibility gives you more room to be direct later. Earn it through follow-through.",
+          "Being reliable is more valuable than always agreeing. People trust those who deliver.",
+          "Pay attention to how they handle disagreement from others. That tells you a lot about the relationship."
         ],
         tailoredTo: goal
       },
@@ -4726,7 +4726,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
         tips: [
           "Peer relationships are long-term, be relationship-conscious",
           "Appeal to mutual benefit, not obligation",
-          "Follow up when they help you - build reciprocity"
+          "Follow up when they help you. Reciprocity is what makes peer relationships work."
         ],
         tailoredTo: goal
       },
@@ -4761,9 +4761,9 @@ function buildLocalTailoredLearningPath(goalDescription) {
         ],
         example: "They start: 'I'm frustrated with the project...' You immediately think: 'They don't understand the constraints' and stop truly listening.",
         tips: [
-          "Record yourself in a conversation - you'll hear your listening patterns",
-          "Ask: 'Am I listening to respond or listening to understand?'",
-          "Listening fully takes discipline - attention is a gift"
+          "Record yourself in a conversation sometime. You will hear your own listening patterns clearly.",
+          "Ask yourself: am I listening to respond or listening to actually understand?",
+          "Listening fully takes real discipline. Your full attention is a meaningful thing to give someone."
         ],
         tailoredTo: goal
       },
@@ -4779,7 +4779,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
         example: "Instead of: 'You should just talk to them.' Try: 'What have you already tried? What do you think is blocking the conversation?'",
         tips: [
           "Genuine questions sound curious, not interrogating",
-          "Some people need space to think - wait for them to fill silence",
+          "Some people need space to think. Let the silence sit and wait for them to fill it.",
           "Your questions shape what they feel safe sharing"
         ],
         tailoredTo: goal
@@ -4795,7 +4795,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
         ],
         example: "They say: 'This was a waste of time.' You: 'I hear that you're disappointed. Tell me what you expected vs what happened.'",
         tips: [
-          "Acknowledgment ≠ agreement - you can validate their emotion and still disagree",
+          "Acknowledging a feeling is not the same as agreeing with their conclusion. You can do both at once.",
           "People share more when they feel heard",
           "'That makes sense' or 'I can see why that frustrated you' opens doors"
         ],
@@ -4814,7 +4814,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
         tips: [
           "Paraphrasing prevents assumptions",
           "It shows you care enough to get it right",
-          "Many conflicts come from misunderstandings - this stops them early"
+          "Many conflicts come from misunderstandings. Paraphrasing before responding stops them early."
         ],
         tailoredTo: goal
       },
@@ -4847,7 +4847,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
         example: "You both care about customer success but disagree on approach. Start there: 'We both want customers happy. Let's figure out how.'",
         tips: [
           "Listening is how you find the path forward",
-          "Most conflicts have more agreement than it seems - listen for it",
+          "Most conflicts have more agreement underneath than they appear to. Listen for it.",
           "Feeling heard makes people more flexible"
         ],
         tailoredTo: goal
@@ -4885,17 +4885,17 @@ function buildLocalTailoredLearningPath(goalDescription) {
         tips: [
           "Tradeoffs are honest and empowering",
           "Hiding constraints feels like you're hiding something",
-          "Let them decide - you implement their choice"
+          "Let them make the call. Your job is to implement it well, not to win the argument."
         ],
         tailoredTo: goal
       },
       {
         id: "module-3",
         title: "Module 3: Co-Create Solutions With Them",
-        summary: "Don't impose solutions - build them together",
+        summary: "Do not impose solutions. Build them together with the other person.",
         points: [
-          "Ask: 'What would work for you?' not 'Take it or leave it'",
-          "Invite their creativity - they might see options you missed",
+          "Ask what would work for them rather than presenting a take-it-or-leave-it option.",
+          "Invite their ideas. They might see possibilities you did not think of.",
           "Build on their ideas even if they're not perfect"
         ],
         example: "Instead of: 'Here's the schedule.' Try: 'We need to deliver by June. What would you propose to make that work?'",
@@ -4911,7 +4911,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
         title: "Module 4: Expand the Solution Space",
         summary: "Look beyond the obvious answer for creative options",
         points: [
-          "Ask: 'What if we changed X?' - test assumptions",
+          "Ask what would happen if you changed one assumption. Test the edges of the problem.",
           "Consider: partnership, phasing, scope cuts, quality cuts, timeline cuts",
           "Sometimes the best solution is different from what either of you proposed"
         ],
@@ -4951,7 +4951,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
         ],
         example: "'We chose option B. After 2 weeks, we learned X. Does that change what we want to do? Should we adjust?'",
         tips: [
-          "Decisions aren't permanent - frame as experiments",
+          "Decisions do not have to be permanent. Frame them as experiments you will review together.",
           "This builds trust that you're flexible when needed",
           "Adjustment shows you're co-invested in success"
         ],
@@ -5039,7 +5039,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
           "Involve them in creating the solution",
           "Show you're committed to making it work for both"
         ],
-        example: "For " + goal + ": 'What would help resolve this? Here's what I'm thinking - what do you suggest?'",
+        example: "For " + goal + ": 'What would help resolve this? Here is what I am thinking. What do you suggest?'",
         tips: [
           "Collaboration builds commitment",
           "Options feel better than demands",
