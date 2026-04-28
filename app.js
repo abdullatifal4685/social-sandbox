@@ -4372,18 +4372,533 @@ function buildLocalTailoredLearningPath(goalDescription) {
         tailoredTo: goal
       }
     ];
+  } else if (goalLower.includes("surface") || goalLower.includes("risk") || goalLower.includes("bad news")) {
+    modules = [
+      {
+        id: "module-1",
+        title: "Module 1: Diagnose Why Risk Is Hard to Surface — Focus: " + goal,
+        summary: "Understand the fear blocking you from raising bad news",
+        points: [
+          "Identify what you fear: rejection, blame, relationship damage, looking incompetent",
+          "Notice your avoidance pattern: staying silent, soften the message, bury the bad news",
+          "Recognize the cost of NOT surfacing the risk"
+        ],
+        example: "You see a project timeline slipping by 4 weeks but don't flag it yet. Ask: 'What am I afraid will happen if I raise this now? Will they think I'm incompetent or that I failed to plan?'",
+        tips: [
+          "List 3 risks you've held back - what were your fears?",
+          "Talk to trusted colleagues - they likely have similar fears",
+          "Remember: surfacing risk early is valued, not punished"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-2",
+        title: "Module 2: Frame the Risk Diplomatically — Focus: " + goal,
+        summary: "Deliver bad news in a way people can hear it",
+        points: [
+          "Lead with shared interest: 'I want to flag something so we can solve it together'",
+          "Be factual, not emotional: 'The data shows...' not 'This is a disaster'",
+          "Propose options immediately: 'We could adjust timeline or add resources'"
+        ],
+        example: "Instead of: 'This is going to fail!' Try: 'The test results show we need 2 more weeks. We could slip the deadline, add resources, or scope down. What works for you?'",
+        tips: [
+          "Practice the message before delivering it",
+          "Use 'we' not 'I told you' language",
+          "Follow bad news quickly with options"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-3",
+        title: "Module 3: Choose the Right Time and Audience — Focus: " + goal,
+        summary: "Surface risks when decision-makers can actually respond",
+        points: [
+          "Early, private conversations work better than public announcements",
+          "Give context before the bad news (situation, impact, options)",
+          "Involve relevant people but not the whole team"
+        ],
+        example: "Pull your manager aside first: 'I've been tracking something I want to talk through with you before we discuss with the team.' Then share privately, then decide together on next steps.",
+        tips: [
+          "Bad news delivered privately allows them to react without audience",
+          "Early flag = respected, last-minute = blamed",
+          "Ask: 'Who needs to know this and in what order?'"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-4",
+        title: "Module 4: Listen to Their Concerns About the Risk — Focus: " + goal,
+        summary: "Understand their perspective on the bad news",
+        points: [
+          "Don't defend or over-explain your concern",
+          "Ask what they're worried about regarding the risk",
+          "Acknowledge legitimate concerns even if you disagree on urgency"
+        ],
+        example: "You: 'Security team flagged a risk in our API.' Them: 'Can it be hacked right now?' You: 'Not immediately, but within 2 weeks if unfixed. What are YOUR concerns about fixing it now?'",
+        tips: [
+          "Pause after you share the risk - let them react",
+          "Ask 'What's your concern?' not 'Do you understand?'",
+          "They may have context that changes urgency"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-5",
+        title: "Module 5: Co-Create an Action Plan for the Risk — Focus: " + goal,
+        summary: "Move from bad news to decision and accountability",
+        points: [
+          "Get agreement on whether/when to act",
+          "Clarify who does what and by when",
+          "Schedule a follow-up to monitor the risk"
+        ],
+        example: "'So we agree this needs fixing. You'll scope the work, I'll draft the timeline, and we'll check in Thursday. Does that work?'",
+        tips: [
+          "Make the decision explicit: 'We're choosing to delay and accept risk' or 'We're fixing it now'",
+          "Written summary prevents 'I thought we decided' conflicts",
+          "Set early touchpoints so bad news doesn't surprise leadership later"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-6",
+        title: "Module 6: Build a Culture of Early Risk Surfacing — Focus: " + goal,
+        summary: "Create psychological safety for future risk conversations",
+        points: [
+          "Thank people when they surface risks early (reinforce the behavior)",
+          "Celebrate quick decisions on bad news (even if hard)",
+          "Never punish the messenger for raising problems"
+        ],
+        example: "Someone flags a risk: 'Thank you for bringing this early - that gave us time to respond. I want to keep this culture where we all flag issues ASAP.'",
+        tips: [
+          "Model surfacing your own risks and mistakes",
+          "Explicitly say: 'Bad news is better early than late'",
+          "Track which risks you surfaced and what happened - build evidence"
+        ],
+        tailoredTo: goal
+      }
+    ];
+  } else if (goalLower.includes("authority") || goalLower.includes("hierarchy") || goalLower.includes("manager") || goalLower.includes("boss")) {
+    modules = [
+      {
+        id: "module-1",
+        title: "Module 1: Understand the Power Dynamics You're In — Focus: " + goal,
+        summary: "Recognize how hierarchy affects your communication",
+        points: [
+          "Map your role in the hierarchy (peer, above, below, cross-functional)",
+          "Identify what you fear: rejection, judgment, being wrong, losing autonomy",
+          "Notice how power affects your willingness to speak up"
+        ],
+        example: "With your boss: you might hold back honest questions. With direct reports: you might over-explain decisions. With peer above you: you might defer too quickly.",
+        tips: [
+          "Name the dynamic: 'This person has authority over my work/pay/opportunities'",
+          "Different hierarchy = different communication needed",
+          "Fear is normal but doesn't mean you can't speak up"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-2",
+        title: "Module 2: Earn Credibility in the Relationship — Focus: " + goal,
+        summary: "Build trust before asking for something difficult",
+        points: [
+          "Deliver work on time and with quality",
+          "Ask clarifying questions to show you care about their goals",
+          "Follow through on small commitments first"
+        ],
+        example: "Before asking your boss for flexibility on a deadline, show you've shipped reliably. Before challenging a peer above you, show you understand their constraints.",
+        tips: [
+          "Credibility buys you permission to be direct later",
+          "It's not about agreeing with everything - it's about being reliable",
+          "Watch how they handle disagreement - that's where trust shows"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-3",
+        title: "Module 3: Communicate Upward: Frame Issues in Their Terms — Focus: " + goal,
+        summary: "Get buy-in from people above you by addressing their concerns",
+        points: [
+          "Understand what matters to them (business goals, deadlines, reputation)",
+          "Show how your request/concern affects THEIR priorities",
+          "Propose solutions that reduce their risk"
+        ],
+        example: "Instead of: 'I need more time.' Try: 'To hit the quality bar you care about, we need 2 more weeks. Otherwise we're shipping with known bugs.'",
+        tips: [
+          "Lead with impact to their goals, not your need",
+          "Give them options so they feel in control",
+          "Show you've thought it through"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-4",
+        title: "Module 4: Communicate Downward: Be Clear About Scope and Decisions — Focus: " + goal,
+        summary: "Give clear direction to people below you without micromanaging",
+        points: [
+          "Explain the 'why' behind decisions, not just the 'what'",
+          "Show where you have flexibility and where you don't",
+          "Invite input before finalizing decisions"
+        ],
+        example: "'Here's the deadline (fixed), scope (flexible), and quality bar (fixed). Where can you suggest changes to make this work?'",
+        tips: [
+          "People below you need to know: what's negotiable and what's not",
+          "Ask their opinion genuinely, don't ask if you've already decided",
+          "Give them autonomy where you can"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-5",
+        title: "Module 5: Manage Across: Work with Peers You Don't Control — Focus: " + goal,
+        summary: "Influence without authority on the same level",
+        points: [
+          "Find shared goals instead of demanding compliance",
+          "Give before you ask (help them first)",
+          "Acknowledge their constraints without letting them off the hook"
+        ],
+        example: "'I know your team is slammed. I need your API by Thursday to hit my milestone. How can I help you make that happen?'",
+        tips: [
+          "Peer relationships are long-term, be relationship-conscious",
+          "Appeal to mutual benefit, not obligation",
+          "Follow up when they help you - build reciprocity"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-6",
+        title: "Module 6: Handle Disagreement With Different Levels — Focus: " + goal,
+        summary: "Disagree respectfully across power lines",
+        points: [
+          "With authority above: propose alternatives respectfully, don't argue",
+          "With reports below: make the final call clear even if they disagree",
+          "With peers: acknowledge their view and find middle ground"
+        ],
+        example: "Boss wants option A, you think B: 'I understand the appeal of A. Can we explore B? If you decide A, I'm committed.'",
+        tips: [
+          "Disagreement ≠ disrespect, but tone matters",
+          "Give them a graceful way to change their mind",
+          "Commit to their decision once made (no later 'I told you so')"
+        ],
+        tailoredTo: goal
+      }
+    ];
+  } else if (goalLower.includes("listen") || goalLower.includes("empathy") || goalLower.includes("understand")) {
+    modules = [
+      {
+        id: "module-1",
+        title: "Module 1: Recognize When You're Not Really Listening — Focus: " + goal,
+        summary: "Identify your listening blockers and habits",
+        points: [
+          "Catch yourself planning your response instead of hearing them",
+          "Notice when you interrupt or finish their sentences",
+          "See when you jump to solutions before understanding the real problem"
+        ],
+        example: "They start: 'I'm frustrated with the project...' You immediately think: 'They don't understand the constraints' and stop truly listening.",
+        tips: [
+          "Record yourself in a conversation - you'll hear your listening patterns",
+          "Ask: 'Am I listening to respond or listening to understand?'",
+          "Listening fully takes discipline - attention is a gift"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-2",
+        title: "Module 2: Ask Genuine Questions to Understand — Focus: " + goal,
+        summary: "Use questions to learn what they actually think and feel",
+        points: [
+          "Ask 'What?' and 'Why?' before offering advice",
+          "Follow up on vague statements: 'What do you mean by frustrated?'",
+          "Ask about their perspective, not just facts"
+        ],
+        example: "Instead of: 'You should just talk to them.' Try: 'What have you already tried? What do you think is blocking the conversation?'",
+        tips: [
+          "Genuine questions sound curious, not interrogating",
+          "Some people need space to think - wait for them to fill silence",
+          "Your questions shape what they feel safe sharing"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-3",
+        title: "Module 3: Acknowledge Emotion Without Dismissing It — Focus: " + goal,
+        summary: "Validate feelings even if you disagree with their conclusion",
+        points: [
+          "Name what you hear: 'That sounds frustrating' or 'I hear you're scared'",
+          "Don't minimize: avoid 'You shouldn't feel that way'",
+          "Show you understand the feeling, even if you'd act differently"
+        ],
+        example: "They say: 'This was a waste of time.' You: 'I hear that you're disappointed. Tell me what you expected vs what happened.'",
+        tips: [
+          "Acknowledgment ≠ agreement - you can validate their emotion and still disagree",
+          "People share more when they feel heard",
+          "'That makes sense' or 'I can see why that frustrated you' opens doors"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-4",
+        title: "Module 4: Paraphrase to Ensure You Understand — Focus: " + goal,
+        summary: "Confirm you heard correctly before responding",
+        points: [
+          "Reflect back what you heard in your own words",
+          "Ask: 'Is that right?' or 'Did I get that?'",
+          "Correct misunderstandings gently: 'So not X, but Y?'"
+        ],
+        example: "They: 'I'm overwhelmed with deadlines and no support.' You: 'So you're carrying the weight alone and that's burning you out? Did I hear that right?'",
+        tips: [
+          "Paraphrasing prevents assumptions",
+          "It shows you care enough to get it right",
+          "Many conflicts come from misunderstandings - this stops them early"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-5",
+        title: "Module 5: Extend Empathy Even When You Disagree — Focus: " + goal,
+        summary: "Stay curious about different perspectives",
+        points: [
+          "Separate their feeling from their proposed solution",
+          "Understand their viewpoint without adopting it",
+          "Acknowledge legitimate concerns even if you'd decide differently"
+        ],
+        example: "They want to cancel the project. You don't agree. But understand: 'I see why you're concerned about ROI. I'm looking at it differently, but I get your concern.'",
+        tips: [
+          "Empathy doesn't mean saying yes",
+          "Understanding them builds their trust in you",
+          "You can disagree and still respect them"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-6",
+        title: "Module 6: Listen to Find What You Have in Common — Focus: " + goal,
+        summary: "Use listening to resolve conflict and build connection",
+        points: [
+          "Listen for shared goals underneath disagreements",
+          "Find one thing you agree on and start there",
+          "Use their language and frame when building consensus"
+        ],
+        example: "You both care about customer success but disagree on approach. Start there: 'We both want customers happy. Let's figure out how.'",
+        tips: [
+          "Listening is how you find the path forward",
+          "Most conflicts have more agreement than it seems - listen for it",
+          "Feeling heard makes people more flexible"
+        ],
+        tailoredTo: goal
+      }
+    ];
+  } else if (goalLower.includes("option") || goalLower.includes("solution") || goalLower.includes("tradeoff") || goalLower.includes("choice")) {
+    modules = [
+      {
+        id: "module-1",
+        title: "Module 1: Reframe 'No' as 'Here's What We Can Do' — Focus: " + goal,
+        summary: "Move from blocking conversations to possibility conversations",
+        points: [
+          "Notice your default: saying no without offering options",
+          "Understand what's actually fixed vs flexible in your constraints",
+          "Prepare options BEFORE the conversation, not during"
+        ],
+        example: "Instead of: 'We can't ship by Friday.' Try: 'Friday has risk. We could ship core features Friday and full suite Monday, or we could give full suite one more week.'",
+        tips: [
+          "People feel heard when they have choices",
+          "Even 'no' feels better with options",
+          "Prepare 2-3 options so it's not just 'my way'"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-2",
+        title: "Module 2: Offer Explicit Tradeoffs — Focus: " + goal,
+        summary: "Help people understand what they're choosing between",
+        points: [
+          "Name what's fixed: timeline, budget, quality, scope",
+          "Show what's flexible and how changing it affects outcomes",
+          "Be honest about the consequences of each choice"
+        ],
+        example: "'We have X budget. We can: (A) Full scope, no changes, launches 3 months. (B) Core scope, launches 1 month. (C) Full scope with scope cuts elsewhere. Pick the tradeoff.'",
+        tips: [
+          "Tradeoffs are honest and empowering",
+          "Hiding constraints feels like you're hiding something",
+          "Let them decide - you implement their choice"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-3",
+        title: "Module 3: Co-Create Solutions With Them — Focus: " + goal,
+        summary: "Don't impose solutions - build them together",
+        points: [
+          "Ask: 'What would work for you?' not 'Take it or leave it'",
+          "Invite their creativity - they might see options you missed",
+          "Build on their ideas even if they're not perfect"
+        ],
+        example: "Instead of: 'Here's the schedule.' Try: 'We need to deliver by June. What would you propose to make that work?'",
+        tips: [
+          "People commit to solutions they helped create",
+          "Their constraints might be different than you assumed",
+          "Collaboration builds relationship, not just outcomes"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-4",
+        title: "Module 4: Expand the Solution Space — Focus: " + goal,
+        summary: "Look beyond the obvious answer for creative options",
+        points: [
+          "Ask: 'What if we changed X?' - test assumptions",
+          "Consider: partnership, phasing, scope cuts, quality cuts, timeline cuts",
+          "Sometimes the best solution is different from what either of you proposed"
+        ],
+        example: "'We can't build that in-house by Friday. What if we partner with X team or bring in contract help?'",
+        tips: [
+          "The first answer is rarely the best",
+          "Ask 'What else is possible?' to brainstorm",
+          "Wildest ideas sometimes lead to best solutions"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-5",
+        title: "Module 5: Make the Decision Clear — Focus: " + goal,
+        summary: "Get agreement on which option you're choosing",
+        points: [
+          "Summarize: 'So we're choosing option B, which means...'",
+          "Confirm understanding of consequences",
+          "Document the decision for future reference"
+        ],
+        example: "'We're prioritizing speed over full feature set, shipping Monday with core features. Everyone agrees? Let me document this.'",
+        tips: [
+          "Unclear decisions create conflict later",
+          "Written recap prevents 'I thought we agreed'",
+          "Clear choices reduce second-guessing"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-6",
+        title: "Module 6: Iterate and Adjust As You Learn — Focus: " + goal,
+        summary: "Treat solutions as starting points, not final answers",
+        points: [
+          "Check back after implementation: 'Is this working as expected?'",
+          "Be willing to adjust if circumstances change",
+          "Show that chosen solutions can evolve based on learning"
+        ],
+        example: "'We chose option B. After 2 weeks, we learned X. Does that change what we want to do? Should we adjust?'",
+        tips: [
+          "Decisions aren't permanent - frame as experiments",
+          "This builds trust that you're flexible when needed",
+          "Adjustment shows you're co-invested in success"
+        ],
+        tailoredTo: goal
+      }
+    ];
   } else {
-    // Generic fallback for other goals - still tries to be different per goal
-    const baseModules = MODULE_SECTIONS.slice(0, 6);
-    modules = baseModules.map((section, idx) => ({
-      id: `module-${idx + 1}`,
-      title: `${section.title} — Focus: ${goal}`,
-      summary: section.summary,
-      points: section.points,
-      example: section.example,
-      tips: ["Tip specific to " + goal, "Technique for " + goal, "Strategy for " + goal],
-      tailoredTo: goal,
-    }));
+    // Generic fallback for truly custom or unrecognized goals
+    // Use AI if possible, otherwise create semi-generic progression
+    modules = [
+      {
+        id: "module-1",
+        title: "Module 1: Diagnose Your Challenge — Focus: " + goal,
+        summary: "Understand what makes this difficult conversation hard for you",
+        points: [
+          "Identify what you fear or avoid about this conversation",
+          "Recognize the stakes and what could go wrong",
+          "Acknowledge the cost of not having this conversation"
+        ],
+        example: "Reflect: What specifically about " + goal + " makes you hesitate?",
+        tips: [
+          "Name your biggest fear about this",
+          "Look for patterns in similar conversations",
+          "Remember why this matters to you"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-2",
+        title: "Module 2: Plan Your Approach — Focus: " + goal,
+        summary: "Prepare how you'll approach this specific conversation",
+        points: [
+          "Think about timing, setting, and who needs to be involved",
+          "Draft your opening: what's your shared interest?",
+          "Anticipate reactions and how you'll respond"
+        ],
+        example: "For " + goal + ": When's the best time? What's your opening line? What might they say?",
+        tips: [
+          "Planning removes some anxiety",
+          "Practice your opening out loud",
+          "Have 2-3 responses ready for their likely reactions"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-3",
+        title: "Module 3: Listen More Than You Explain — Focus: " + goal,
+        summary: "Let them share their perspective before you push yours",
+        points: [
+          "Ask genuine questions about their perspective",
+          "Don't interrupt or plan your rebuttal while they speak",
+          "Paraphrase to show you understand"
+        ],
+        example: "Instead of launching into your viewpoint: 'Help me understand your perspective on " + goal + ".'",
+        tips: [
+          "Listening first = they listen to you second",
+          "You might learn something that changes your approach",
+          "Understanding builds connection"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-4",
+        title: "Module 4: Acknowledge Their Concerns — Focus: " + goal,
+        summary: "Validate their feelings even if you disagree",
+        points: [
+          "Name what you hear: their fear, frustration, or concern",
+          "Show you respect their viewpoint",
+          "Separate emotion from the problem"
+        ],
+        example: "'I hear you're concerned about " + goal + ". That makes sense. Let me share my perspective.'",
+        tips: [
+          "Acknowledgment opens doors",
+          "You can validate and still disagree",
+          "Feeling heard makes people more receptive"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-5",
+        title: "Module 5: Propose Solutions Together — Focus: " + goal,
+        summary: "Move toward resolution with options, not demands",
+        points: [
+          "Offer choices rather than ultimatums",
+          "Involve them in creating the solution",
+          "Show you're committed to making it work for both"
+        ],
+        example: "For " + goal + ": 'What would help resolve this? Here's what I'm thinking - what do you suggest?'",
+        tips: [
+          "Collaboration builds commitment",
+          "Options feel better than demands",
+          "Their buy-in is critical for follow-through"
+        ],
+        tailoredTo: goal
+      },
+      {
+        id: "module-6",
+        title: "Module 6: Commit and Follow Up — Focus: " + goal,
+        summary: "Ensure the agreement holds and the relationship strengthens",
+        points: [
+          "Confirm what you both agreed to",
+          "Be clear on next steps and accountability",
+          "Check in to show you care about the outcome"
+        ],
+        example: "'So here's what we agreed: ... Let's check in on " + goal + " next week. Deal?'",
+        tips: [
+          "Follow-up shows commitment",
+          "Written agreement prevents misunderstandings",
+          "Consistency builds trust for future conversations"
+        ],
+        tailoredTo: goal
+      }
+    ];
   }
   
   return modules;
