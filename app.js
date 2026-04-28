@@ -1737,13 +1737,12 @@ function hasLearnerName() {
   return Boolean((state.userName || "").trim());
 }
 
-function displayUserGreeting(elementId) {
+function displayUserGreeting(elementId, message) {
   const element = document.getElementById(elementId);
   if (!element) return;
-  
   const userName = getLearnerName();
   if (userName && userName !== "Learner") {
-    element.textContent = `Hi ${userName}, what do you want to learn?`;
+    element.textContent = message ? message.replace("{name}", userName) : "";
   } else {
     element.textContent = "";
   }
@@ -1829,9 +1828,9 @@ function renderPage() {
   if (state.page === "goals") {
     renderGoalsIdentity();
   } else if (state.page === "dashboard") {
-    displayUserGreeting("dashboardUserGreeting");
+    displayUserGreeting("dashboardUserGreeting", "Hi {name}.");
   } else if (state.page === "final") {
-    displayUserGreeting("finalUserGreeting");
+    displayUserGreeting("finalUserGreeting", "");
   }
 }
 
@@ -4109,11 +4108,11 @@ function applyScenarioScaffoldDefault(scenarioId) {
 function messageShowsStageProgress(text, stageName) {
   const value = text.toLowerCase();
   const checks = {
-    Introduce: ["i want to discuss", "can we talk", "thank you for meeting", "my goal"],
-    Listen: ["can you share", "help me understand", "what happened", "?"],
-    Empathize: ["i understand", "i hear", "that sounds", "i appreciate", "it makes sense"],
-    Talk: ["i noticed", "impact", "concern", "risk", "deadline", "evidence"],
-    Solve: ["next step", "plan", "agree", "action", "follow up", "by"],
+    Introduce: ["i want to discuss", "can we talk", "thank you for meeting", "my goal", "i wanted to raise", "i wanted to bring up"],
+    Listen: ["can you share", "help me understand", "what happened", "what do you mean", "can you walk me through", "what led to"],
+    Empathize: ["i understand", "i hear you", "that sounds", "i appreciate", "it makes sense", "i can see why", "i get that"],
+    Talk: ["i noticed", "impact", "concern", "risk", "deadline", "evidence", "specifically", "in the last", "data shows"],
+    Solve: ["next step", "let's agree", "who owns", "by friday", "follow up", "action item", "check in"],
   };
 
   return checks[stageName].some((needle) => value.includes(needle));
@@ -7899,19 +7898,30 @@ restartPracticeBtn.addEventListener("click", () => {
   promptInput.focus();
 });
 
+function confirmLeaveSession(destination) {
+  const userTurns = state.messages.filter((m) => m.role === "user").length;
+  if (state.page === "practice" && userTurns > 0) {
+    const ok = window.confirm(
+      "You have an active practice session. Leaving now will end it without saving your coaching feedback.\n\nClick OK to leave, or Cancel to stay."
+    );
+    if (!ok) return;
+  }
+  goToPage(destination);
+}
+
 goHomeBtn.addEventListener("click", () => {
-  goToPage("landing");
+  confirmLeaveSession("landing");
 });
 
 if (goLearningPathBtn) {
   goLearningPathBtn.addEventListener("click", () => {
-    goToPage("choice");
+    confirmLeaveSession("choice");
   });
 }
 
 if (backToBriefingBtn) {
   backToBriefingBtn.addEventListener("click", () => {
-    goToPage("scenarioBriefing");
+    confirmLeaveSession("scenarioBriefing");
   });
 }
 

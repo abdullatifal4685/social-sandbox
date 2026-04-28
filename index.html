@@ -88,7 +88,7 @@
       <p class="choice-path-instruction">Choose one path to continue.</p>
 
       <div class="path-grid">
-        <button id="chooseLearnBtn" class="path-btn" type="button" onclick="if(window.__ssNavigate){window.__ssNavigate('learn')}else{document.getElementById('pageChoice')?.classList.add('is-hidden');document.getElementById('pageLearn')?.classList.remove('is-hidden');window.scrollTo(0,0);}">
+        <button id="chooseLearnBtn" class="path-btn" type="button">
           <span class="path-icon-wrap" aria-hidden="true">
             <svg class="path-icon-svg" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
               <path d="M4 6.5c0-1.1.9-2 2-2h5c1 0 2 .4 2.7 1.1L14 6v12l-.5-.3c-.7-.5-1.6-.7-2.5-.7H6a2 2 0 0 1-2-2V6.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
@@ -98,7 +98,7 @@
           <strong>Learn the Concept</strong>
           <span>Work through goal-specific modules and the ILETS framework before jumping into practice.</span>
         </button>
-        <button id="choosePracticeBtn" class="path-btn" type="button" onclick="if(window.__ssNavigate){window.__ssNavigate('scenarioBriefing')}else{document.getElementById('pageChoice')?.classList.add('is-hidden');document.getElementById('pageScenarioBriefing')?.classList.remove('is-hidden');window.scrollTo(0,0);}">
+        <button id="choosePracticeBtn" class="path-btn" type="button">
           <span class="path-icon-wrap path-icon-wrap-accent" aria-hidden="true">
             <svg class="path-icon-svg path-icon-svg-practice" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
               <path d="M4 6.8A2.8 2.8 0 0 1 6.8 4h7.4A2.8 2.8 0 0 1 17 6.8v4.9a2.8 2.8 0 0 1-2.8 2.8H9l-3 2v-2.1A2.8 2.8 0 0 1 4 11.7V6.8Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
@@ -108,7 +108,7 @@
           <strong>Practice Difficult Conversations</strong>
           <span>Choose a scenario, set your difficulty level, and practice with a live AI partner and real-time coaching.</span>
         </button>
-        <button id="choosePeerBtn" class="path-btn" type="button" onclick="if(window.__ssNavigate){window.__ssNavigate('peerPracticum')}else{document.getElementById('pageChoice')?.classList.add('is-hidden');document.getElementById('pagePeerPracticum')?.classList.remove('is-hidden');window.scrollTo(0,0);}">
+        <button id="choosePeerBtn" class="path-btn" type="button">
           <span class="path-icon-wrap" aria-hidden="true">
             <svg class="path-icon-svg" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
               <circle cx="6" cy="8" r="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/>
@@ -478,9 +478,9 @@
             <h4 class="briefing-label">Support Level</h4>
             <p id="briefScaffoldHint" class="muted">Choose how much scaffolding you want. Level 1 shows sentence starters throughout; Level 2 fades them unless you pause; Level 3 is independent — no hints.</p>
             <div class="scaffold-level-group" id="briefScaffoldLevelGroup" role="group" aria-label="Choose scaffold level">
-              <button class="ghost scaffold-level-btn" type="button" data-brief-scaffold="1">Level 1 — Fully Guided</button>
-              <button class="ghost scaffold-level-btn" type="button" data-brief-scaffold="2">Level 2 — Assisted</button>
-              <button class="ghost scaffold-level-btn" type="button" data-brief-scaffold="3">Level 3 — Independent</button>
+              <button class="ghost scaffold-level-btn" type="button" data-brief-scaffold="1">Level 1: Fully Guided</button>
+              <button class="ghost scaffold-level-btn" type="button" data-brief-scaffold="2">Level 2: Assisted</button>
+              <button class="ghost scaffold-level-btn" type="button" data-brief-scaffold="3">Level 3: Independent</button>
             </div>
           </div>
         </div>
@@ -488,7 +488,7 @@
         <div class="flow-actions flow-actions-spread">
           <button id="backFromBriefingBtn" class="ghost" type="button">Back</button>
           <div style="display: flex; gap: 0.75rem;">
-            <button id="editScenarioBriefingBtn" class="ghost" type="button">✏️ Edit Scenario</button>
+            <button id="editScenarioBriefingBtn" class="ghost" type="button">Edit Scenario</button>
             <button id="beginPracticeBtn" type="button">Begin Practice</button>
           </div>
         </div>
@@ -766,7 +766,7 @@ Agree on next step" required></textarea>
     </form>
   </dialog>
 
-  <script src="./app.js?v=20260428-260000" defer></script>
+  <script src="./app.js?v=20260428-270000" defer></script>
 </body>
 </html>
 
