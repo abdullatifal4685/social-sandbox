@@ -2,38 +2,38 @@ const ILETS = ["Introduce", "Listen", "Empathize", "Talk", "Solve"];
 const LEARNING_GOALS = [
   {
     id: "surface-risks",
-    title: "Surface Risks & Bad News",
-    description: "Learn to deliver difficult information, raise concerns, and surface risks diplomatically",
+    title: "Deliver Bad News & Surface Risks",
+    description: "Speak up early about problems, raise concerns before they escalate, and deliver difficult information without damaging trust",
     scenarios: ["failing-project", "quality-vs-speed"],
   },
   {
     id: "peer-feedback",
-    title: "Give Peer Feedback",
-    description: "Address behavior, performance, or interpersonal issues with peers without defensiveness",
+    title: "Give Difficult Feedback",
+    description: "Address behavior, performance, or attitude issues directly — with a colleague, manager, or direct report — without triggering defensiveness",
     scenarios: ["dominance-in-meetings", "unsafe-shortcut"],
   },
   {
     id: "navigate-authority",
-    title: "Navigate Authority Relationships",
-    description: "Communicate effectively with people above or below you in hierarchy, manage scope and decisions",
+    title: "Speak Up Across Power Levels",
+    description: "Communicate confidently with people above or below you — push back on decisions, set expectations, and be heard without overstepping",
     scenarios: ["failing-project", "resource-priority-conflict", "quality-vs-speed"],
   },
   {
     id: "handle-pressure",
-    title: "Handle Pressure & Conflict",
-    description: "Stay composed when stressed, acknowledge constraints, find solutions in tight situations",
+    title: "Stay Composed Under Pressure",
+    description: "Keep the conversation productive when you're stressed, the other person is reactive, or time and resources are running out",
     scenarios: ["unsafe-shortcut", "resource-priority-conflict"],
   },
   {
     id: "listen-empathize",
-    title: "Improve Listening & Empathy",
-    description: "Ask better questions, understand others' perspectives, acknowledge emotion and pressure",
+    title: "Listen to Understand, Not Just to Reply",
+    description: "Ask the right questions, reflect back what you hear, and acknowledge emotion — so the other person feels understood before you make your case",
     scenarios: ["failing-project", "dominance-in-meetings", "unsafe-shortcut"],
   },
   {
     id: "provide-options",
-    title: "Provide Options & Solutions",
-    description: "Propose trade-offs, offer choices, co-create solutions instead of just saying no",
+    title: "Say No Without Closing the Door",
+    description: "Move beyond a flat refusal by offering trade-offs, alternatives, and co-created solutions — keeping momentum even when you can't say yes",
     scenarios: ["resource-priority-conflict", "quality-vs-speed"],
   },
 ];
@@ -6251,7 +6251,7 @@ function saveReflectionEntry(entry) {
 
     try {
       btn.disabled = true;
-      btn.textContent = "Building learning path...";
+      btn.textContent = "Personalizing your modules...";
 
       const modules = await getTailoredLearningPath(goalText);
       state.customTailoredModules = Array.isArray(modules) ? modules : [];
