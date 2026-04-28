@@ -1109,12 +1109,6 @@ const goalsNameInput = document.getElementById("goalsNameInput");
 const goalsSaveNameBtn = document.getElementById("goalsSaveNameBtn");
 const goalsNameStatus = document.getElementById("goalsNameStatus");
 const goalsTitle = document.getElementById("goalsTitle");
-const choiceStageLabel = document.getElementById("choiceStageLabel");
-const choiceWeakStage = document.getElementById("choiceWeakStage");
-const choiceRecentScore = document.getElementById("choiceRecentScore");
-const choiceCompletionRate = document.getElementById("choiceCompletionRate");
-const choiceScaffoldLevel = document.getElementById("choiceScaffoldLevel");
-const cycleScaffoldLevelBtn = document.getElementById("cycleScaffoldLevelBtn");
 const openDashboardBtn = document.getElementById("openDashboardBtn");
 const dashboardIdentity = document.getElementById("dashboardIdentity");
 const dashboardStageLabel = document.getElementById("dashboardStageLabel");
@@ -1873,45 +1867,7 @@ function getRecommendedStartStage() {
   return focus.isTie ? "Introduce" : focus.stage;
 }
 
-function renderChoiceSnapshot() {
-  if (!choiceWeakStage || !choiceRecentScore || !choiceCompletionRate) {
-    return;
-  }
-
-  const finalEntries = state.reflectionHistory.filter((entry) => entry.kind === "final");
-  const recent = finalEntries.slice(-5);
-  const avgRecent = recent.length
-    ? Math.round(recent.reduce((sum, item) => sum + (item.scorePercent || 0), 0) / recent.length)
-    : null;
-
-  const focus = getCurrentWeakStageFocusInfo();
-
-  const attempts = state.improvementTrack.reduce((sum, item) => sum + (item.attempts || 0), 0);
-  const completions = state.improvementTrack.reduce((sum, item) => sum + (item.completions || 0), 0);
-  const completionRate = attempts ? Math.round((completions / attempts) * 100) : 0;
-
-  const isReturning = finalEntries.length > 0;
-  if (choiceStageLabel) {
-    choiceStageLabel.textContent = isReturning ? "Most frequent weak stage" : "Start here (recommended)";
-  }
-  if (isReturning && focus.isTie) {
-    choiceStageLabel.textContent = "Current focus (tie)";
-    choiceWeakStage.textContent = "Multiple stages";
-  } else {
-    choiceWeakStage.textContent = isReturning ? focus.stage : "Introduce";
-  }
-  choiceRecentScore.textContent = avgRecent === null ? "No history yet" : `${avgRecent}%`;
-  choiceCompletionRate.textContent = `${completionRate}%`;
-
-  const scaffold = getScaffoldLevelConfig();
-  if (choiceScaffoldLevel) {
-    choiceScaffoldLevel.textContent = scaffold.label;
-  }
-  if (cycleScaffoldLevelBtn) {
-    const nextLevel = state.scaffold.level === 1 ? 2 : (state.scaffold.level === 2 ? 3 : 1);
-    cycleScaffoldLevelBtn.textContent = `Switch to Level ${nextLevel}`;
-  }
-}
+function renderChoiceSnapshot() {}
 
 function buildDashboardWeakBreakdownHtml() {
   const finalEntries = state.reflectionHistory.filter((entry) => entry.kind === "final").slice(-12);
@@ -7288,16 +7244,6 @@ toggleTipsBtn.addEventListener("click", () => {
   renderTips();
 });
 
-if (cycleScaffoldLevelBtn) {
-  cycleScaffoldLevelBtn.addEventListener("click", () => {
-    const nextLevel = state.scaffold.level === 1 ? 2 : (state.scaffold.level === 2 ? 3 : 1);
-    setScaffoldLevel(nextLevel);
-    renderChoiceSnapshot();
-    renderBriefingPage();
-    renderPracticeStrip();
-    renderHeader();
-  });
-}
 
 if (toggleStartersBtn) {
   toggleStartersBtn.addEventListener("click", () => {
@@ -7443,11 +7389,6 @@ choosePracticeBtn.addEventListener("click", () => {
   goToPage("scenarioBriefing");
 });
 
-if (openDashboardBtn) {
-  openDashboardBtn.addEventListener("click", () => {
-    goToPage("dashboard");
-  });
-}
 
 if (choosePeerBtn) {
   choosePeerBtn.addEventListener("click", () => {
