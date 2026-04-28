@@ -31,8 +31,16 @@
 
   <section id="pageGoals" class="flow-page flow-page-goals is-hidden">
     <div class="flow-card flow-card-goals">
-      <h2>What do you want to learn?</h2>
-      <p id="goalsUserGreeting" class="muted" style="margin: 0; margin-bottom: 1rem;"></p>
+      <section class="goals-identity" aria-label="Learner name">
+        <label class="flow-label" for="goalsNameInput">Your name (set once)</label>
+        <div class="goals-identity-row">
+          <input id="goalsNameInput" type="text" maxlength="40" placeholder="for example: Abdul" />
+          <button id="goalsSaveNameBtn" class="ghost" type="button">Save Name</button>
+        </div>
+        <p id="goalsNameStatus" class="muted">This name is used for AI practice and peer practice.</p>
+      </section>
+
+      <h2 id="goalsTitle">What do you want to learn?</h2>
       <p class="muted">Select learning goal regarding difficult conversations that matter to you. These will guide which learning materials and practice scenarios we recommend.</p>
 
       <div class="goals-grid" id="goalsGrid">
@@ -60,15 +68,6 @@
     <div class="flow-card flow-card-choice">
       <h2 id="choiceWelcomeTitle">Choose Your Path</h2>
       <p id="choiceWelcomeSubtitle" class="muted">Select your learning preference below.</p>
-
-      <section class="choice-identity" aria-label="Learner profile">
-        <label class="flow-label" for="choiceNameInput">Your name (set once)</label>
-        <div class="choice-identity-row">
-          <input id="choiceNameInput" type="text" maxlength="40" placeholder="for example: Abdul" />
-          <button id="choiceSaveNameBtn" class="ghost" type="button">Save Name</button>
-        </div>
-        <p id="choiceNameStatus" class="muted">This name is used for AI practice and peer practice.</p>
-      </section>
 
       <p class="choice-path-instruction">Please click one option below to continue.</p>
 

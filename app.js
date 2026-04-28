@@ -1105,6 +1105,10 @@ const choiceWelcomeSubtitle = document.getElementById("choiceWelcomeSubtitle");
 const choiceNameInput = document.getElementById("choiceNameInput");
 const choiceSaveNameBtn = document.getElementById("choiceSaveNameBtn");
 const choiceNameStatus = document.getElementById("choiceNameStatus");
+const goalsNameInput = document.getElementById("goalsNameInput");
+const goalsSaveNameBtn = document.getElementById("goalsSaveNameBtn");
+const goalsNameStatus = document.getElementById("goalsNameStatus");
+const goalsTitle = document.getElementById("goalsTitle");
 const choiceStageLabel = document.getElementById("choiceStageLabel");
 const choiceWeakStage = document.getElementById("choiceWeakStage");
 const choiceRecentScore = document.getElementById("choiceRecentScore");
@@ -1750,7 +1754,7 @@ function setChoiceNameStatus(message) {
 }
 
 function ensureLearnerNameSet() {
-  const candidate = (state.userName || choiceNameInput?.value || userNameInput?.value || "").trim();
+  const candidate = (state.userName || userNameInput?.value || "").trim();
   if (candidate) {
     if (candidate !== state.userName) {
       saveUserName(candidate);
@@ -1758,10 +1762,13 @@ function ensureLearnerNameSet() {
     return true;
   }
 
-  setChoiceNameStatus("Please set your name once before continuing.");
-  if (choiceNameInput) {
-    choiceNameInput.focus();
-    choiceNameInput.select();
+  goToPage("goals");
+  if (goalsNameStatus) {
+    goalsNameStatus.textContent = "Please set your name before continuing.";
+  }
+  if (goalsNameInput) {
+    goalsNameInput.focus();
+    goalsNameInput.select();
   }
   return false;
 }
@@ -1773,23 +1780,22 @@ function renderChoiceIdentity() {
     choiceWelcomeTitle.textContent = learner ? `Hi ${learner}, choose your path` : "Choose Your Path";
   }
   if (choiceWelcomeSubtitle) {
-    choiceWelcomeSubtitle.textContent = learner
-      ? "Select your learning preference below."
-      : "Set your name once, then select your learning preference below.";
+    choiceWelcomeSubtitle.textContent = "Select your learning preference below.";
   }
+}
 
-  if (choiceNameInput && document.activeElement !== choiceNameInput) {
-    choiceNameInput.value = state.userName;
+function renderGoalsIdentity() {
+  const learner = (state.userName || "").trim();
+  if (goalsTitle) {
+    goalsTitle.textContent = learner ? `Hi ${learner}, what do you want to learn?` : "What do you want to learn?";
   }
-
-  if (!choiceNameStatus) {
-    return;
+  if (goalsNameInput && document.activeElement !== goalsNameInput) {
+    goalsNameInput.value = state.userName || "";
   }
-
-  if (learner) {
-    choiceNameStatus.textContent = "Name saved. This identity is used in AI practice and peer practice.";
-  } else {
-    choiceNameStatus.textContent = "This name is used for AI practice and peer practice.";
+  if (goalsNameStatus) {
+    goalsNameStatus.textContent = learner
+      ? "Name saved. This identity is used in AI practice and peer practice."
+      : "This name is used for AI practice and peer practice.";
   }
 }
 
@@ -1818,7 +1824,7 @@ function renderPage() {
   
   // Display user greetings on relevant pages
   if (state.page === "goals") {
-    displayUserGreeting("goalsUserGreeting");
+    renderGoalsIdentity();
   } else if (state.page === "dashboard") {
     displayUserGreeting("dashboardUserGreeting");
   } else if (state.page === "final") {
@@ -7424,7 +7430,6 @@ if (dashboardBackBtn) {
 if (dashboardPracticeAiBtn) {
   dashboardPracticeAiBtn.addEventListener("click", () => {
     if (!ensureLearnerNameSet()) {
-      goToPage("choice");
       return;
     }
     const recommendedStage = getRecommendedStartStage();
@@ -7436,7 +7441,6 @@ if (dashboardPracticeAiBtn) {
 if (dashboardPracticePeerBtn) {
   dashboardPracticePeerBtn.addEventListener("click", () => {
     if (!ensureLearnerNameSet()) {
-      goToPage("choice");
       return;
     }
     goToPage("peerPracticum");
@@ -7450,11 +7454,11 @@ learnBackBtn.addEventListener("click", () => {
 startPracticeBtn.addEventListener("click", () => {
   const enteredName = (state.userName || userNameInput?.value || "").trim();
   if (!enteredName) {
-    goToPage("choice");
-    setChoiceNameStatus("Please set your name once before starting practice.");
-    if (choiceNameInput) {
-      choiceNameInput.focus();
-      choiceNameInput.select();
+    goToPage("goals");
+    if (goalsNameStatus) goalsNameStatus.textContent = "Please set your name before starting practice.";
+    if (goalsNameInput) {
+      goalsNameInput.focus();
+      goalsNameInput.select();
     }
     return;
   }
@@ -7556,6 +7560,29 @@ if (choiceSaveNameBtn && choiceNameInput) {
     if (event.key === "Enter") {
       event.preventDefault();
       choiceSaveNameBtn.click();
+    }
+  });
+}
+
+if (goalsSaveNameBtn && goalsNameInput) {
+  goalsSaveNameBtn.addEventListener("click", () => {
+    const typed = goalsNameInput.value.trim();
+    if (!typed) {
+      if (goalsNameStatus) goalsNameStatus.textContent = "Please enter your name first.";
+      goalsNameInput.focus();
+      return;
+    }
+    saveUserName(typed);
+    renderGoalsIdentity();
+    renderChoiceIdentity();
+    renderUserNameSummary();
+    renderHeader();
+  });
+
+  goalsNameInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      goalsSaveNameBtn.click();
     }
   });
 }

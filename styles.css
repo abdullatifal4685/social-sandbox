@@ -714,6 +714,33 @@ textarea {
   margin: 0.5rem 0 0;
 }
 
+.goals-identity {
+  margin-bottom: 1.2rem;
+  border: 1.5px solid rgba(20, 97, 255, 0.14);
+  border-radius: 14px;
+  padding: 0.82rem 0.92rem;
+  background: linear-gradient(180deg, #ffffff, #f7fbff);
+}
+
+.goals-identity .flow-label {
+  margin-top: 0;
+}
+
+.goals-identity-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.58rem;
+  align-items: center;
+}
+
+.goals-identity-row button {
+  white-space: nowrap;
+}
+
+.goals-identity .muted {
+  margin: 0.5rem 0 0;
+}
+
 .choice-snapshot {
   margin-top: 1rem;
   border: 1.5px solid rgba(20, 97, 255, 0.14);
