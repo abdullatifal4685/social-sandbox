@@ -305,7 +305,7 @@ const DEFAULT_SCENARIOS = [
       "Collaborate on solutions under stress"
     ],
     context:
-      "Your engineering team is racing to hit a quarterly release deadline. A teammate just committed code that bypasses a critical data validation step—a step that catches errors before they reach production. When you ask why, they say, 'We're already late. I'll add it back after launch.' You know this is risky. If bad data slips through, it will create downstream data corruption that's expensive to fix. The team is already stressed, and you don't want to trigger a blame conversation. But you also can't let this pass. You need to address it without making your teammate defensive.",
+      "Your engineering team is racing to hit a quarterly release deadline. A teammate just committed code that bypasses a critical data validation step, the step that catches errors before they reach production. When you ask why, they say, 'We're already late. I'll add it back after launch.' You know this is risky. If bad data slips through, it will create downstream data corruption that's expensive to fix. The team is already stressed, and you don't want to trigger a blame conversation. But you also can't let this pass. You need to address it without making your teammate defensive.",
     imageUrl: "./assets/scenarios/unsafe-shortcut.svg",
     aiRole: "Teammate",
     opening:
@@ -321,8 +321,8 @@ const DEFAULT_SCENARIOS = [
       Introduce: {
         objective: "Flag the concern clearly without sounding judgmental.",
         starters: [
-          { style: "deferential", text: "Can we pause for a minute? I noticed something in the commit and want to check in about it—not in blame, just to make sure we're aligned." },
-          { style: "balanced", text: "I saw the validation step was removed. I'm not trying to call you out—I want to understand the decision and make sure we're not risking the data." },
+          { style: "deferential", text: "Can we pause for a minute? I noticed something in the commit and want to check in, not to assign blame, but to make sure we are aligned." },
+          { style: "balanced", text: "I saw the validation step was removed. I'm not trying to call you out. I want to understand the decision and make sure we are not risking the data." },
           { style: "direct", text: "The validation bypass could create data corruption downstream. I need to understand why that happened and how we fix it." },
         ],
       },
@@ -337,7 +337,7 @@ const DEFAULT_SCENARIOS = [
       Empathize: {
         objective: "Acknowledge pressure and timeline without dropping the issue.",
         starters: [
-          { style: "deferential", text: "I get it—the deadline is real and you're trying to move fast. I appreciate you're under a lot of pressure. And I want to make sure we don't create a bigger problem later." },
+          { style: "deferential", text: "I get it. The deadline is real and you're trying to move fast. I appreciate that you're under a lot of pressure. And I want to make sure we don't create a bigger problem later." },
           { style: "balanced", text: "I understand the deadline crunch. Corners feel necessary. But a data corruption fix will cost us more time than adding the validation back now." },
           { style: "direct", text: "You're under time pressure. That's real. But data corruption will create technical debt that costs us weeks to fix. We need to solve this now." },
         ],
@@ -423,7 +423,7 @@ const DEFAULT_SCENARIOS = [
         starters: [
           {
             style: "deferential",
-            text: "I get it—you're trying to be efficient and not waste people's time. That's a strength. And I'm seeing that the pace is making juniors hesitant to speak up.",
+            text: "I get it. You're trying to be efficient and not waste people's time. That's a real strength. And I'm also seeing that the pace is making junior members hesitant to speak up.",
           },
           {
             style: "balanced",
@@ -483,7 +483,7 @@ const DEFAULT_SCENARIOS = [
       "Offer options instead of just saying no",
       "Align priorities across stakeholders"
     ],
-    context: `You're a project lead working across two business units. Your primary sponsor told you a month ago that delivery date was fixed. But six weeks in, a more senior leader (not your direct manager) has been requesting increasing scope—new features, reports, data integrations. The problem: each addition adds 1-2 weeks to the timeline, and your team is already stretched. Your original sponsor is now asking why feature X isn't done yet, unaware that the scope has expanded. You need to have a conversation with the senior leader about timeline vs. scope trade-offs. But they outrank you, and you don't want to seem uncooperative or like you're refusing work. How do you raise this without appearing to say no?`,
+    context: `You're a project lead working across two business units. Your primary sponsor told you a month ago that delivery date was fixed. But six weeks in, a more senior leader (not your direct manager) has been requesting increasing scope: new features, reports, and data integrations. The problem: each addition adds 1-2 weeks to the timeline, and your team is already stretched. Your original sponsor is now asking why feature X isn't done yet, unaware that the scope has expanded. You need to have a conversation with the senior leader about timeline vs. scope trade-offs. But they outrank you, and you don't want to seem uncooperative or like you're refusing work. How do you raise this without appearing to say no?`,
     imageUrl: "./assets/scenarios/resource-priority.svg",
     aiRole: "Senior Leader (Different Unit)",
     opening: "I've been thinking about next steps. We should add the user dashboard to this release. I know it's late in the cycle, but the stakeholder asked for it. Can you make it work?",
@@ -504,7 +504,7 @@ const DEFAULT_SCENARIOS = [
           },
           {
             style: "balanced",
-            text: "I appreciate the feature idea—it's solid. I want to make sure we build it right. Let me show you the current capacity so we can figure out the best path.",
+            text: "I appreciate the feature idea. It's solid. I want to make sure we build it right, so let me show you the current capacity so we can figure out the best path.",
           },
           {
             style: "direct",
@@ -517,7 +517,7 @@ const DEFAULT_SCENARIOS = [
         starters: [
           {
             style: "deferential",
-            text: "Can I ask—is the dashboard critical for the business case, or is it nice-to-have? Understanding your priority will help me figure out the best path.",
+            text: "Can I ask: is the dashboard critical for the business case, or is it more of a nice-to-have? Understanding your priority will help me figure out the best path.",
           },
           {
             style: "balanced",
@@ -568,7 +568,7 @@ const DEFAULT_SCENARIOS = [
         starters: [
           {
             style: "deferential",
-            text: "Which of these works best for you? I can build a case for any of them—I just need to know which direction to move in.",
+            text: "Which of these works best for you? I can make the case for any of them. I just need to know which direction to move in.",
           },
           {
             style: "balanced",
@@ -594,7 +594,7 @@ const DEFAULT_SCENARIOS = [
       "Find middle-ground solutions",
       "Balance business pressure with standards"
     ],
-    context: `You're a QA lead on a product launch. Your test plan includes three rounds of testing—unit, integration, and user acceptance. Today, your product manager informed you that to hit the market window, testing needs to be compressed to one week (originally two weeks) and only cover "critical path" functionality. They're feeling pressure from executives to get to market fast. But you know that skipping integration testing has historically led to 10-15% of bugs reaching production. That's not acceptable for this product category. You need to push back—but respectfully, because your manager agrees with the compressed timeline, and you don't want to be seen as slowing the company down. How do you advocate for quality without sounding obstructionist?`,
+    context: `You're a QA lead on a product launch. Your test plan includes three rounds of testing: unit, integration, and user acceptance. Today, your product manager informed you that to hit the market window, testing needs to be compressed to one week (originally two weeks) and only cover "critical path" functionality. They're feeling pressure from executives to get to market fast. But you know that skipping integration testing has historically led to 10-15% of bugs reaching production. That's not acceptable for this product category. You need to push back, but respectfully, because your manager agrees with the compressed timeline, and you don't want to be seen as slowing the company down. How do you advocate for quality without sounding obstructionist?`,
     imageUrl: "./assets/scenarios/quality-vs-speed.svg",
     aiRole: "Product Manager",
     opening: "I know the test plan is ambitious, but we've got to cut it. The market window is closing. Can you get to MVP quality in one week instead of two?",
@@ -649,7 +649,7 @@ const DEFAULT_SCENARIOS = [
           },
           {
             style: "balanced",
-            text: "I get the competitive pressure you're under. I'm not trying to slow you down—I'm trying to keep us from launching a buggy product.",
+            text: "I get the competitive pressure you're under. I'm not trying to slow you down. I'm trying to keep us from launching a buggy product.",
           },
           {
             style: "direct",
@@ -2133,7 +2133,7 @@ function renderModule() {
     if (hasILETSSection && index === tailoredCount) {
       moduleTransitionCard.innerHTML = `
         <p style="margin:0 0 0.4rem; font-weight:700; color:var(--ink-dark);">Now for the framework that ties it all together.</p>
-        <p style="margin:0; line-height:1.6; color:var(--ink-muted);">Your previous modules focused on skills specific to your goal. The <strong>ILETS Framework</strong> is the step-by-step conversation structure you'll actually use during practice — it works in any difficult conversation, not just yours. Think of it as the engine; your goal modules were the fuel.</p>
+        <p style="margin:0; line-height:1.6; color:var(--ink-muted);">Your previous modules focused on skills specific to your goal. The <strong>ILETS Framework</strong> is the step-by-step conversation structure you'll actually use during practice. It works in any difficult conversation, not just yours. Think of it as the engine; your goal modules were the fuel.</p>
       `;
       moduleTransitionCard.classList.remove("is-hidden");
     } else {
@@ -2507,14 +2507,44 @@ function renderBriefingPage() {
   
 }
 
+// Returns the first 1-2 sentences of a scenario context (at least 160 chars).
+function getContextPreview(context) {
+  const sentences = context.match(/[^.!?]+[.!?]+(\s|$)/g) || [];
+  if (sentences.length >= 2) {
+    const two = (sentences[0] + sentences[1]).trim();
+    return two.length > 260 ? two.substring(0, 260) + "…" : two;
+  }
+  if (sentences.length === 1) {
+    const one = sentences[0].trim();
+    return one.length > 260 ? one.substring(0, 260) + "…" : one;
+  }
+  return context.length > 200 ? context.substring(0, 200) + "…" : context;
+}
+
 function renderScenarioPicker() {
   state.nameEditorOpen = false;
   void ensureGoalTailoredScenario();
-  const previewCount = 6;
   const orderedScenarios = getOrderedScenarios();
+  const hasGoalFilter = state.userLearningGoals.length > 0;
+
+  // When a goal is selected, default view shows ONLY scenarios that directly match.
+  // Custom/tailored scenarios always appear. "More scenarios" reveals the rest.
+  let matchedScenarios, unmatchedScenarios;
+  if (hasGoalFilter) {
+    matchedScenarios = orderedScenarios.filter((s) => {
+      if (s.isCustom || s.customGoal) return true;
+      const scenarioGoalIds = getScenarioGoalMatch(s.id);
+      return scenarioGoalIds.some((id) => state.userLearningGoals.includes(id));
+    });
+    unmatchedScenarios = orderedScenarios.filter((s) => !matchedScenarios.includes(s));
+  } else {
+    matchedScenarios = orderedScenarios;
+    unmatchedScenarios = [];
+  }
+
   const visibleScenarios = state.scenarioPickerExpanded
     ? orderedScenarios
-    : orderedScenarios.slice(0, previewCount);
+    : matchedScenarios;
 
   if (userNameInput && document.activeElement !== userNameInput) {
     userNameInput.value = state.userName;
@@ -2544,7 +2574,7 @@ function renderScenarioPicker() {
       
       const goalContextHtml = `
         <div class="scenario-goals-context-bar">
-          <span class="sgc-label">Scenarios matched to your goal:</span>
+          <span class="sgc-label">Showing scenarios for:</span>
           <span class="sgc-goals">${allGoals.map((g) => `<strong>${escapeHtml(g)}</strong>`).join(", ")}</span>
         </div>
       `;
@@ -2570,26 +2600,37 @@ function renderScenarioPicker() {
 
   scenarioPickerGrid.innerHTML = visibleScenarios
     .map((scenario) => {
-      const scenarioGoals = getScenarioGoalMatch(scenario.id);
-      const goalBadges = scenarioGoals
-        .map((goalId) => {
-          const goal = LEARNING_GOALS.find((g) => g.id === goalId);
-          return goal ? `<span class="goal-badge" title="${escapeHtml(goal.title)}">${escapeHtml(goal.title)}</span>` : "";
-        })
-        .join("");
-      const isRecommended = state.userLearningGoals.length > 0 && scenarioGoals.some((id) => state.userLearningGoals.includes(id));
+      const scenarioGoalIds = getScenarioGoalMatch(scenario.id);
       const isTailored = scenario.isCustom || scenario.customGoal;
 
+      // Only show badges for goals the user actually selected — no unrelated ones
+      const matchingUserGoalIds = scenarioGoalIds.filter((id) => state.userLearningGoals.includes(id));
+      const goalBadges = matchingUserGoalIds
+        .map((goalId) => {
+          const goal = LEARNING_GOALS.find((g) => g.id === goalId);
+          return goal ? `<span class="goal-badge">${escapeHtml(goal.title)}</span>` : "";
+        })
+        .join("");
+
+      // "Matches your goal" only when there is a direct match with what the user selected
+      const isDirectMatch = hasGoalFilter && matchingUserGoalIds.length > 0;
+
+      const badge = isTailored
+        ? '<span class="recommended-badge">✦ Your custom scenario</span>'
+        : isDirectMatch
+          ? '<span class="recommended-badge">Matches your goal</span>'
+          : "";
+
       return `
-      <article class="scenario-picker-card ${scenario.id === state.selectedScenarioId ? "active" : ""} ${isRecommended ? "is-recommended" : ""} ${isTailored ? "is-tailored" : ""}" data-scenario-id="${escapeHtml(scenario.id)}">
+      <article class="scenario-picker-card ${scenario.id === state.selectedScenarioId ? "active" : ""} ${isDirectMatch ? "is-recommended" : ""} ${isTailored ? "is-tailored" : ""}" data-scenario-id="${escapeHtml(scenario.id)}">
         <button class="picker-card-select" data-scenario-id="${escapeHtml(scenario.id)}" type="button">
           ${scenario.imageUrl ? `<img class="picker-card-illustration" src="${escapeHtml(scenario.imageUrl)}" alt="Illustration for ${escapeHtml(scenario.title)}" />` : ""}
-          ${isTailored ? '<span class="recommended-badge">✦ Matched to your goal</span>' : isRecommended ? '<span class="recommended-badge">Recommended</span>' : ""}
+          ${badge}
           <div class="picker-card-head">
             <strong>${escapeHtml(scenario.title)}</strong>
             <span class="picker-card-badge">${escapeHtml(scenario.difficulty)}</span>
           </div>
-          <p class="picker-card-text">${escapeHtml(scenario.context.substring(0, 110))}...</p>
+          <p class="picker-card-text">${escapeHtml(getContextPreview(scenario.context))}</p>
           <p class="picker-card-role">Partner: ${escapeHtml(scenario.aiRole)}</p>
           ${goalBadges ? `<div class="picker-card-goals">${goalBadges}</div>` : ""}
         </button>
@@ -2615,12 +2656,12 @@ function renderScenarioPicker() {
     })
     .join("");
 
-  if (orderedScenarios.length > previewCount) {
+  const hiddenCount = state.scenarioPickerExpanded ? 0 : unmatchedScenarios.length;
+  if (hiddenCount > 0 || state.scenarioPickerExpanded) {
     toggleScenarioPickerListBtn.classList.remove("is-hidden");
-    const hiddenCount = orderedScenarios.length - previewCount;
     toggleScenarioPickerListBtn.textContent = state.scenarioPickerExpanded
       ? "Show fewer scenarios"
-      : `More scenarios (${hiddenCount})`;
+      : `Browse all scenarios (${hiddenCount} more)`;
   } else {
     toggleScenarioPickerListBtn.classList.add("is-hidden");
   }
@@ -6077,23 +6118,23 @@ function addCoachNote(userText, replyObject) {
   let note = "";
 
   if (/^(hi|hello|hey)$/i.test(userText.trim())) {
-    note = "Open more directly — name why you asked for this conversation in your next sentence.";
+    note = "Open more directly. Name why you asked for this conversation in your next sentence.";
   } else if (lower.includes("deadline") || lower.includes("risk") || lower.includes("late")) {
-    note = "Good — you surfaced the issue. Now anchor it with one specific fact or number.";
+    note = "Good. You surfaced the issue. Now anchor it with one specific fact or number.";
   } else if (lower.includes("sorry") || lower.includes("frustrat") || lower.includes("stress")) {
     note = "Good acknowledgement. Keep it brief, then move to a specific question or next step.";
   } else if (stage === "Listen") {
-    note = "Ask one open question, then pause fully — let them finish before you respond.";
+    note = "Ask one open question, then pause fully. Let them finish before you respond.";
   } else if (stage === "Empathize") {
     note = "Name one specific pressure they're carrying, not just 'I understand.' Then keep moving.";
   } else if (stage === "Talk") {
-    note = "Add one concrete detail — a date, number, or observable behavior — so the impact is undeniable.";
+    note = "Add one concrete detail, like a date, number, or observable behavior, so the impact is undeniable.";
   } else if (stage === "Solve") {
     note = "Make the next step explicit: who does what, by when, and when you'll check back.";
   } else if ((replyObject?.message || "").length < 60) {
-    note = "Good start. Expand slightly — add one sentence of context or intent.";
+    note = "Good start. Expand slightly and add one sentence of context or intent.";
   } else {
-    note = `Stay focused on ${scenario.aiRole.toLowerCase()}'s constraints — answer what they need before making your point.`;
+    note = `Stay focused on ${scenario.aiRole.toLowerCase()}'s constraints. Answer what they need before making your point.`;
   }
 
   state.coachNote = note;
@@ -6742,7 +6783,7 @@ async function generateFeedback() {
   const reflectionHtml = `
     <article class="analytics-card reflection-form-card">
       <h4>Reflect on This Session</h4>
-      <p class="muted" style="margin-bottom:1.25rem;">These three questions are tailored to your weak stage${weak.length === 1 ? '' : 's'} — <strong>${escapeHtml(weak.join(", ") || "keep building on all stages")}</strong>. Answer honestly in your own words. Then submit for personalized written feedback.</p>
+      <p class="muted" style="margin-bottom:1.25rem;">These three questions are tailored to your weak stage${weak.length === 1 ? '' : 's'}: <strong>${escapeHtml(weak.join(", ") || "keep building on all stages")}</strong>. Answer honestly in your own words. Then submit for personalized written feedback.</p>
 
       <section class="reflection-item">
         <div class="reflection-item-head">
@@ -6750,7 +6791,7 @@ async function generateFeedback() {
           <span class="reflection-stage-tag">${escapeHtml(metacognitivePrompts[0].stage)}</span>
         </div>
         <p class="reflection-question">${escapeHtml(metacognitivePrompts[0].question)}</p>
-        <textarea id="reflectionAnswer1" rows="4" placeholder="Be specific — reference something that actually happened in your conversation..."></textarea>
+        <textarea id="reflectionAnswer1" rows="4" placeholder="Be specific. Reference something that actually happened in your conversation..."></textarea>
       </section>
 
       <section class="reflection-item">
@@ -6780,7 +6821,7 @@ async function generateFeedback() {
       <div id="reflectionAiFeedback" class="reflection-feedback muted"></div>
 
       <h4 style="margin-top:1.5rem;">Your Reflection History</h4>
-      <p class="muted" style="font-size:0.88rem; margin-bottom:0.75rem;">Previous drafts from past sessions — load any to compare your thinking over time.</p>
+      <p class="muted" style="font-size:0.88rem; margin-bottom:0.75rem;">Previous drafts from past sessions. Load any to compare your thinking over time.</p>
       <div id="reflectionDraftHistory" class="reflection-trend">${buildReflectionDraftHistoryHtml()}</div>
     </article>
   `;
@@ -7793,7 +7834,7 @@ Be direct and warm. No bullet points — just natural, thoughtful prose.`
     state.moduleQuizPassed = true;
   } catch {
     if (quizResultText) {
-      quizResultText.innerHTML = `<p style="margin:0;">Thanks for reflecting. You're ready to practice — keep these thoughts in mind as you go.</p>`;
+      quizResultText.innerHTML = `<p style="margin:0;">Thanks for reflecting. You're ready to practice. Keep these thoughts in mind as you go.</p>`;
       quizResultText.classList.remove("is-hidden");
     }
     state.moduleQuizPassed = true;
