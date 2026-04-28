@@ -2411,14 +2411,14 @@ textarea {
 
 .layout {
   display: grid;
-  grid-template-columns: 300px 1fr 320px;
+  grid-template-columns: 268px 1fr 300px;
   gap: 1rem;
   min-height: calc(100vh - 5.7rem);
   padding-bottom: 1rem;
 }
 
 body.hide-left .layout {
-  grid-template-columns: 56px 1fr 320px;
+  grid-template-columns: 56px 1fr 300px;
 }
 
 body.hide-left .panel-scenarios {
@@ -2440,7 +2440,7 @@ body.hide-left .panel-scenarios .scenarios-head .meta-toggle {
 }
 
 body.hide-right .layout {
-  grid-template-columns: 300px 1fr 140px;
+  grid-template-columns: 268px 1fr 120px;
 }
 
 body.hide-right .panel-feedback {
@@ -2476,7 +2476,7 @@ body.hide-right .panel-feedback .feedback-head::after {
 }
 
 body.hide-left.hide-right .layout {
-  grid-template-columns: 56px 1fr 140px;
+  grid-template-columns: 56px 1fr 120px;
 }
 
 .panel {
@@ -2536,6 +2536,9 @@ body.hide-left.hide-right .layout {
 .chat-session-head #finishBtn {
   align-self: flex-start;
   white-space: nowrap;
+  background: linear-gradient(135deg, #0ea37a, #0b8a65);
+  border-color: transparent;
+  font-size: 0.88rem;
 }
 
 .panel-feedback {

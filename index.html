@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./styles.css?v=20260427-032200" />
+  <link rel="stylesheet" href="./styles.css?v=20260428-120000" />
 </head>
 <body>
   <div class="page-glow page-glow-a"></div>
@@ -41,7 +41,7 @@
       </section>
 
       <h2 id="goalsTitle">What do you want to learn?</h2>
-      <p class="muted">Select learning goal regarding difficult conversations that matter to you. These will guide which learning materials and practice scenarios we recommend.</p>
+      <p class="muted">Choose what you want to get better at. We'll build your learning path and practice scenarios around your selection.</p>
 
       <div class="goals-grid" id="goalsGrid">
         <!-- Goals will be populated by JavaScript -->
@@ -67,9 +67,9 @@
   <section id="pageChoice" class="flow-page flow-page-choice is-hidden">
     <div class="flow-card flow-card-choice">
       <h2 id="choiceWelcomeTitle">Choose Your Path</h2>
-      <p id="choiceWelcomeSubtitle" class="muted">Select your learning preference below.</p>
+      <p id="choiceWelcomeSubtitle" class="muted">What would you like to do in this session?</p>
 
-      <p class="choice-path-instruction">Please click one option below to continue.</p>
+      <p class="choice-path-instruction">Choose one path to continue.</p>
 
       <div class="path-grid">
         <button id="chooseLearnBtn" class="path-btn" type="button" onclick="if(window.__ssNavigate){window.__ssNavigate('learn')}else{document.getElementById('pageChoice')?.classList.add('is-hidden');document.getElementById('pageLearn')?.classList.remove('is-hidden');window.scrollTo(0,0);}">
@@ -80,7 +80,7 @@
             </svg>
           </span>
           <strong>Learn the Concept</strong>
-          <span>Read a short course on difficult conversation principles before practice.</span>
+          <span>Work through goal-specific modules and the ILETS framework before jumping into practice.</span>
         </button>
         <button id="choosePracticeBtn" class="path-btn" type="button" onclick="if(window.__ssNavigate){window.__ssNavigate('scenarioBriefing')}else{document.getElementById('pageChoice')?.classList.add('is-hidden');document.getElementById('pageScenarioBriefing')?.classList.remove('is-hidden');window.scrollTo(0,0);}">
           <span class="path-icon-wrap path-icon-wrap-accent" aria-hidden="true">
@@ -90,7 +90,7 @@
             </svg>
           </span>
           <strong>Practice Difficult Conversations</strong>
-          <span>Start roleplay now with stage tips and live coaching.</span>
+          <span>Choose a scenario, set your difficulty level, and practice with a live AI partner and real-time coaching.</span>
         </button>
         <button id="choosePeerBtn" class="path-btn" type="button" onclick="if(window.__ssNavigate){window.__ssNavigate('peerPracticum')}else{document.getElementById('pageChoice')?.classList.add('is-hidden');document.getElementById('pagePeerPracticum')?.classList.remove('is-hidden');window.scrollTo(0,0);}">
           <span class="path-icon-wrap" aria-hidden="true">
@@ -102,7 +102,7 @@
             </svg>
           </span>
           <strong>Peer Practice</strong>
-          <span>Join a peer practice space with separate community, session, and reflection pages.</span>
+          <span>Connect with a practice partner, run a live conversation, and exchange structured feedback after.</span>
         </button>
       </div>
 
@@ -207,13 +207,13 @@
     <div class="flow-card">
       <h2>Session Review</h2>
       <p id="finalUserGreeting" class="muted" style="margin: 0; margin-bottom: 1rem;"></p>
-      <p id="finalIdentity" class="muted">Results from your latest practice session.</p>
-      <p class="dashboard-help muted">This is your after-practice view. It keeps coaching notes and session results in one place so you can review what happened and what to improve next.</p>
+      <p id="finalIdentity" class="muted">Here's what happened in your latest practice session.</p>
+      <p class="dashboard-help muted">Review your AI coaching feedback, write a short reflection, and track your progress across sessions.</p>
 
       <div class="dashboard-tabs" role="tablist" aria-label="Session review sections">
-        <button id="finalTabOverview" class="dashboard-tab active" type="button">Coaching</button>
-        <button id="finalTabReflection" class="dashboard-tab" type="button">Reflection</button>
-        <button id="finalTabSession" class="dashboard-tab" type="button">Analytics</button>
+        <button id="finalTabOverview" class="dashboard-tab active" type="button">AI Coaching</button>
+        <button id="finalTabReflection" class="dashboard-tab" type="button">Reflect</button>
+        <button id="finalTabSession" class="dashboard-tab" type="button">Progress</button>
       </div>
 
       <section id="finalOverviewSection" class="dashboard-section active">
@@ -221,12 +221,12 @@
       </section>
 
       <section id="finalReflectionSection" class="dashboard-section">
-        <p class="dashboard-help muted">Reflection helps you think through what happened and how to improve next time.</p>
+        <p class="dashboard-help muted">Write your reflection while the session is fresh. Submit it for personalized written feedback from the AI coach.</p>
         <div id="finalReflectionContent" class="analytics-grid"></div>
       </section>
 
       <section id="finalSessionSection" class="dashboard-section">
-        <p class="dashboard-help muted">Session results and progress tracking appear here in the same view.</p>
+        <p class="dashboard-help muted">Track your ILETS stage performance, compare to past sessions, and see how you're improving over time.</p>
         <div id="analyticsSummary" class="analytics-grid"></div>
       </section>
 
@@ -242,8 +242,8 @@
       <div class="peer-page-head">
         <div>
           <h2>Peer Practice</h2>
-          <p class="muted">Practice difficult conversations with real peers, then exchange advice and feedback after each session.</p>
-          <p class="dashboard-help muted">Analytics is the after-practice view. It shows what happened in the session, what your patterns look like, and how your improvement tracker is moving.</p>
+          <p class="muted">Practice a real difficult conversation with a study partner, then reflect together and exchange structured feedback.</p>
+          <p class="dashboard-help muted">Use the Reflection tab after a session to log what you practiced and give each other one strength and one growth suggestion.</p>
         </div>
       </div>
 
@@ -256,13 +256,13 @@
 
       <div id="peerCommunityView" class="peer-community-view">
         <div class="peer-room-head">
-          <h3>Community Practice Directory</h3>
+          <h3>Find a Practice Partner</h3>
         </div>
         <div id="peerUserDirectory" class="peer-user-directory"></div>
 
         <section class="peer-panel">
           <h3>Practice Requests</h3>
-          <p class="muted">Send requests to peers and start conversation when one is accepted.</p>
+          <p class="muted">Request a session from someone above. Once accepted, switch to the Live Session tab to start practicing.</p>
           <ul id="peerRequestList" class="peer-participant-list"></ul>
         </section>
       </div>
@@ -324,13 +324,13 @@
 
         <section class="peer-panel peer-reflection-intro">
           <h3>Reflection Workspace</h3>
-          <p class="muted">Use this tab to review the session, mark the ILETS stages you practiced, and leave notes or feedback after the conversation.</p>
+          <p class="muted">After the conversation ends, check off the stages you practiced, write shared notes, and give each other one piece of feedback.</p>
         </section>
 
         <div class="peer-reflection-grid">
           <section class="peer-panel">
             <h3>Collaborative ILETS Tracker</h3>
-            <p class="muted">Check off stages you have successfully practiced in this conversation.</p>
+            <p class="muted">Which ILETS stages did you both practice in this session? Check them off together.</p>
             <div class="peer-checklist">
               <label><input type="checkbox" data-peer-stage="Introduce" /> <span>Introduce</span></label>
               <label><input type="checkbox" data-peer-stage="Listen" /> <span>Listen</span></label>
@@ -354,7 +354,7 @@
 
           <section class="peer-panel">
             <h3>Mutual Feedback</h3>
-            <p class="muted">After ending the conversation, exchange one strength and one growth suggestion.</p>
+            <p class="muted">Give your partner one thing they did well and one specific thing to work on next time.</p>
             <label class="flow-label" for="peerFeedbackInput">Feedback to your peer</label>
             <textarea id="peerFeedbackInput" rows="4" placeholder="What worked well? What could improve next time?"></textarea>
             <div class="peer-notes-actions">
@@ -453,18 +453,18 @@
 
           <!-- AI Opening -->
           <div class="briefing-section">
-            <h4 class="briefing-label">Scenario Catalyst</h4>
-            <p class="muted">High-tension trigger to help you plan your first move.</p>
+            <h4 class="briefing-label">How It Starts</h4>
+            <p class="muted">This is the opening line from your conversation partner. Read it carefully and plan your first response.</p>
             <blockquote id="briefOpening" class="briefing-quote">-</blockquote>
           </div>
 
           <div class="briefing-section">
-            <h4 class="briefing-label">Scaffold Level</h4>
-            <p id="briefScaffoldHint" class="muted">Choose how much support you want before starting this session.</p>
+            <h4 class="briefing-label">Support Level</h4>
+            <p id="briefScaffoldHint" class="muted">Choose how much scaffolding you want. Level 1 shows sentence starters throughout; Level 2 fades them unless you pause; Level 3 is independent — no hints.</p>
             <div class="scaffold-level-group" id="briefScaffoldLevelGroup" role="group" aria-label="Choose scaffold level">
-              <button class="ghost scaffold-level-btn" type="button" data-brief-scaffold="1">Level 1 Fully Guided</button>
-              <button class="ghost scaffold-level-btn" type="button" data-brief-scaffold="2">Level 2 Assisted</button>
-              <button class="ghost scaffold-level-btn" type="button" data-brief-scaffold="3">Level 3 Independent</button>
+              <button class="ghost scaffold-level-btn" type="button" data-brief-scaffold="1">Level 1 — Fully Guided</button>
+              <button class="ghost scaffold-level-btn" type="button" data-brief-scaffold="2">Level 2 — Assisted</button>
+              <button class="ghost scaffold-level-btn" type="button" data-brief-scaffold="3">Level 3 — Independent</button>
             </div>
           </div>
         </div>
@@ -554,7 +554,7 @@
             </div>
           </div>
         </div>
-        <button id="finishBtn" type="button">Finish + Feedback</button>
+        <button id="finishBtn" type="button">Finish & Get Coaching</button>
       </section>
 
       <section class="scenario-brief">
@@ -599,24 +599,24 @@
         <button id="toggleRightColumnBtn" class="ghost icon-btn column-toggle" type="button" title="Toggle right panel" aria-label="Toggle right panel">
           <span class="icon icon-menu" aria-hidden="true"></span>
         </button>
-        <h2>Formative Feedback</h2>
+        <h2>Live Guidance</h2>
       </div>
       <div class="right-tabs" id="rightTabs">
         <button class="right-tab active" data-right-tab="coach" type="button">Coach</button>
-        <button class="right-tab" data-right-tab="feedback" type="button">Feedback</button>
-        <button class="right-tab" data-right-tab="practice" type="button">Practice</button>
+        <button class="right-tab" data-right-tab="feedback" type="button">Gap Analysis</button>
+        <button class="right-tab" data-right-tab="practice" type="button">Hints</button>
       </div>
 
       <section id="sectionCoach" class="panel-section active" aria-live="polite">
         <section class="live-notes">
           <p class="practice-label">Live Coach Note</p>
-          <div id="coachNote" class="coach-note">Type a message and I’ll give you a quick note here.</div>
+          <div id="coachNote" class="coach-note">Send your first message — your coach will respond here with specific guidance based on what you said.</div>
           <ul id="coachNoteList" class="coach-note-list"></ul>
         </section>
 
         <section id="inMomentReflectionCard" class="reflection-card is-hidden">
-          <p class="practice-label">In-the-moment reflection</p>
-          <p id="inMomentPromptText" class="muted">Pause and reflect on your current strategy.</p>
+          <p class="practice-label">Pause & Reflect</p>
+          <p id="inMomentPromptText" class="muted">Take 30 seconds to reflect before your next message.</p>
           <label class="sr-only" for="inMomentAnswerInput">In-moment reflection answer</label>
           <textarea id="inMomentAnswerInput" rows="3" placeholder="Write a short reflection before sending your next messages..."></textarea>
           <button id="submitInMomentReflectionBtn" class="ghost" type="button">Save Reflection</button>
@@ -652,7 +652,7 @@
               <p class="practice-label">Sentence Starters</p>
               <button id="toggleStartersBtn" class="ghost starter-toggle-btn" type="button">Hide Hints</button>
             </div>
-            <p id="stageStartersMeta" class="muted starter-meta">Hints are visible to support your current stage.</p>
+            <p id="stageStartersMeta" class="muted starter-meta">These starters update based on your conversation. Click one to paste it, then adapt it in your own words.</p>
             <div id="stageStarters" class="starter-list"></div>            
             <!-- Assertion templates section -->
             <div id="assertionTemplatesSection" class="assertion-templates-section is-hidden">
@@ -662,7 +662,7 @@
                 <div id="assertionTemplatesList" class="assertion-templates-list"></div>
               </details>
             </div>          </div>
-          <button id="nextStageBtn" class="ghost" type="button">Mark Stage Done</button>
+          <button id="nextStageBtn" class="ghost" type="button">Move to Next Stage →</button>
         </section>
       </section>
     </aside>
@@ -755,7 +755,7 @@ Agree on next step" required></textarea>
     </form>
   </dialog>
 
-  <script src="./app.js?v=20260427-032200" defer></script>
+  <script src="./app.js?v=20260428-120000" defer></script>
 </body>
 </html>
 

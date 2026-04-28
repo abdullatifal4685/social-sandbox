@@ -2693,8 +2693,8 @@ function renderPeerDirectory() {
   peerUserDirectory.innerHTML = PEER_DIRECTORY.map((user) => `
     <article class="peer-user-card">
       <h4>${escapeHtml(user.name)}</h4>
-      <p class="muted">${escapeHtml(user.country)} • Focus: ${escapeHtml(user.focus)}</p>
-      <button type="button" data-peer-request="${escapeHtml(user.id)}">Ask to Practice</button>
+      <p class="muted">${escapeHtml(user.country)} · Practicing: <strong>${escapeHtml(user.focus)}</strong></p>
+      <button type="button" data-peer-request="${escapeHtml(user.id)}">Request Practice</button>
     </article>
   `).join("");
 }
@@ -2801,19 +2801,19 @@ function renderPeerDashboard() {
   peerDashboardSummary.innerHTML = `
     <div class="peer-dashboard-grid">
       <article class="peer-dashboard-card">
-        <p class="muted">Completed Sessions</p>
+        <p class="muted">Sessions Completed</p>
         <strong>${totalSessions}</strong>
       </article>
       <article class="peer-dashboard-card">
-        <p class="muted">Average Learner Turns</p>
+        <p class="muted">Avg Turns / Session</p>
         <strong>${averageTurns}</strong>
       </article>
       <article class="peer-dashboard-card">
-        <p class="muted">Stage Completion Rate</p>
+        <p class="muted">Stage Practice Rate</p>
         <strong>${stageCompletionRate}%</strong>
       </article>
       <article class="peer-dashboard-card">
-        <p class="muted">Most Practiced Stage</p>
+        <p class="muted">Your Strongest Stage</p>
         <strong>${escapeHtml(strongestStage)}</strong>
       </article>
     </div>
@@ -4062,23 +4062,30 @@ function advanceStageFromUserMessage(message) {
 
 function buildRoleplayPrompt() {
   const scenario = getScenario();
+  const stage = ILETS[state.stageIndex];
+  const stageObjectives = {
+    Introduce: "open with clear purpose, set a respectful tone, and signal shared intent",
+    Listen: "ask genuine questions to understand the other person’s constraints before arguing",
+    Empathize: "acknowledge what is valid in their position without dropping the core issue",
+    Talk: "state specific behaviors and their impact with concrete evidence, not opinions",
+    Solve: "close with explicit actions, named owners, and a follow-up timeline",
+  };
   return [
-    "You are a roleplay partner in Social Sandbox, a difficult conversations lab.",
+    "You are a roleplay partner in Social Sandbox, a difficult conversations training lab.",
     `Scenario: ${scenario.title}`,
     `Context: ${scenario.context}`,
-    `You are speaking as: ${scenario.aiRole}`,
+    `You are playing the role of: ${scenario.aiRole}`,
     `Learner name: ${getLearnerName()}`,
-    `Current user stage is: ${ILETS[state.stageIndex]}`,
+    `Current ILETS stage: ${stage} — the learner should ${stageObjectives[stage] || "practice this stage"}`,
     "Rules:",
-    "- Respond naturally in 2-4 sentences.",
-    "- Do not prepend speaker labels like 'Senior Manager:' or names.",
-    "- Keep realistic tension but avoid hostility.",
-    "- Respond directly to the user’s last point, not with the same question each turn.",
-    "- Vary the opening sentence so replies do not feel repetitive.",
-    "- If the user is brief, acknowledge them and ask for one specific detail.",
-    "- Mention the learner by name naturally at least once every 1-2 turns.",
-    "- Add one coaching hint line prefixed with 'Coach Hint:' aligned with current ILETS stage.",
-    "- Keep the coaching hint short and actionable.",
+    "- Respond naturally as the character in 2-4 sentences.",
+    "- Do not prepend speaker labels like ‘Senior Manager:’ or your name.",
+    "- Stay realistic — maintain your character’s perspective and pressure, but don’t be hostile.",
+    "- Respond directly to what the learner just said, not a generic reply.",
+    "- Vary your opening sentence each turn so it doesn’t feel repetitive.",
+    "- If the learner is brief or vague, acknowledge them and probe for one specific detail.",
+    "- Mention the learner by name naturally once every 1-2 turns.",
+    "- After your character reply, add exactly one line prefixed ‘Coach Hint:’ that references a specific phrase or move from the learner’s last message and gives a concrete, actionable suggestion for what to say or do next in this exact conversation (not a generic ILETS tip).",
   ].join("\n");
 }
 
@@ -6037,30 +6044,38 @@ function addHint(hint) {
 }
 
 function addCoachNote(userText, replyObject) {
+  // Prefer the AI-generated hint from the roleplay reply (most contextual)
+  const aiHint = (replyObject?.hint || "").trim();
+  if (aiHint) {
+    state.coachNote = aiHint;
+    pushCoachNoteHistory(aiHint);
+    return;
+  }
+
+  // Fallback: rule-based note when AI hint is missing
   const scenario = getScenario();
   const stage = ILETS[state.stageIndex];
   const lower = userText.toLowerCase();
-
   let note = "";
 
   if (/^(hi|hello|hey)$/i.test(userText.trim())) {
-    note = "Great start. Open a little more directly so the other person understands why you asked for this conversation.";
+    note = "Open more directly — name why you asked for this conversation in your next sentence.";
   } else if (lower.includes("deadline") || lower.includes("risk") || lower.includes("late")) {
-    note = "Great point. Make the intro a bit clearer so the issue feels purposeful, not abrupt.";
+    note = "Good — you surfaced the issue. Now anchor it with one specific fact or number.";
   } else if (lower.includes("sorry") || lower.includes("frustrat") || lower.includes("stress")) {
-    note = "Good acknowledgement. Now keep it short and move toward one specific question.";
+    note = "Good acknowledgement. Keep it brief, then move to a specific question or next step.";
   } else if (stage === "Listen") {
-    note = "Good question. Follow it with one pause, then reflect back what you heard.";
+    note = "Ask one open question, then pause fully — let them finish before you respond.";
   } else if (stage === "Empathize") {
-    note = "Strong empathy. Keep the concern visible so the conversation still moves forward.";
+    note = "Name one specific pressure they're carrying, not just 'I understand.' Then keep moving.";
   } else if (stage === "Talk") {
-    note = "Better. Add one concrete example or number so the impact is easier to trust.";
+    note = "Add one concrete detail — a date, number, or observable behavior — so the impact is undeniable.";
   } else if (stage === "Solve") {
-    note = "Nice direction. Make the next step explicit: owner, timeline, and follow-up.";
+    note = "Make the next step explicit: who does what, by when, and when you'll check back.";
   } else if ((replyObject?.message || "").length < 60) {
-    note = "Good start. Expand the intro slightly so it feels more grounded.";
+    note = "Good start. Expand slightly — add one sentence of context or intent.";
   } else {
-    note = `Good direction for ${scenario.title.toLowerCase()}. Keep the message concise and avoid overexplaining.`;
+    note = `Stay focused on ${scenario.aiRole.toLowerCase()}'s constraints — answer what they need before making your point.`;
   }
 
   state.coachNote = note;
@@ -6666,30 +6681,43 @@ async function generateFeedback() {
   }
 
   const overviewHtml = `
-    <article class="analytics-card">
-      <h4>Strength</h4>
-      <p class="analytics-metric">${
-        analysisData?.strengths?.[0]
-          ? `${escapeHtml(analysisData.strengths[0].behavior)}<br><span class="strength-evidence" style="display:block; font-size:0.85em; color:#666; margin-top:0.5rem; font-style:italic; border-left:3px solid #0fa37a; padding-left:0.75rem;">"${escapeHtml(analysisData.strengths[0].evidence)}"</span>`
-          : escapeHtml(coachingFeedback.split("GROWTH")[0].replace(/STRENGTH:|strength:/i, "").trim())
-      }</p>
-      <p class="muted">Keep this behavior consistent while you focus your next practice on one weaker stage.</p>
+    <article class="analytics-card" style="margin-bottom:1rem;">
+      <h4 style="margin-bottom:0.6rem;">Your Coach Says</h4>
+      <p style="line-height:1.75; margin:0; color:var(--ink-dark);">${escapeHtml(coachingFeedback || "Complete a practice session to get personalized coaching feedback.")}</p>
     </article>
-    <article class="analytics-card">
-      <h4>Growth Area</h4>
-      <p class="analytics-metric">${
-        analysisData?.growthAreas?.[0]
-          ? `${escapeHtml(analysisData.growthAreas[0].area)}<br><span class="growth-suggestion" style="display:block; font-size:0.85em; color:#666; margin-top:0.5rem; border-left:3px solid #d9751e; padding-left:0.75rem;">${escapeHtml(analysisData.growthAreas[0].suggestion)}</span>`
-          : escapeHtml(coachingFeedback.split("GROWTH")[1]?.replace(/AREA:|area:/i, "").trim() || "Focus on your weaker ILETS stages.")
-      }</p>
-      <p class="muted">Practice this area in your next session for meaningful improvement.</p>
+    ${analysisData?.strengths?.length ? `
+    <article class="analytics-card" style="margin-bottom:1rem;">
+      <h4 style="margin-bottom:0.6rem;">What You Did Well</h4>
+      <div style="display:grid; gap:1rem;">
+        ${analysisData.strengths.map((s) => `
+          <div>
+            <p style="margin:0 0 0.4rem; font-weight:600; color:var(--ink-dark); font-size:0.95rem;">${escapeHtml(s.behavior)}</p>
+            <blockquote style="margin:0; padding:0.5rem 0.85rem; border-left:3px solid #0fa37a; background:rgba(14,163,122,0.06); font-size:0.88rem; color:#444; font-style:italic; border-radius:0 4px 4px 0; line-height:1.5;">"${escapeHtml(s.evidence)}"</blockquote>
+          </div>
+        `).join('')}
+      </div>
     </article>
+    ` : ''}
+    ${analysisData?.growthAreas?.length ? `
+    <article class="analytics-card">
+      <h4 style="margin-bottom:0.6rem;">Where to Focus Next</h4>
+      <div style="display:grid; gap:1rem;">
+        ${analysisData.growthAreas.map((g) => `
+          <div>
+            <p style="margin:0 0 0.4rem; font-weight:600; color:var(--ink-dark); font-size:0.95rem;">${escapeHtml(g.area)}</p>
+            <p style="margin:0; font-size:0.9rem; border-left:3px solid #d9751e; padding-left:0.85rem; color:#555; line-height:1.5; background:rgba(217,117,30,0.04); padding:0.5rem 0.85rem; border-radius:0 4px 4px 0;">${escapeHtml(g.suggestion)}</p>
+            ${g.exampleStage ? `<p style="margin:0.4rem 0 0; font-size:0.82rem; color:#888;">Practice stage: <strong>${escapeHtml(g.exampleStage)}</strong></p>` : ''}
+          </div>
+        `).join('')}
+      </div>
+    </article>
+    ` : ''}
   `;
 
   const reflectionHtml = `
     <article class="analytics-card reflection-form-card">
-      <h4>Reflection</h4>
-      <p class="muted">Answer these prompts in your own words. AI feedback will adapt to weak stages: ${escapeHtml(weak.join(", ") || "None")}</p>
+      <h4>Reflect on This Session</h4>
+      <p class="muted" style="margin-bottom:1.25rem;">These three questions are tailored to your weak stage${weak.length === 1 ? '' : 's'} — <strong>${escapeHtml(weak.join(", ") || "keep building on all stages")}</strong>. Answer honestly in your own words. Then submit for personalized written feedback.</p>
 
       <section class="reflection-item">
         <div class="reflection-item-head">
@@ -6697,7 +6725,7 @@ async function generateFeedback() {
           <span class="reflection-stage-tag">${escapeHtml(metacognitivePrompts[0].stage)}</span>
         </div>
         <p class="reflection-question">${escapeHtml(metacognitivePrompts[0].question)}</p>
-        <textarea id="reflectionAnswer1" rows="3" placeholder="Write your reflection..."></textarea>
+        <textarea id="reflectionAnswer1" rows="4" placeholder="Be specific — reference something that actually happened in your conversation..."></textarea>
       </section>
 
       <section class="reflection-item">
@@ -6706,27 +6734,28 @@ async function generateFeedback() {
           <span class="reflection-stage-tag">${escapeHtml(metacognitivePrompts[1].stage)}</span>
         </div>
         <p class="reflection-question">${escapeHtml(metacognitivePrompts[1].question)}</p>
-        <textarea id="reflectionAnswer2" rows="3" placeholder="Write your reflection..."></textarea>
+        <textarea id="reflectionAnswer2" rows="4" placeholder="Think about what you'd do differently, or what worked well..."></textarea>
       </section>
 
       <section class="reflection-item">
         <div class="reflection-item-head">
           <strong>${reflectionTitles[metacognitivePrompts[2].id]}</strong>
-          <span class="reflection-stage-tag">Transfer</span>
+          <span class="reflection-stage-tag">Real-world Transfer</span>
         </div>
         <p class="reflection-question">${escapeHtml(metacognitivePrompts[2].question)}</p>
-        <textarea id="reflectionAnswer3" rows="3" placeholder="Write your reflection..."></textarea>
+        <textarea id="reflectionAnswer3" rows="4" placeholder="Name a real situation where you'll apply one thing from this session..."></textarea>
       </section>
 
       <div class="flow-actions flow-actions-wrap">
         <button id="saveReflectionDraftBtn" class="ghost" type="button">Save Draft</button>
         <button id="editReflectionDraftBtn" class="ghost" type="button" disabled>Edit Draft</button>
-        <button id="submitReflectionBtn" type="button">Get Adaptive Coach Feedback</button>
+        <button id="submitReflectionBtn" type="button">Get Written Feedback</button>
       </div>
       <p id="reflectionDraftStatus" class="muted">Draft not saved yet.</p>
       <div id="reflectionAiFeedback" class="reflection-feedback muted"></div>
 
-      <h4>Draft History</h4>
+      <h4 style="margin-top:1.5rem;">Your Reflection History</h4>
+      <p class="muted" style="font-size:0.88rem; margin-bottom:0.75rem;">Previous drafts from past sessions — load any to compare your thinking over time.</p>
       <div id="reflectionDraftHistory" class="reflection-trend">${buildReflectionDraftHistoryHtml()}</div>
     </article>
   `;
@@ -6812,24 +6841,15 @@ async function generateFeedback() {
     `;
   }
   
-  const communicationCard = `
-    <article class="analytics-card">
-      <h4>Communication & Clarity</h4>
-      <p class="analytics-metric">Clarity Score: ${Math.max(20, 100 - analytics.fillerRate)}%</p>
-      <p class="analytics-metric">Directness Score: ${Math.round((total / max) * 100)}%</p>
-      <p class="analytics-metric">Filler Words: ${analytics.fillerCount} (${analytics.fillerRate}%)</p>
-      <p class="muted">Focus on clear, direct statements with concrete next steps. Reduce filler language.</p>
-    </article>
-  `;
   const sessionHtml = `
     <article class="analytics-card">
-      <h4>Analytics Overview</h4>
-      <p class="analytics-metric">Turns: ${analytics.totalTurns} | Avg words/turn: ${analytics.avgWords}</p>
-      <p class="muted">Stage coverage: ${analytics.stageCoverage}%</p>
+      <h4>Session Overview</h4>
+      <p class="analytics-metric" style="margin-bottom:0.3rem;"><strong>Scenario:</strong> ${escapeHtml(scenario.title)}</p>
+      <p class="analytics-metric" style="margin-bottom:0.3rem;"><strong>Turns:</strong> ${analytics.totalTurns} &nbsp;·&nbsp; <strong>Avg words/turn:</strong> ${analytics.avgWords}</p>
+      <p class="muted">You actively covered <strong>${analytics.stageCoverage}%</strong> of the ILETS stages in this session.</p>
     </article>
     ${stagePerformanceBarsHtml}
     ${comparisonHtml}
-    ${communicationCard}
   `;
 
   feedbackPanel.innerHTML = overviewHtml;
