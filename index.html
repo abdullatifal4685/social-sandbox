@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./styles.css?v=20260428-140000" />
+  <link rel="stylesheet" href="./styles.css?v=20260428-160000" />
 </head>
 <body>
   <div class="page-glow page-glow-a"></div>
@@ -557,7 +557,6 @@
             <span id="practiceIdentity" class="muted">Practicing as: Learner</span>
             <div class="practice-scaffold-menu-wrap">
               <button id="practiceScaffoldMenuBtn" class="ghost practice-scaffold-menu-btn" type="button" aria-expanded="false" aria-label="Change scaffold level">
-                <span class="scaffold-menu-title">Scaffold Level</span>
                 <span class="scaffold-menu-current">Level 1: Fully Guided</span>
                 <span class="scaffold-menu-change">Change</span>
                 <span class="scaffold-menu-caret" aria-hidden="true">▾</span>
@@ -617,19 +616,16 @@
         </button>
         <h2>Live Guidance</h2>
       </div>
-      <div class="right-tabs" id="rightTabs">
-        <button class="right-tab active" data-right-tab="coach" type="button">Coach</button>
+      <!-- Tab stubs kept for JS compatibility — hidden via CSS -->
+      <div class="right-tabs" id="rightTabs" aria-hidden="true" style="display:none">
+        <button class="right-tab" data-right-tab="coach" type="button">Coach</button>
         <button class="right-tab" data-right-tab="feedback" type="button">Gap Analysis</button>
-        <button class="right-tab" data-right-tab="practice" type="button">Hints</button>
+        <button class="right-tab active" data-right-tab="practice" type="button">Hints</button>
       </div>
 
-      <section id="sectionCoach" class="panel-section active" aria-live="polite">
-        <section class="live-notes">
-          <p class="practice-label">Live Coach Note</p>
-          <div id="coachNote" class="coach-note">Send your first message — your coach will respond here with specific guidance based on what you said.</div>
-          <ul id="coachNoteList" class="coach-note-list"></ul>
-        </section>
-
+      <!-- Hidden coach/feedback shells — JS writes to these but they're not shown -->
+      <section id="sectionCoach" class="panel-section" aria-hidden="true" style="display:none">
+        <div id="coachNoteList" class="coach-note-list" aria-hidden="true"></div>
         <section id="inMomentReflectionCard" class="reflection-card is-hidden">
           <p class="practice-label">Pause & Reflect</p>
           <p id="inMomentPromptText" class="muted">Take 30 seconds to reflect before your next message.</p>
@@ -638,46 +634,45 @@
           <button id="submitInMomentReflectionBtn" class="ghost" type="button">Save Reflection</button>
           <p id="inMomentReflectionFeedback" class="muted"></p>
         </section>
-
-        <section class="tips-card">
-          <button id="toggleTipsBtn" class="ghost tips-toggle" type="button" aria-expanded="false">Show Coaching Tips</button>
-          <div id="tipsContent" class="tips-content is-collapsed">
-            <p id="tipsLead" class="muted">Tips will appear here as you practice.</p>
-            <ul id="tipsList"></ul>
-          </div>
-        </section>
-      </section>
-
-      <section id="sectionFeedback" class="panel-section">
-        <div id="feedbackPanel" class="feedback-panel">
-          <h3>Gap Analysis</h3>
-          <p class="muted">No values yet. Send your first response to see live progress here.</p>
+        <div id="tipsContent" class="tips-content is-hidden" aria-hidden="true">
+          <ul id="tipsList"></ul>
         </div>
+        <button id="toggleTipsBtn" class="ghost tips-toggle is-hidden" type="button" aria-expanded="false">Show Tips</button>
+      </section>
+      <section id="sectionFeedback" class="panel-section" aria-hidden="true" style="display:none">
+        <div id="feedbackPanel" class="feedback-panel" aria-hidden="true"></div>
       </section>
 
-      <section id="sectionPractice" class="panel-section" aria-label="ILETS practice helper">
+      <!-- Main guidance panel — always visible -->
+      <section id="sectionPractice" class="panel-section active" aria-label="ILETS practice helper">
+        <!-- AI coach note: appears after first message, personalized to what was said -->
+        <div id="coachNoteWrap" class="coach-note-wrap is-hidden">
+          <p class="practice-label coach-note-label">Coach Feedback</p>
+          <div id="coachNote" class="coach-note" aria-live="polite"></div>
+        </div>
+
         <section class="practice-strip practice-strip-side">
           <div class="practice-scaffold-chip" id="practiceScaffoldChip">Active Scaffold: Level 1 - Fully Guided</div>
           <div>
             <p class="practice-label">Current Practice Step</p>
             <h3 id="stageObjectiveTitle">Introduce</h3>
-            <p id="stageObjectiveText" class="muted">Open with purpose and respectful intent.</p>
+            <p id="stageObjectiveText" class="muted">Open the conversation in a way that applies to your goal.</p>
           </div>
           <div class="starter-wrap">
             <div class="starter-head">
               <p class="practice-label">Sentence Starters</p>
               <button id="toggleStartersBtn" class="ghost starter-toggle-btn" type="button">Hide Hints</button>
             </div>
-            <p id="stageStartersMeta" class="muted starter-meta">These starters update based on your conversation. Click one to paste it, then adapt it in your own words.</p>
-            <div id="stageStarters" class="starter-list"></div>            
-            <!-- Assertion templates section -->
+            <p id="stageStartersMeta" class="muted starter-meta">Updated after each AI reply. Click a starter to paste it, then rewrite it in your own words.</p>
+            <div id="stageStarters" class="starter-list"></div>
             <div id="assertionTemplatesSection" class="assertion-templates-section is-hidden">
               <details class="assertion-templates-toggle" open>
-                <summary class="practice-label">Respectful Assertion Templates</summary>
-                <p class="muted starter-meta">Three ways to phrase this stage: deferential (face-preserving), balanced (respectful-assertive), or direct (evidence-based).</p>
+                <summary class="practice-label">Assertion Templates</summary>
+                <p class="muted starter-meta">Three ways to phrase this stage: deferential, balanced, or direct.</p>
                 <div id="assertionTemplatesList" class="assertion-templates-list"></div>
               </details>
-            </div>          </div>
+            </div>
+          </div>
           <button id="nextStageBtn" class="ghost" type="button">Move to Next Stage →</button>
         </section>
       </section>
@@ -771,7 +766,7 @@ Agree on next step" required></textarea>
     </form>
   </dialog>
 
-  <script src="./app.js?v=20260428-120000" defer></script>
+  <script src="./app.js?v=20260428-160000" defer></script>
 </body>
 </html>
 

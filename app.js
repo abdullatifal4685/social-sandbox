@@ -915,13 +915,13 @@ const state = {
   stageIndex: 0,
   isTyping: false,
   briefTab: "scenario",
-  scenarioBriefExpanded: true,
+  scenarioBriefExpanded: false,
   scenariosExpanded: true,
   scenarioListExpanded: false,
   scenarioPickerExpanded: false,
   editingScenarioId: null,
   iletsExpanded: true,
-  rightTab: "coach",
+  rightTab: "practice",
   focusMode: false,
   leftVisible: true,
   rightVisible: true,
@@ -2549,15 +2549,9 @@ function renderScenarioPicker() {
       ];
       
       const goalContextHtml = `
-        <div style="background: rgba(14, 95, 229, 0.05); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; border-left: 4px solid var(--accent);">
-          <h3 style="margin-top: 0; font-size: 1rem; color: var(--ink-dark);">📚 Personalized Scenarios for Your Goals</h3>
-          <p style="margin: 0.75rem 0 0 0; font-size: 0.9rem; color: var(--ink-dark);">
-            Based on your learning goals, the picker is prioritizing generated scenarios for:
-            <strong>${allGoals.map((g) => `"${escapeHtml(g)}"`).join(", ")}</strong>
-          </p>
-          <p style="margin: 0.75rem 0 0 0; font-size: 0.85rem; color: var(--ink);">
-            These scenarios are created to match what you selected, so you can practice the exact situations you care about.
-          </p>
+        <div class="scenario-goals-context-bar">
+          <span class="sgc-label">Scenarios matched to your goal:</span>
+          <span class="sgc-goals">${allGoals.map((g) => `<strong>${escapeHtml(g)}</strong>`).join(", ")}</span>
         </div>
       `;
       goalsHeading.innerHTML = goalContextHtml;
@@ -2594,15 +2588,14 @@ function renderScenarioPicker() {
 
       return `
       <article class="scenario-picker-card ${scenario.id === state.selectedScenarioId ? "active" : ""} ${isRecommended ? "is-recommended" : ""} ${isTailored ? "is-tailored" : ""}" data-scenario-id="${escapeHtml(scenario.id)}">
-        ${isTailored ? '<div class="recommended-badge" style="background: rgba(14, 163, 122, 0.9);">Tailored for you: ' + escapeHtml(scenario.customGoal || scenario.title) + '</div>' : ""}
-        ${isRecommended && !isTailored ? '<div class="recommended-badge">Recommended for your goals</div>' : ""}
         <button class="picker-card-select" data-scenario-id="${escapeHtml(scenario.id)}" type="button">
           ${scenario.imageUrl ? `<img class="picker-card-illustration" src="${escapeHtml(scenario.imageUrl)}" alt="Illustration for ${escapeHtml(scenario.title)}" />` : ""}
+          ${isTailored ? '<span class="recommended-badge">✦ Matched to your goal</span>' : isRecommended ? '<span class="recommended-badge">Recommended</span>' : ""}
           <div class="picker-card-head">
             <strong>${escapeHtml(scenario.title)}</strong>
             <span class="picker-card-badge">${escapeHtml(scenario.difficulty)}</span>
           </div>
-          <p class="picker-card-text">${escapeHtml(scenario.context.substring(0, 80))}...</p>
+          <p class="picker-card-text">${escapeHtml(scenario.context.substring(0, 110))}...</p>
           <p class="picker-card-role">Partner: ${escapeHtml(scenario.aiRole)}</p>
           ${goalBadges ? `<div class="picker-card-goals">${goalBadges}</div>` : ""}
         </button>
@@ -3117,10 +3110,10 @@ function renderPeerPracticum() {
 function enterPracticeCompactMode() {
   state.leftVisible = true;
   state.rightVisible = false;
-  state.scenarioBriefExpanded = true;
+  state.scenarioBriefExpanded = false;
   state.scenariosExpanded = true;
   state.iletsExpanded = true;
-  state.rightTab = "coach";
+  state.rightTab = "practice";
   state.focusMode = false;
 }
 
@@ -3506,18 +3499,21 @@ async function ensureGoalTailoredScenario() {
 }
 
 function renderCoachNote() {
-  coachNote.textContent = state.coachNote || "Type a message and I’ll give you a quick note here.";
-  const current = (state.coachNote || "").trim();
-  const uniqueHistory = [...new Set((state.coachNoteHistory || []).map((item) => item.trim()).filter(Boolean))]
-    .filter((item) => item !== current);
-  const items = uniqueHistory.length
-    ? uniqueHistory
-    : [
-        "Keep the opening short and purposeful.",
-        "Use a question after you state the issue.",
-        "Move from concern to next step quickly.",
-      ];
-  coachNoteList.innerHTML = items.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+  const note = (state.coachNote || "").trim();
+  const wrap = document.getElementById("coachNoteWrap");
+  if (wrap) {
+    if (note) {
+      wrap.classList.remove("is-hidden");
+    } else {
+      wrap.classList.add("is-hidden");
+    }
+  }
+  if (coachNote) {
+    coachNote.textContent = note;
+  }
+  if (coachNoteList) {
+    coachNoteList.innerHTML = "";
+  }
 }
 
 function renderLiveFeedbackPanel() {
@@ -6615,7 +6611,7 @@ function maybeQueueInMomentReflection() {
     turn: userTurnCount,
   };
   state.inMomentPromptAtTurn = userTurnCount;
-  state.rightTab = "coach";
+  state.rightTab = "practice";
 }
 
 async function generateFeedback() {
@@ -7129,7 +7125,7 @@ if (finalReflectionContent) {
     if (action === "ai-now") {
       upsertImprovementTrack({ stage, mode: "ai", status: "started" });
       state.stageIndex = Math.max(0, ILETS.indexOf(stage));
-      state.rightTab = "coach";
+      state.rightTab = "practice";
       openSessionIntro();
       goToPage("practice");
       render();
@@ -7297,7 +7293,7 @@ promptInput.addEventListener("input", () => {
 
 finishBtn.addEventListener("click", async () => {
   await generateFeedback();
-  state.rightTab = "feedback";
+  state.rightTab = "practice";
   renderRightPanel();
   goToPage("final");
 });

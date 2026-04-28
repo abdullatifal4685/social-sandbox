@@ -1485,8 +1485,8 @@ textarea {
 
 .scenario-picker-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
   margin-top: 1rem;
   max-height: 520px;
   overflow-y: auto;
@@ -2533,8 +2533,6 @@ body.hide-left.hide-right .layout {
 .chat-session-head #finishBtn {
   align-self: flex-start;
   white-space: nowrap;
-  background: linear-gradient(135deg, #0ea37a, #0b8a65);
-  border-color: transparent;
   font-size: 0.88rem;
 }
 
@@ -2668,6 +2666,32 @@ body.hide-left.hide-right .layout {
   margin-top: 0.8rem;
   border-top: 1px solid rgba(19, 30, 21, 0.12);
   padding-top: 0.8rem;
+}
+
+.coach-note-wrap {
+  margin: 0.6rem 0 0;
+  padding: 0.75rem 0.9rem;
+  background: linear-gradient(135deg, rgba(20, 97, 255, 0.05), rgba(14, 163, 122, 0.04));
+  border: 1px solid rgba(20, 97, 255, 0.14);
+  border-radius: 12px;
+}
+
+.coach-note-wrap .coach-note-label {
+  margin-bottom: 0.35rem;
+  color: var(--accent);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+}
+
+.coach-note-wrap .coach-note {
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--ink-dark);
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  box-shadow: none;
 }
 
 .reflection-card textarea,
@@ -3097,17 +3121,40 @@ body.hide-left.hide-right .layout {
 }
 
 .recommended-badge {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  background: var(--accent);
-  color: white;
-  padding: 0.5rem 1rem;
-  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(14, 163, 122, 0.12);
+  color: #0b7a5a;
+  border: 1px solid rgba(14, 163, 122, 0.28);
+  padding: 0.22rem 0.6rem;
+  font-size: 0.73rem;
   font-weight: 600;
-  border-radius: 12px 12px 0 0;
-  z-index: 2;
+  border-radius: 99px;
+  margin-bottom: 0.55rem;
+  letter-spacing: 0.01em;
+}
+
+.scenario-goals-context-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.7rem 1rem;
+  background: rgba(14, 95, 229, 0.05);
+  border: 1px solid rgba(14, 95, 229, 0.14);
+  border-radius: 10px;
+  margin-bottom: 0.85rem;
+  font-size: 0.86rem;
+}
+
+.sgc-label {
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.sgc-goals strong {
+  color: var(--ink-dark);
 }
 
 .picker-card-goals {
