@@ -7186,14 +7186,14 @@ if (finalReflectionContent) {
     }
 
     const [a1 = "", a2 = "", a3 = ""] = draft.answers || [];
-    const n1 = finalFeedbackContent.querySelector("#reflectionAnswer1");
-    const n2 = finalFeedbackContent.querySelector("#reflectionAnswer2");
-    const n3 = finalFeedbackContent.querySelector("#reflectionAnswer3");
+    const n1 = finalReflectionContent.querySelector("#reflectionAnswer1");
+    const n2 = finalReflectionContent.querySelector("#reflectionAnswer2");
+    const n3 = finalReflectionContent.querySelector("#reflectionAnswer3");
     if (n1) n1.value = a1;
     if (n2) n2.value = a2;
     if (n3) n3.value = a3;
 
-    const statusNode = finalFeedbackContent.querySelector("#reflectionDraftStatus");
+    const statusNode = finalReflectionContent.querySelector("#reflectionDraftStatus");
     if (statusNode) {
       statusNode.textContent = `Draft loaded from ${new Date(draft.savedAt).toLocaleString()}.`;
     }
@@ -7203,9 +7203,9 @@ if (finalReflectionContent) {
 
   const saveDraftButton = event.target.closest("#saveReflectionDraftBtn");
   if (saveDraftButton) {
-    const answer1 = finalFeedbackContent.querySelector("#reflectionAnswer1")?.value?.trim() || "";
-    const answer2 = finalFeedbackContent.querySelector("#reflectionAnswer2")?.value?.trim() || "";
-    const answer3 = finalFeedbackContent.querySelector("#reflectionAnswer3")?.value?.trim() || "";
+    const answer1 = finalReflectionContent.querySelector("#reflectionAnswer1")?.value?.trim() || "";
+    const answer2 = finalReflectionContent.querySelector("#reflectionAnswer2")?.value?.trim() || "";
+    const answer3 = finalReflectionContent.querySelector("#reflectionAnswer3")?.value?.trim() || "";
     const answers = [answer1, answer2, answer3];
     if (!answers.some((value) => value.length)) {
       return;
@@ -7222,12 +7222,12 @@ if (finalReflectionContent) {
     state.reflectionDrafts = state.reflectionDrafts.slice(0, 40);
     persistReflectionDrafts();
 
-    const historyNode = finalFeedbackContent.querySelector("#reflectionDraftHistory");
+    const historyNode = finalReflectionContent.querySelector("#reflectionDraftHistory");
     if (historyNode) {
       historyNode.innerHTML = buildReflectionDraftHistoryHtml();
     }
 
-    const statusNode = finalFeedbackContent.querySelector("#reflectionDraftStatus");
+    const statusNode = finalReflectionContent.querySelector("#reflectionDraftStatus");
     if (statusNode) {
       statusNode.textContent = "Draft saved. Click Edit Draft to revise.";
     }
@@ -7239,11 +7239,11 @@ if (finalReflectionContent) {
   const editDraftButton = event.target.closest("#editReflectionDraftBtn");
   if (editDraftButton) {
     setReflectionDraftLock(false);
-    const statusNode = finalFeedbackContent.querySelector("#reflectionDraftStatus");
+    const statusNode = finalReflectionContent.querySelector("#reflectionDraftStatus");
     if (statusNode) {
       statusNode.textContent = "Editing enabled. Save draft when ready.";
     }
-    finalFeedbackContent.querySelector("#reflectionAnswer1")?.focus();
+    finalReflectionContent.querySelector("#reflectionAnswer1")?.focus();
     return;
   }
 
