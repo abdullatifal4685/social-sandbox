@@ -2314,7 +2314,7 @@ Return ONLY JSON:
 }`,
       };
 
-      const response = await callOpenAI([prompt], "gpt-4");
+      const response = await callProxyAPI({ model: state.settings.model || "gpt-4", messages: [prompt] });
       const parsed = JSON.parse(response);
       hintsCache[stage] = parsed.starters || [];
     } catch (error) {
@@ -3325,9 +3325,7 @@ Return ONLY JSON in this format:
   };
 
   try {
-    const response = state.settings.mode === "proxy"
-      ? await callProxyAPI({ model: state.settings.model, messages: [prompt] })
-      : await callOpenAI([prompt], "gpt-4");
+    const response = await callProxyAPI({ model: state.settings.model, messages: [prompt] });
     const parsed = JSON.parse(response);
     return Array.isArray(parsed?.starters) ? parsed.starters.filter((item) => item && item.text) : [];
   } catch (error) {
@@ -4124,7 +4122,7 @@ Be specific to the actual conversation content.`,
   };
 
   try {
-    const feedback = await callOpenAI([systemPrompt, conversationSummary], "gpt-4");
+    const feedback = await callProxyAPI({ model: state.settings.model || "gpt-4", messages: [systemPrompt, conversationSummary] });
     return feedback;
   } catch (error) {
     console.warn("Coach feedback generation failed:", error);
@@ -4159,7 +4157,7 @@ Please provide adaptive feedback.`,
   };
 
   try {
-    const feedback = await callOpenAI([systemPrompt, reflectionContext], "gpt-4");
+    const feedback = await callProxyAPI({ model: state.settings.model || "gpt-4", messages: [systemPrompt, reflectionContext] });
     return feedback;
   } catch (error) {
     console.warn("Reflection feedback generation failed:", error);
@@ -4195,7 +4193,7 @@ ${userMessages.map((m, i) => `Message ${i + 1}: ${m}`).join("\n\n")}`,
   };
 
   try {
-    const analysis = await callOpenAI([systemPrompt, analyticsQuery], "gpt-4");
+    const analysis = await callProxyAPI({ model: state.settings.model || "gpt-4", messages: [systemPrompt, analyticsQuery] });
     return analysis;
   } catch (error) {
     console.warn("Analytics generation failed:", error);
@@ -4980,8 +4978,8 @@ function classifyCustomGoal(goalDescription) {
 async function getTailoredLearningPath(goalDescription) {
   const storageKey = "sandbox.customTailoredModules";
   
-  // If API key present, try callOpenAI with STRICT goal-specific requirements
-  if (state.settings && state.settings.apiKey) {
+  // Try AI via proxy with STRICT goal-specific requirements
+  if (state.settings) {
     const goalClass = classifyCustomGoal(goalDescription);
     
     // Provide context-specific guidance based on goal classification
@@ -5072,7 +5070,7 @@ Return ONLY the JSON array.`
     };
 
     try {
-      const responseText = await callOpenAI([systemPrompt, userPrompt], state.settings.model || "gpt-4");
+      const responseText = await callProxyAPI({ model: state.settings.model || "gpt-4", messages: [systemPrompt, userPrompt] });
       let parsed;
       try {
         const cleaned = responseText.replace(/^```json\s*/, "").replace(/\s*```$/, "").trim();
@@ -5141,8 +5139,8 @@ function validateTailoredPath(modules, goalDescription) {
 // Try AI first, validate, then fallback to local generator and persist
 async function getTailoredLearningPath(goalDescription) {
   const storageKey = "sandbox.customTailoredModules";
-  // If API key present, try callOpenAI with strict schema
-  if (state.settings && state.settings.apiKey) {
+  // Try AI via proxy with strict schema
+  if (state.settings) {
     const systemPrompt = {
       role: "system",
       content: `You are an expert instructional designer creating STRICTLY TAILORED learning modules.
@@ -5200,7 +5198,7 @@ Return ONLY the JSON array, no other text.`
     };
 
     try {
-      const responseText = await callOpenAI([systemPrompt, userPrompt], state.settings.model || "gpt-4");
+      const responseText = await callProxyAPI({ model: state.settings.model || "gpt-4", messages: [systemPrompt, userPrompt] });
       let parsed;
       try {
         // Clean response in case AI added markdown code fence
@@ -5257,7 +5255,7 @@ Return a JSON object with this EXACT structure:
 Be specific, practical, and actionable. Avoid generic advice. Reference specific phrases and techniques.`,
     };
 
-    const response = await callOpenAI([systemPrompt], "gpt-4");
+    const response = await callProxyAPI({ model: state.settings.model || "gpt-4", messages: [systemPrompt] });
     const parsed = JSON.parse(response);
     
     return {
@@ -5615,7 +5613,7 @@ Return ONLY this JSON:
     
     for (let i = 0; i < prompts.length; i++) {
       try {
-        const response = await callOpenAI([prompts[i]], "gpt-4");
+        const response = await callProxyAPI({ model: state.settings.model || "gpt-4", messages: [prompts[i]] });
         const parsed = JSON.parse(response);
         modules.push({
           id: `tailored-module-${Date.now()}-${i}`,
@@ -5656,7 +5654,7 @@ Return a JSON object with this exact structure:
 Make the scenario realistic, relevant to the stated goal, and actionable.`,
     };
 
-    const response = await callOpenAI([systemPrompt], "gpt-4");
+    const response = await callProxyAPI({ model: state.settings.model || "gpt-4", messages: [systemPrompt] });
     const parsed = JSON.parse(response);
     
     return {
@@ -5769,7 +5767,7 @@ Analyze the user's performance and return a JSON object:
 Be specific and reference actual quotes from their messages.`,
     };
 
-    const response = await callOpenAI([analysis], "gpt-4");
+    const response = await callProxyAPI({ model: state.settings.model || "gpt-4", messages: [analysis] });
     const parsed = JSON.parse(response);
     
     state.currentSessionAnalysis.userQuotes = parsed.userQuotes || [];
@@ -5827,7 +5825,7 @@ Generate 3-4 sentences of coaching feedback that:
 Keep it warm, specific, and focused on their learning goals.`,
     };
 
-    return await callOpenAI([feedback], "gpt-4");
+    return await callProxyAPI({ model: state.settings.model || "gpt-4", messages: [feedback] });
   } catch (error) {
     console.error("Failed to generate adaptive feedback:", error);
     return "Good effort in your practice! Keep building these skills with each scenario.";
@@ -5860,7 +5858,7 @@ Return a JSON array:
 Make each scenario realistic, progressively challenging, and directly tied to their goals.`,
     };
 
-    const response = await callOpenAI([recommendations], "gpt-4");
+    const response = await callProxyAPI({ model: state.settings.model || "gpt-4", messages: [recommendations] });
     const parsed = JSON.parse(response);
     return parsed || [];
   } catch (error) {
@@ -6021,11 +6019,7 @@ async function generateRoleplayReply() {
   const systemPrompt = { role: "system", content: buildRoleplayPrompt() };
   const conversation = [systemPrompt, ...state.messages];
 
-  if (state.settings.mode === "proxy") {
-    return callProxyAPI({ model: state.settings.model, messages: conversation });
-  }
-
-  return callOpenAI(conversation);
+  return callProxyAPI({ model: state.settings.model, messages: conversation });
 }
 
 function scoreStage(messages, stage) {
@@ -6184,18 +6178,10 @@ async function generateReflectionFeedbackText(prompts, answers, weakStages) {
   ].join("\n");
 
   try {
-    if (state.settings.mode === "proxy") {
-      return await callProxyAPI({
-        model: state.settings.model,
-        messages: [{ role: "user", content: promptText }],
-      });
-    }
-
-    if (!state.settings.apiKey) {
-      return buildRuleBasedReflectionFeedback(answers, weakStages);
-    }
-
-    return await callOpenAI([{ role: "user", content: promptText }]);
+    return await callProxyAPI({
+      model: state.settings.model,
+      messages: [{ role: "user", content: promptText }],
+    });
   } catch {
     return buildRuleBasedReflectionFeedback(answers, weakStages);
   }
@@ -6466,18 +6452,10 @@ async function generateStageDrill(stage, weakStages) {
   ].join("\n");
 
   try {
-    if (state.settings.mode === "proxy") {
-      return await callProxyAPI({
-        model: state.settings.model,
-        messages: [{ role: "user", content: promptText }],
-      });
-    }
-
-    if (!state.settings.apiKey) {
-      return buildStageFallbackDrill(stage);
-    }
-
-    return await callOpenAI([{ role: "user", content: promptText }]);
+    return await callProxyAPI({
+      model: state.settings.model,
+      messages: [{ role: "user", content: promptText }],
+    });
   } catch {
     return buildStageFallbackDrill(stage);
   }
