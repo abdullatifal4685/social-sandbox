@@ -3316,18 +3316,15 @@ function renderPracticeStrip() {
 
   if (showHints && !hintsDisabled) {
     const starters = guide.starters;
-    const hasTemplates = starters.length > 0 && typeof starters[0] === "object" && starters[0].style;
+    const hasTemplates = starters.length > 0 && typeof starters[0] === "object" && starters[0].text;
 
     if (hasTemplates) {
       stageStarters.innerHTML = starters
         .map((template) => {
-          const styleClass = `hint-tag-${escapeHtml((template.style || "balanced").toLowerCase())}`;
-          const label = (template.style || "tip").charAt(0).toUpperCase() + (template.style || "tip").slice(1);
           const exampleHtml = template.example
             ? `<span class="hint-example">${escapeHtml(template.example)}</span>`
             : "";
-          return `<button class="hint-card" type="button" data-starter="${escapeHtml(template.text)}">
-            <span class="hint-tag ${styleClass}">${escapeHtml(label)}</span>
+          return `<button class="hint-card hint-card-simple" type="button" data-starter="${escapeHtml(template.text)}">
             <span class="hint-body">
               <span class="hint-text">${escapeHtml(template.text)}</span>${exampleHtml}
             </span>
@@ -3395,33 +3392,33 @@ function buildConversationGuidedHints(stage, scenario, messages) {
   switch (stage) {
     case "Introduce":
       return [
-        { style: "direct", text: `Name your purpose right away, referencing what the AI just said.`, example: `"I want to address what you raised about ${focus30}. Here is my concern."` },
-        { style: "balanced", text: `State your goal and link it to what was just discussed.`, example: `"My goal today is [X], especially given what you raised about ${focus30}."` },
-        { style: "empathetic", text: `Acknowledge their concern first, then introduce your point.`, example: `"I hear you on ${focus30}. Can I share what I am seeing from my side?"` },
+        { text: `Name your purpose right away, before anything else.`, example: `"I want to raise something specific with you. Here is my concern."` },
+        { text: `State your goal and connect it to their situation.`, example: `"My goal today is [X]. I know it connects directly to what you just said."` },
+        { text: `Acknowledge what they said, then introduce your point.`, example: `"I hear you. Can I share what I am seeing from my side?"` },
       ];
     case "Listen":
       return [
-        { style: "direct", text: `Ask a specific question about what they just said.`, example: `"When you mentioned ${focus30}, what exactly do you mean? I want to make sure I understand."` },
-        { style: "balanced", text: `Invite them to say more before you respond.`, example: `"Help me understand your side fully before I respond. What happened first?"` },
-        { style: "empathetic", text: `Reflect back the emotion you heard in their reply.`, example: `"It sounds like ${focus30} is putting real pressure on you. Is that right?"` },
+        { text: `Ask one specific question about what they just said.`, example: `"When you said [that], what did you mean exactly? I want to make sure I understand."` },
+        { text: `Invite them to say more before you respond.`, example: `"Help me understand your side fully. What happened first?"` },
+        { text: `Reflect back the feeling you heard in their reply.`, example: `"It sounds like this situation is putting real pressure on you. Is that right?"` },
       ];
     case "Empathize":
       return [
-        { style: "direct", text: `Name one valid point from their message, then add yours.`, example: `"You're right that ${focus30} is a real issue. Here is where I see it differently."` },
-        { style: "balanced", text: `Show you understand why this feels hard for them.`, example: `"I can see why ${focus30} feels frustrating. I want to work through it together."` },
-        { style: "empathetic", text: `Validate the feeling, then stay on point.`, example: `"That's a tough spot. I appreciate you being honest about it."` },
+        { text: `Name one valid point from their message, then add yours.`, example: `"You're right that [their point] is a real issue. Here is where I see it differently."` },
+        { text: `Show you understand why this feels hard for them.`, example: `"I can see why this feels frustrating. I want to work through it together."` },
+        { text: `Validate the feeling, then stay on your point.`, example: `"That's a tough spot. I appreciate you being honest about it."` },
       ];
     case "Talk":
       return [
-        { style: "direct", text: `State one concrete fact or example to back your concern.`, example: `"Here's a specific instance: ${focus30}. This happened on [date] and the impact was..."` },
-        { style: "balanced", text: `Explain the impact and why it matters to you.`, example: `"When ${focus30}, it affects [X] because... and that is why I am raising it now."` },
-        { style: "empathetic", text: `Keep it firm but respectful, then say what you need.`, example: `"I want to be direct without putting you on the spot. What I need is..."` },
+        { text: `Give one specific example that supports your concern.`, example: `"Here is a concrete example: [situation]. The impact was [X]."` },
+        { text: `Explain the impact and why it matters to you.`, example: `"When [this happens], it affects [X] because [reason]. That is why I am raising it now."` },
+        { text: `Be direct about what you need without putting them on the spot.`, example: `"I want to be clear without making this personal. What I need is [X]."` },
       ];
     case "Solve":
       return [
-        { style: "direct", text: `Propose one specific action with an owner and a timeline.`, example: `"Let's agree on [action]. You handle [X] by [date], and I will follow up on [Y]."` },
-        { style: "balanced", text: `Suggest an action tied to the concern they just voiced.`, example: `"Given what you said about ${focus30}, what if we tried... and checked in on Friday?"` },
-        { style: "empathetic", text: `Close with a shared next step that addresses both sides.`, example: `"So we both agree on [X]. If ${focus30} comes up again, we can revisit this together."` },
+        { text: `Propose one specific action with an owner and a timeline.`, example: `"Let's agree on [action]. You handle [X] by [date], and I will follow up on [Y]."` },
+        { text: `Suggest a step that addresses the concern they raised.`, example: `"Given what you said, what if we tried [approach] and checked in by Friday?"` },
+        { text: `Close with a shared next step that works for both sides.`, example: `"So we both agree on [X]. If this comes up again, we can revisit it together."` },
       ];
     default:
       return [];
@@ -3582,6 +3579,10 @@ function renderCoachNote() {
   if (coachNoteList) {
     coachNoteList.innerHTML = "";
   }
+  if (note) {
+    const rightPanel = document.querySelector(".panel-feedback");
+    if (rightPanel) rightPanel.scrollTo({ top: 0, behavior: "smooth" });
+  }
 }
 
 function renderLiveFeedbackPanel() {
@@ -3649,7 +3650,7 @@ function renderColumnVisibility() {
 
 function renderChat() {
   const typingHtml = state.isTyping
-    ? '<article class="message assistant">Thinking through your situation...</article>'
+    ? '<article class="message assistant typing-indicator" aria-label="Responding"><span class="typing-dots"><span></span><span></span><span></span></span></article>'
     : "";
 
   chatMessages.innerHTML = state.messages
@@ -7422,7 +7423,14 @@ promptInput.addEventListener("input", () => {
 });
 
 finishBtn.addEventListener("click", async () => {
-  await generateFeedback();
+  finishBtn.disabled = true;
+  finishBtn.textContent = "Generating your feedback...";
+  try {
+    await generateFeedback();
+  } finally {
+    finishBtn.disabled = false;
+    finishBtn.textContent = "Finish & Get Coaching";
+  }
   state.rightTab = "practice";
   renderRightPanel();
   goToPage("final");
