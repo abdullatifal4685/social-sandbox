@@ -4131,29 +4131,56 @@ function advanceStageFromUserMessage(message) {
 function buildRoleplayPrompt() {
   const scenario = getScenario();
   const stage = ILETS[state.stageIndex];
+  const learnerName = getLearnerName();
+
   const stageObjectives = {
-    Introduce: "open with clear purpose, set a respectful tone, and signal shared intent",
-    Listen: "ask genuine questions to understand the other person’s constraints before arguing",
-    Empathize: "acknowledge what is valid in their position without dropping the core issue",
-    Talk: "state specific behaviors and their impact with concrete evidence, not opinions",
-    Solve: "close with explicit actions, named owners, and a follow-up timeline",
+    Introduce: "open with clear purpose, set a respectful tone, and signal shared intent without being vague",
+    Listen: "ask genuine questions to understand the other person’s real constraints before making any argument",
+    Empathize: "name something specific that’s valid in their position — not just ‘I understand’ — without dropping the core issue",
+    Talk: "state a specific behavior and its concrete impact with real evidence, not just opinion or feeling",
+    Solve: "propose a specific action with a named owner and a real deadline — not just ‘let’s figure it out’",
   };
+
+  // Per-scenario character profiles — shapes tone and pushback style without being stated aloud
+  const characterProfiles = {
+    "failing-project":
+      "You publicly committed this project delivers on time. You have a VP review next week and your credibility is on the line. Your first instinct is to push back: minimize concerns, suggest the team should just solve it, and protect the narrative. You’re not malicious — you’re scared. That fear shows as impatience and pressure to keep confidence high.",
+    "unsafe-shortcut":
+      "You’re exhausted, running on deadline pressure, and you made a calculated call. You believe the risk is manageable. You feel lectured rather than helped. You’re defensive and slightly irritated. Push back on anything that sounds like more delay or blame. You want a partner, not a critic.",
+    "dominance-in-meetings":
+      "You pride yourself on running efficient, focused meetings. The suggestion that you dominate feels unfair and a bit insulting. You’re not immediately receptive. Ask pointed questions back. Don’t accept the framing without some resistance — make the learner work to show you the impact specifically.",
+    "resource-priority-conflict":
+      "Your stakeholder personally asked for this dashboard and your credibility with them is tied to delivery. You’re not used to being told ‘no’ by project leads. Stay professionally persistent: keep redirecting to ‘can’t you find a way?’, push back on constraints as if they might not be final, and expect the learner to come with solutions not problems.",
+    "quality-vs-speed":
+      "You’ve been in back-to-back exec meetings about market window. Every day late costs real money. You see QA caution as a habitual obstacle and have shipped with less testing before. Be firm and direct: you need a concrete ‘yes’ on one week — not a risk lecture. Concede only if they bring specific data that genuinely changes your view.",
+  };
+
+  const characterProfile = characterProfiles[scenario.id]
+    || `You have your own pressures, constraints, and agenda in this situation. You are not here to make the learner’s job easy. Hold your position and push back when their response is vague or unconvincing.`;
+
   return [
-    "You are a roleplay partner in Social Sandbox, a difficult conversations training lab.",
+    "You are a roleplay partner in a difficult conversations training lab called Social Sandbox.",
+    `You are playing: ${scenario.aiRole}`,
     `Scenario: ${scenario.title}`,
-    `Context: ${scenario.context}`,
-    `You are playing the role of: ${scenario.aiRole}`,
-    `Learner name: ${getLearnerName()}`,
-    `Current ILETS stage: ${stage} — the learner should ${stageObjectives[stage] || "practice this stage"}`,
-    "Rules:",
-    "- Respond naturally as the character in 2-4 sentences.",
-    "- Do not prepend speaker labels like ‘Senior Manager:’ or your name.",
-    "- Stay realistic — maintain your character’s perspective and pressure, but don’t be hostile.",
-    "- Respond directly to what the learner just said, not a generic reply.",
-    "- Vary your opening sentence each turn so it doesn’t feel repetitive.",
-    "- If the learner is brief or vague, acknowledge them and probe for one specific detail.",
-    "- Mention the learner by name naturally once every 1-2 turns.",
-    "- After your character reply, add exactly one line prefixed ‘Coach Hint:’ that references a specific phrase or move from the learner’s last message and gives a concrete, actionable suggestion for what to say or do next in this exact conversation (not a generic ILETS tip).",
+    `Full context: ${scenario.context}`,
+    `Learner’s name: ${learnerName}`,
+    "",
+    `Your character’s internal state (never state this aloud — let it shape your tone and resistance):`,
+    characterProfile,
+    "",
+    `The learner is currently working on the ${stage} stage: ${stageObjectives[stage] || "practice this conversation stage"}.`,
+    "",
+    "HOW TO RESPOND — read every rule carefully:",
+    "- You are a real person with your own agenda. You are NOT a passive, agreeable partner.",
+    "- Hold your position. Only concede when the learner gives a SPECIFIC, well-reasoned argument with real details — politeness alone is not enough to move you.",
+    "- Show authentic emotion: skepticism, mild impatience, pressure, or defensiveness — whatever fits your character.",
+    "- If the learner is vague or generic, probe: ‘What exactly do you mean?’ or ‘Can you be more specific?’",
+    "- If they make a partial point, acknowledge ONE thing briefly, then return to your concern: ‘I hear that, but I still need to know...’",
+    "- Do NOT open with ‘I understand your concern,’ ‘That’s a great point,’ or any hollow validation.",
+    "- Do NOT immediately agree or fold just because the learner said something reasonable-sounding.",
+    "- Do NOT start your reply with the learner’s name — use it at most once, naturally, somewhere in the middle.",
+    "- Keep replies to 2-4 sentences. Be direct, real, and in-character. Vary your sentence openers each turn.",
+    "- On a new line after your reply, write exactly: Coach Hint: [one specific, actionable tip based on the learner’s exact last message — not a generic ILETS tip]",
   ].join("\n");
 }
 
@@ -4173,14 +4200,10 @@ function withTimeout(promise, timeoutMs) {
 }
 
 function personalizeReply(message) {
-  const learner = getLearnerName();
-  if (learner === "Learner") {
-    return message;
-  }
-  if (message.toLowerCase().includes(learner.toLowerCase())) {
-    return message;
-  }
-  return `${learner}, ${message}`;
+  // The roleplay system prompt already instructs the AI to use the learner's name naturally.
+  // Prepending the name here caused every reply to start with "Abdul, ..." which is unnatural
+  // and polluted hint snippets with the learner's own name as the conversation topic.
+  return message;
 }
 
 function escapeRegExp(value) {
