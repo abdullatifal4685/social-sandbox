@@ -2092,12 +2092,7 @@ function renderModule() {
   // Display user greeting with name
   const learnUserGreeting = document.getElementById("learnUserGreeting");
   if (learnUserGreeting) {
-    const userName = getLearnerName();
-    if (userName && userName !== "Learner") {
-      learnUserGreeting.textContent = `Hi ${userName}, what do you want to learn?`;
-    } else {
-      learnUserGreeting.textContent = "";
-    }
+    learnUserGreeting.textContent = "";
   }
 
   moduleProgressLabel.textContent = `Module ${index + 1}/${total}`;
@@ -3382,7 +3377,14 @@ function buildConversationGuidedHints(stage, scenario, messages) {
     return [];
   }
 
-  const assistantSnippet = getConversationSnippet(messages, "assistant");
+  const rawAssistant = getConversationSnippet(messages, "assistant");
+  // Strip learner-name prefix that personalizeReply prepends (e.g. "Abdul, ...")
+  // so hint examples don't say "I want to address what you raised about Abdul"
+  const learnerName = getLearnerName();
+  const namePrefix = new RegExp(`^${learnerName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")},?\\s*`, "i");
+  const assistantSnippet = (learnerName && learnerName !== "Learner")
+    ? rawAssistant.replace(namePrefix, "").trim()
+    : rawAssistant;
   const userSnippet = getConversationSnippet(messages, "user");
   const focusSnippet = assistantSnippet || userSnippet || scenario?.context || scenario?.title || "this conversation";
   const cleanFocus = focusSnippet.replace(/["'`]/g, "");
@@ -6393,9 +6395,18 @@ function saveReflectionEntry(entry) {
         btn.textContent = "Continue";
       }
     } else {
-      // Preset goal selected — use static modules instantly, no AI cost
-      state.customTailoredModules = [];
-      localStorage.setItem("sandbox.customTailoredModules", "[]");
+      // Preset goal selected — use built-in tailored modules (no API call needed)
+      const presetKeywordMap = {
+        "peer-feedback":      "peer feedback give difficult feedback",
+        "navigate-authority": "authority hierarchy navigate power levels",
+        "handle-pressure":    "pressure conflict composed",
+        "surface-risks":      "surface risk bad news deliver",
+        "listen-empathize":   "listen empathy understand",
+        "provide-options":    "options solutions tradeoffs say no",
+      };
+      const searchText = presetKeywordMap[selectedPresetId] || (LEARNING_GOALS.find((g) => g.id === selectedPresetId)?.title || "");
+      state.customTailoredModules = buildLocalTailoredLearningPath(searchText);
+      localStorage.setItem("sandbox.customTailoredModules", JSON.stringify(state.customTailoredModules));
     }
 
     goToPage("choice");
