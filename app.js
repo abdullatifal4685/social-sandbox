@@ -1730,6 +1730,18 @@ function hasLearnerName() {
   return Boolean((state.userName || "").trim());
 }
 
+function displayUserGreeting(elementId) {
+  const element = document.getElementById(elementId);
+  if (!element) return;
+  
+  const userName = getLearnerName();
+  if (userName && userName !== "Learner") {
+    element.textContent = `Hi ${userName}, what do you want to learn?`;
+  } else {
+    element.textContent = "";
+  }
+}
+
 function setChoiceNameStatus(message) {
   if (!choiceNameStatus) {
     return;
@@ -1803,6 +1815,15 @@ function renderPage() {
   Object.entries(map).forEach(([key, element]) => {
     element.classList.toggle("is-hidden", key !== state.page);
   });
+  
+  // Display user greetings on relevant pages
+  if (state.page === "goals") {
+    displayUserGreeting("goalsUserGreeting");
+  } else if (state.page === "dashboard") {
+    displayUserGreeting("dashboardUserGreeting");
+  } else if (state.page === "final") {
+    displayUserGreeting("finalUserGreeting");
+  }
 }
 
 function getCurrentWeakStageFocusInfo() {
@@ -2091,6 +2112,17 @@ function renderModule() {
   const index = Math.min(state.moduleIndex, Math.max(total - 1, 0));
   const section = allModules[index];
   const progress = Math.round(((index + 1) / total) * 100);
+
+  // Display user greeting with name
+  const learnUserGreeting = document.getElementById("learnUserGreeting");
+  if (learnUserGreeting) {
+    const userName = getLearnerName();
+    if (userName && userName !== "Learner") {
+      learnUserGreeting.textContent = `Hi ${userName}, what do you want to learn?`;
+    } else {
+      learnUserGreeting.textContent = "";
+    }
+  }
 
   moduleProgressLabel.textContent = `Module ${index + 1}/${total}`;
   moduleProgressPercent.textContent = `${progress}%`;
