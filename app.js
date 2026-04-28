@@ -2500,17 +2500,6 @@ function renderBriefingPage() {
   scenarioBriefingSection.classList.remove("is-hidden");
   pickerActions.classList.add("is-hidden");
   
-  // Generate contextual hints for this scenario asynchronously
-  if (scenario && !scenario.contextualHints) {
-    generateContextualHintsForScenario(scenario).then((hints) => {
-      // Store in scenario object so we can use later during practice
-      if (scenario) {
-        scenario.contextualHints = hints;
-      }
-    }).catch((err) => {
-      console.warn("Failed to generate contextual hints:", err);
-    });
-  }
 }
 
 function renderScenarioPicker() {
@@ -3285,24 +3274,28 @@ function renderPracticeStrip() {
   if (showHints && !hintsDisabled) {
     const starters = guide.starters;
     const hasTemplates = starters.length > 0 && typeof starters[0] === "object" && starters[0].style;
-    
+
     if (hasTemplates) {
-      // Render template tabs (deferential, balanced, direct)
       stageStarters.innerHTML = starters
-        .map(
-          (template) =>
-            `<div class="starter-template" data-template-style="${escapeHtml(template.style || "")}">
-              <span class="template-style-badge">${escapeHtml(template.style || "").charAt(0).toUpperCase() + (template.style || "").slice(1)}</span>
-              <button class="starter-chip" type="button" data-starter="${escapeHtml(template.text)}">${escapeHtml(template.text)}</button>
-            </div>`
-        )
+        .map((template) => {
+          const styleClass = `hint-tag-${escapeHtml((template.style || "balanced").toLowerCase())}`;
+          const label = (template.style || "tip").charAt(0).toUpperCase() + (template.style || "tip").slice(1);
+          const exampleHtml = template.example
+            ? `<span class="hint-example">${escapeHtml(template.example)}</span>`
+            : "";
+          return `<button class="hint-card" type="button" data-starter="${escapeHtml(template.text)}">
+            <span class="hint-tag ${styleClass}">${escapeHtml(label)}</span>
+            <span class="hint-body">
+              <span class="hint-text">${escapeHtml(template.text)}</span>${exampleHtml}
+            </span>
+          </button>`;
+        })
         .join("");
     } else {
-      // Fallback to simple string starters
       stageStarters.innerHTML = starters
         .map(
           (starter) =>
-            `<button class="starter-chip" type="button" data-starter="${escapeHtml(starter)}">${escapeHtml(starter)}</button>`
+            `<button class="hint-card hint-card-simple" type="button" data-starter="${escapeHtml(typeof starter === "string" ? starter : starter.text)}">${escapeHtml(typeof starter === "string" ? starter : starter.text)}</button>`
         )
         .join("");
     }
@@ -3348,36 +3341,37 @@ function buildConversationGuidedHints(stage, scenario, messages) {
   const focusSnippet = assistantSnippet || userSnippet || scenario?.context || scenario?.title || "this conversation";
   const cleanFocus = focusSnippet.replace(/["'`]/g, "");
 
+  const focus30 = cleanFocus.slice(0, 40);
   switch (stage) {
     case "Introduce":
       return [
-        { style: "direct", text: `Open by naming the point the AI just raised: ${cleanFocus}.` },
-        { style: "balanced", text: `State your goal clearly and connect it to what was just discussed.` },
-        { style: "empathetic", text: `Acknowledge their last concern before you move into your point.` },
+        { style: "direct", text: `Name your purpose right away, referencing what the AI just said.`, example: `"I want to address what you mentioned about ${focus30} — here's my concern."` },
+        { style: "balanced", text: `State your goal and link it to what was just discussed.`, example: `"My goal today is [X], especially given what you raised about ${focus30}."` },
+        { style: "empathetic", text: `Acknowledge their concern first, then introduce your point.`, example: `"I hear you on ${focus30} — can I share what I'm seeing from my side?"` },
       ];
     case "Listen":
       return [
-        { style: "direct", text: `Ask what they mean by ${cleanFocus}.` },
-        { style: "balanced", text: `Invite them to explain their side before you respond again.` },
-        { style: "empathetic", text: `Reflect back the pressure or frustration in their last reply.` },
+        { style: "direct", text: `Ask a specific question about what they just said.`, example: `"When you said '${focus30}' — what exactly do you mean by that?"` },
+        { style: "balanced", text: `Invite them to say more before you respond.`, example: `"Help me understand your side better before I respond — what happened first?"` },
+        { style: "empathetic", text: `Reflect back the emotion you heard in their reply.`, example: `"It sounds like ${focus30} is putting real pressure on you — is that right?"` },
       ];
     case "Empathize":
       return [
-        { style: "direct", text: `Name the valid point in their last message before adding your view.` },
-        { style: "balanced", text: `Show you understand why ${cleanFocus} feels difficult for them.` },
-        { style: "empathetic", text: `Use one sentence to validate the emotion behind their reply.` },
+        { style: "direct", text: `Name one valid point from their message, then add yours.`, example: `"You're right that ${focus30} is a real issue — here's where I see it differently."` },
+        { style: "balanced", text: `Show you understand why this feels hard for them.`, example: `"I can see why ${focus30} feels frustrating, and I want to work through it together."` },
+        { style: "empathetic", text: `Validate the feeling, then stay on point.`, example: `"That's a tough spot — I appreciate you being honest about it."` },
       ];
     case "Talk":
       return [
-        { style: "direct", text: `Bring the conversation back to ${cleanFocus} with one concrete example.` },
-        { style: "balanced", text: `Explain the impact of what was just said and why it matters.` },
-        { style: "empathetic", text: `Keep the point firm but respectful, then state what you need next.` },
+        { style: "direct", text: `State one concrete fact or example to back your concern.`, example: `"Here's a specific instance: ${focus30} — this happened on [date] and the impact was..."` },
+        { style: "balanced", text: `Explain the impact and why it matters to you.`, example: `"When ${focus30}, it affects [X] because... and that's why I'm raising it now."` },
+        { style: "empathetic", text: `Keep it firm but respectful, then say what you need.`, example: `"I want to be direct without putting you on the spot — what I need is..."` },
       ];
     case "Solve":
       return [
-        { style: "direct", text: `Turn the last exchange into one specific next step.` },
-        { style: "balanced", text: `Suggest an action, an owner, and a check-in tied to this conversation.` },
-        { style: "empathetic", text: `Close by aligning on a solution that answers the concern they just voiced.` },
+        { style: "direct", text: `Propose one specific action with an owner and timeline.`, example: `"Let's agree on [action] — you handle [X] by [date], I'll follow up on [Y]."` },
+        { style: "balanced", text: `Suggest an action tied to the concern they just voiced.`, example: `"Given what you said about ${focus30}, what if we... and check in on Friday?"` },
+        { style: "empathetic", text: `Close with a shared next step that addresses both sides.`, example: `"So we both agree on [X] — and if ${focus30} comes up again, we'll..."` },
       ];
     default:
       return [];
@@ -3423,6 +3417,21 @@ Return ONLY JSON in this format:
 }
 
 async function refreshDynamicPracticeHints() {
+  const scenario = getScenario();
+  if (!scenario) {
+    return;
+  }
+
+  const stage = ILETS[state.stageIndex];
+  const hints = buildConversationGuidedHints(stage, scenario, state.messages.slice(-6));
+  scenario.contextualHints = scenario.contextualHints || {};
+  if (hints.length > 0) {
+    scenario.contextualHints[stage] = hints;
+    renderPracticeStrip();
+  }
+}
+
+async function refreshDynamicPracticeHints_UNUSED() {
   const scenario = getScenario();
   if (!scenario) {
     return;
@@ -3602,7 +3611,6 @@ function renderHeader() {
   practiceIdentity.textContent = `Practicing as: ${getLearnerName()}`;
   if (practiceScaffoldMenuBtn) {
     practiceScaffoldMenuBtn.innerHTML = `
-      <span class="scaffold-menu-title">Scaffold Level</span>
       <span class="scaffold-menu-current">${escapeHtml(scaffold.label)}</span>
       <span class="scaffold-menu-change">Change</span>
       <span class="scaffold-menu-caret" aria-hidden="true">▾</span>
@@ -3942,21 +3950,25 @@ function getRecommendedScenariosForGoals(goalIds) {
 }
 
 function render() {
-  renderScenarios();
-  renderScenariosVisibility();
-  renderStages();
-  renderIletsVisibility();
-  renderHeader();
-  renderBrief();
-  renderScenarioBriefVisibility();
-  renderPracticeStrip();
-  renderCoachNote();
-  renderInMomentReflectionCard();
-  renderRightPanel();
-  renderLiveFeedbackPanel();
-  renderFocusMode();
-  renderColumnVisibility();
-  renderTips();
+  try {
+    renderScenarios();
+    renderScenariosVisibility();
+    renderStages();
+    renderIletsVisibility();
+    renderHeader();
+    renderBrief();
+    renderScenarioBriefVisibility();
+    renderPracticeStrip();
+    renderCoachNote();
+    renderInMomentReflectionCard();
+    renderRightPanel();
+    renderLiveFeedbackPanel();
+    renderFocusMode();
+    renderColumnVisibility();
+    renderTips();
+  } catch (e) {
+    console.error("Render error:", e);
+  }
   renderChat();
 }
 
@@ -6889,7 +6901,7 @@ async function handleSend(event) {
   let assistantReply = "";
 
   try {
-    const reply = await withTimeout(generateRoleplayReply(), 15000);
+    const reply = await withTimeout(generateRoleplayReply(), 40000);
     const parsed = parseAssistantOutput(reply);
     addHint(parsed.hint);
     addCoachNote(userText, parsed);
@@ -7438,7 +7450,7 @@ stageList.addEventListener("click", (event) => {
 });
 
 stageStarters.addEventListener("click", (event) => {
-  const button = event.target.closest(".starter-chip");
+  const button = event.target.closest(".hint-card");
   if (!button) {
     return;
   }

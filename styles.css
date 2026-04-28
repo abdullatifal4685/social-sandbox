@@ -3457,8 +3457,8 @@ body.hide-left.hide-right .layout {
 
 .starter-list {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
+  flex-direction: column;
+  gap: 0.35rem;
 }
 
 .starter-head {
@@ -3482,13 +3482,61 @@ body.hide-left.hide-right .layout {
   margin: 0;
 }
 
-.starter-chip {
-  border: 1px solid rgba(18, 26, 43, 0.11);
-  background: transparent;
-  color: var(--ink);
-  border-radius: 999px;
-  padding: 0.36rem 0.62rem;
+.hint-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem;
+  align-items: start;
+  border: 1px solid rgba(20, 97, 255, 0.14);
+  background: rgba(255, 255, 255, 0.72);
+  border-radius: 10px;
+  padding: 0.5rem 0.65rem;
   font-size: 0.86rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+  color: var(--ink);
+}
+
+.hint-card:hover {
+  background: rgba(20, 97, 255, 0.06);
+  border-color: rgba(20, 97, 255, 0.3);
+}
+
+.hint-card-simple {
+  grid-template-columns: 1fr;
+}
+
+.hint-tag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.18rem 0.38rem;
+  border-radius: 4px;
+  white-space: nowrap;
+  margin-top: 0.1rem;
+}
+
+.hint-tag-direct   { background: rgba(220, 60, 30, 0.1);  color: #b03010; }
+.hint-tag-balanced { background: rgba(20, 97, 255, 0.1);  color: #1461d9; }
+.hint-tag-empathetic { background: rgba(14, 163, 122, 0.12); color: #0a8060; }
+
+.hint-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.hint-text {
+  line-height: 1.4;
+}
+
+.hint-example {
+  font-size: 0.8rem;
+  color: var(--muted, #64748b);
+  font-style: italic;
+  line-height: 1.35;
 }
 
 .settings-dialog,
@@ -3738,30 +3786,3 @@ body.hide-left.hide-right .layout {
   margin: 0.7rem 0;
 }
 
-.starter-template {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem;
-  background: rgba(29, 95, 229, 0.04);
-  border: 1px solid rgba(29, 95, 229, 0.12);
-  border-radius: 8px;
-}
-
-.template-style-badge {
-  display: inline-block;
-  min-width: 70px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 0.28rem 0.42rem;
-  background: linear-gradient(135deg, rgba(29, 95, 229, 0.12), rgba(14, 163, 122, 0.08));
-  border-radius: 4px;
-  text-align: center;
-  color: var(--accent);
-}
-
-.starter-template .starter-chip {
-  flex: 1;
-}
