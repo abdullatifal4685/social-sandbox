@@ -2635,6 +2635,7 @@ function renderScenarioPicker() {
           <button class="picker-card-choose-btn picker-card-select" data-scenario-id="${escapeHtml(scenario.id)}" type="button">
             Choose this scenario
           </button>
+          ${scenario.custom ? `
           <div class="picker-card-actions-right">
           <button class="picker-card-icon-btn" data-scenario-action="edit" data-scenario-id="${escapeHtml(scenario.id)}" type="button" aria-label="Edit scenario ${escapeHtml(scenario.title)}" title="Edit scenario">
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -2647,6 +2648,7 @@ function renderScenarioPicker() {
             </svg>
           </button>
           </div>
+          ` : ""}
         </div>
       </article>
     `;
@@ -6402,6 +6404,12 @@ function saveReflectionEntry(entry) {
   if (!btn) return;
 
   btn.addEventListener("click", async () => {
+    // Auto-save name if the user typed it but didn't click "Save Name"
+    const typedName = (document.getElementById("goalsNameInput")?.value || "").trim();
+    if (typedName && typedName !== state.userName) {
+      saveUserName(typedName);
+    }
+
     const selectedPresetId = state.userLearningGoals && state.userLearningGoals[0];
     const selectedCustom = state.userCustomGoals && state.userCustomGoals[0];
     const hasCustomGoal = state.userCustomGoals.length > 0;
