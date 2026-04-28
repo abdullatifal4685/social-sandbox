@@ -2096,8 +2096,24 @@ function renderModule() {
   moduleProgressPercent.textContent = `${progress}%`;
   moduleProgressBar.style.width = `${progress}%`;
   
-  // Check if this module is custom or recommended for user's goals
+  // Display user goal at the top if they have selected goals
   const allUserGoals = [...state.userLearningGoals, ...state.userCustomGoals];
+  const userGoalDisplay = document.getElementById("userGoalDisplay");
+  if (userGoalDisplay && allUserGoals.length > 0) {
+    const goalNames = [
+      ...state.userLearningGoals.map((id) => {
+        const goal = LEARNING_GOALS.find((g) => g.id === id);
+        return goal?.title || id;
+      }),
+      ...state.userCustomGoals
+    ];
+    userGoalDisplay.innerHTML = `<p style="margin: 0; color: var(--accent); font-weight: 600; font-size: 0.95rem;">Learning Goal: ${goalNames.join(", ")}</p>`;
+    userGoalDisplay.classList.remove("is-hidden");
+  } else if (userGoalDisplay) {
+    userGoalDisplay.classList.add("is-hidden");
+  }
+  
+  // Check if this module is custom or recommended for user's goals
   const isCustom = section.isCustom;
   const isRecommendedForGoals = allUserGoals.length > 0 && !isCustom && state.customTailoredModules.length === 0;
   
@@ -4166,7 +4182,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
     modules = [
       {
         id: "module-1",
-        title: "Module 1: Self-Check Before Feedback — Focus: " + goal,
+        title: "Module 1: Self-Check Before Feedback",
         summary: "Identify your defensive patterns before giving feedback",
         points: [
           "Notice when YOU get defensive receiving feedback",
@@ -4183,7 +4199,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-2",
-        title: "Module 2: Opening Peer Feedback Conversations — Focus: " + goal,
+        title: "Module 2: Opening Peer Feedback Conversations",
         summary: "Master the critical first 30 seconds of peer feedback",
         points: [
           "Signal shared purpose: 'I want to help you succeed'",
@@ -4200,7 +4216,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-3",
-        title: "Module 3: Handling Defensive Reactions to Your Feedback — Focus: " + goal,
+        title: "Module 3: Handling Defensive Reactions to Your Feedback",
         summary: "Stay curious when they react defensively to your feedback",
         points: [
           "Expect defensiveness as a normal response",
@@ -4217,7 +4233,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-4",
-        title: "Module 4: Co-Creating Action Plans for Peer Feedback — Focus: " + goal,
+        title: "Module 4: Co-Creating Action Plans for Peer Feedback",
         summary: "Turn feedback into concrete next steps together",
         points: [
           "Ask what they'll do differently, don't prescribe",
@@ -4234,7 +4250,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-5",
-        title: "Module 5: Sustaining Feedback Relationships — Focus: " + goal,
+        title: "Module 5: Sustaining Feedback Relationships",
         summary: "Build trust by noticing their progress on your feedback",
         points: [
           "Acknowledge specific improvements you see",
@@ -4251,7 +4267,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-6",
-        title: "Module 6: Mastering Difficult Peer Feedback Moments — Focus: " + goal,
+        title: "Module 6: Mastering Difficult Peer Feedback Moments",
         summary: "Handle the toughest peer feedback scenarios",
         points: [
           "Feedback about attitude or relationships (not just performance)",
@@ -4271,7 +4287,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
     modules = [
       {
         id: "module-1",
-        title: "Module 1: Recognize Your Stress Response Pattern — Focus: " + goal,
+        title: "Module 1: Recognize Your Stress Response Pattern",
         summary: "Understand how YOU react when stakes are high",
         points: [
           "Identify your stress response (fight/flight/freeze)",
@@ -4288,7 +4304,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-2",
-        title: "Module 2: Create Space Between Trigger and Reaction — Focus: " + goal,
+        title: "Module 2: Create Space Between Trigger and Reaction",
         summary: "Pause and reset before you escalate conflict",
         points: [
           "Use a physiological reset (breathing, water break)",
@@ -4305,7 +4321,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-3",
-        title: "Module 3: Acknowledge Constraints Without Blame — Focus: " + goal,
+        title: "Module 3: Acknowledge Constraints Without Blame",
         summary: "Say what's true about high-pressure situations",
         points: [
           "Name the constraint: 'We have X days and Y resources'",
@@ -4322,7 +4338,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-4",
-        title: "Module 4: Listen to Understand Their Pressure — Focus: " + goal,
+        title: "Module 4: Listen to Understand Their Pressure",
         summary: "See the conflict from their perspective when stakes are high",
         points: [
           "Ask: What's driving their urgency or frustration?",
@@ -4339,7 +4355,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-5",
-        title: "Module 5: Problem-Solve Under Pressure — Focus: " + goal,
+        title: "Module 5: Problem-Solve Under Pressure",
         summary: "Find creative solutions when constraints are tight",
         points: [
           "Start with what's actually possible (not magic)",
@@ -4356,7 +4372,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-6",
-        title: "Module 6: De-escalate Conflict Spirals — Focus: " + goal,
+        title: "Module 6: De-escalate Conflict Spirals",
         summary: "Break cycles where pressure keeps making things worse",
         points: [
           "Notice when emotion is taking over facts",
@@ -4376,7 +4392,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
     modules = [
       {
         id: "module-1",
-        title: "Module 1: Diagnose Why Risk Is Hard to Surface — Focus: " + goal,
+        title: "Module 1: Diagnose Why Risk Is Hard to Surface",
         summary: "Understand the fear blocking you from raising bad news",
         points: [
           "Identify what you fear: rejection, blame, relationship damage, looking incompetent",
@@ -4393,7 +4409,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-2",
-        title: "Module 2: Frame the Risk Diplomatically — Focus: " + goal,
+        title: "Module 2: Frame the Risk Diplomatically",
         summary: "Deliver bad news in a way people can hear it",
         points: [
           "Lead with shared interest: 'I want to flag something so we can solve it together'",
@@ -4410,7 +4426,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-3",
-        title: "Module 3: Choose the Right Time and Audience — Focus: " + goal,
+        title: "Module 3: Choose the Right Time and Audience",
         summary: "Surface risks when decision-makers can actually respond",
         points: [
           "Early, private conversations work better than public announcements",
@@ -4427,7 +4443,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-4",
-        title: "Module 4: Listen to Their Concerns About the Risk — Focus: " + goal,
+        title: "Module 4: Listen to Their Concerns About the Risk",
         summary: "Understand their perspective on the bad news",
         points: [
           "Don't defend or over-explain your concern",
@@ -4444,7 +4460,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-5",
-        title: "Module 5: Co-Create an Action Plan for the Risk — Focus: " + goal,
+        title: "Module 5: Co-Create an Action Plan for the Risk",
         summary: "Move from bad news to decision and accountability",
         points: [
           "Get agreement on whether/when to act",
@@ -4461,7 +4477,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-6",
-        title: "Module 6: Build a Culture of Early Risk Surfacing — Focus: " + goal,
+        title: "Module 6: Build a Culture of Early Risk Surfacing",
         summary: "Create psychological safety for future risk conversations",
         points: [
           "Thank people when they surface risks early (reinforce the behavior)",
@@ -4481,7 +4497,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
     modules = [
       {
         id: "module-1",
-        title: "Module 1: Understand the Power Dynamics You're In — Focus: " + goal,
+        title: "Module 1: Understand the Power Dynamics You're In",
         summary: "Recognize how hierarchy affects your communication",
         points: [
           "Map your role in the hierarchy (peer, above, below, cross-functional)",
@@ -4498,7 +4514,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-2",
-        title: "Module 2: Earn Credibility in the Relationship — Focus: " + goal,
+        title: "Module 2: Earn Credibility in the Relationship",
         summary: "Build trust before asking for something difficult",
         points: [
           "Deliver work on time and with quality",
@@ -4515,7 +4531,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-3",
-        title: "Module 3: Communicate Upward: Frame Issues in Their Terms — Focus: " + goal,
+        title: "Module 3: Communicate Upward: Frame Issues in Their Terms",
         summary: "Get buy-in from people above you by addressing their concerns",
         points: [
           "Understand what matters to them (business goals, deadlines, reputation)",
@@ -4532,7 +4548,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-4",
-        title: "Module 4: Communicate Downward: Be Clear About Scope and Decisions — Focus: " + goal,
+        title: "Module 4: Communicate Downward: Be Clear About Scope and Decisions",
         summary: "Give clear direction to people below you without micromanaging",
         points: [
           "Explain the 'why' behind decisions, not just the 'what'",
@@ -4549,7 +4565,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-5",
-        title: "Module 5: Manage Across: Work with Peers You Don't Control — Focus: " + goal,
+        title: "Module 5: Manage Across: Work with Peers You Don't Control",
         summary: "Influence without authority on the same level",
         points: [
           "Find shared goals instead of demanding compliance",
@@ -4566,7 +4582,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-6",
-        title: "Module 6: Handle Disagreement With Different Levels — Focus: " + goal,
+        title: "Module 6: Handle Disagreement With Different Levels",
         summary: "Disagree respectfully across power lines",
         points: [
           "With authority above: propose alternatives respectfully, don't argue",
@@ -4586,7 +4602,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
     modules = [
       {
         id: "module-1",
-        title: "Module 1: Recognize When You're Not Really Listening — Focus: " + goal,
+        title: "Module 1: Recognize When You're Not Really Listening",
         summary: "Identify your listening blockers and habits",
         points: [
           "Catch yourself planning your response instead of hearing them",
@@ -4603,7 +4619,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-2",
-        title: "Module 2: Ask Genuine Questions to Understand — Focus: " + goal,
+        title: "Module 2: Ask Genuine Questions to Understand",
         summary: "Use questions to learn what they actually think and feel",
         points: [
           "Ask 'What?' and 'Why?' before offering advice",
@@ -4620,7 +4636,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-3",
-        title: "Module 3: Acknowledge Emotion Without Dismissing It — Focus: " + goal,
+        title: "Module 3: Acknowledge Emotion Without Dismissing It",
         summary: "Validate feelings even if you disagree with their conclusion",
         points: [
           "Name what you hear: 'That sounds frustrating' or 'I hear you're scared'",
@@ -4637,7 +4653,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-4",
-        title: "Module 4: Paraphrase to Ensure You Understand — Focus: " + goal,
+        title: "Module 4: Paraphrase to Ensure You Understand",
         summary: "Confirm you heard correctly before responding",
         points: [
           "Reflect back what you heard in your own words",
@@ -4654,7 +4670,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-5",
-        title: "Module 5: Extend Empathy Even When You Disagree — Focus: " + goal,
+        title: "Module 5: Extend Empathy Even When You Disagree",
         summary: "Stay curious about different perspectives",
         points: [
           "Separate their feeling from their proposed solution",
@@ -4671,7 +4687,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-6",
-        title: "Module 6: Listen to Find What You Have in Common — Focus: " + goal,
+        title: "Module 6: Listen to Find What You Have in Common",
         summary: "Use listening to resolve conflict and build connection",
         points: [
           "Listen for shared goals underneath disagreements",
@@ -4691,7 +4707,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
     modules = [
       {
         id: "module-1",
-        title: "Module 1: Reframe 'No' as 'Here's What We Can Do' — Focus: " + goal,
+        title: "Module 1: Reframe 'No' as 'Here's What We Can Do'",
         summary: "Move from blocking conversations to possibility conversations",
         points: [
           "Notice your default: saying no without offering options",
@@ -4708,7 +4724,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-2",
-        title: "Module 2: Offer Explicit Tradeoffs — Focus: " + goal,
+        title: "Module 2: Offer Explicit Tradeoffs",
         summary: "Help people understand what they're choosing between",
         points: [
           "Name what's fixed: timeline, budget, quality, scope",
@@ -4725,7 +4741,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-3",
-        title: "Module 3: Co-Create Solutions With Them — Focus: " + goal,
+        title: "Module 3: Co-Create Solutions With Them",
         summary: "Don't impose solutions - build them together",
         points: [
           "Ask: 'What would work for you?' not 'Take it or leave it'",
@@ -4742,7 +4758,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-4",
-        title: "Module 4: Expand the Solution Space — Focus: " + goal,
+        title: "Module 4: Expand the Solution Space",
         summary: "Look beyond the obvious answer for creative options",
         points: [
           "Ask: 'What if we changed X?' - test assumptions",
@@ -4759,7 +4775,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-5",
-        title: "Module 5: Make the Decision Clear — Focus: " + goal,
+        title: "Module 5: Make the Decision Clear",
         summary: "Get agreement on which option you're choosing",
         points: [
           "Summarize: 'So we're choosing option B, which means...'",
@@ -4776,7 +4792,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-6",
-        title: "Module 6: Iterate and Adjust As You Learn — Focus: " + goal,
+        title: "Module 6: Iterate and Adjust As You Learn",
         summary: "Treat solutions as starting points, not final answers",
         points: [
           "Check back after implementation: 'Is this working as expected?'",
@@ -4798,7 +4814,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
     modules = [
       {
         id: "module-1",
-        title: "Module 1: Diagnose Your Challenge — Focus: " + goal,
+        title: "Module 1: Diagnose Your Challenge",
         summary: "Understand what makes this difficult conversation hard for you",
         points: [
           "Identify what you fear or avoid about this conversation",
@@ -4815,7 +4831,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-2",
-        title: "Module 2: Plan Your Approach — Focus: " + goal,
+        title: "Module 2: Plan Your Approach",
         summary: "Prepare how you'll approach this specific conversation",
         points: [
           "Think about timing, setting, and who needs to be involved",
@@ -4832,7 +4848,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-3",
-        title: "Module 3: Listen More Than You Explain — Focus: " + goal,
+        title: "Module 3: Listen More Than You Explain",
         summary: "Let them share their perspective before you push yours",
         points: [
           "Ask genuine questions about their perspective",
@@ -4849,7 +4865,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-4",
-        title: "Module 4: Acknowledge Their Concerns — Focus: " + goal,
+        title: "Module 4: Acknowledge Their Concerns",
         summary: "Validate their feelings even if you disagree",
         points: [
           "Name what you hear: their fear, frustration, or concern",
@@ -4866,7 +4882,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-5",
-        title: "Module 5: Propose Solutions Together — Focus: " + goal,
+        title: "Module 5: Propose Solutions Together",
         summary: "Move toward resolution with options, not demands",
         points: [
           "Offer choices rather than ultimatums",
@@ -4883,7 +4899,7 @@ function buildLocalTailoredLearningPath(goalDescription) {
       },
       {
         id: "module-6",
-        title: "Module 6: Commit and Follow Up — Focus: " + goal,
+        title: "Module 6: Commit and Follow Up",
         summary: "Ensure the agreement holds and the relationship strengthens",
         points: [
           "Confirm what you both agreed to",
