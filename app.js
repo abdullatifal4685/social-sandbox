@@ -4904,55 +4904,109 @@ function buildLocalTailoredLearningPath(goalDescription) {
   return modules;
 }
 
+// Classify custom goal to understand its nature and provide specific guidance
+function classifyCustomGoal(goalDescription) {
+  const goal = goalDescription.toLowerCase();
+  
+  // Classify based on keywords to understand what the goal is about
+  if (goal.includes("feedback") || goal.includes("critique") || goal.includes("review") || goal.includes("performance")) {
+    return "feedback";
+  } else if (goal.includes("pressure") || goal.includes("stress") || goal.includes("conflict") || goal.includes("disagree") || goal.includes("angry") || goal.includes("tight") || goal.includes("urgent")) {
+    return "pressure";
+  } else if (goal.includes("risk") || goal.includes("bad news") || goal.includes("deliver") || goal.includes("raise") || goal.includes("flag") || goal.includes("concern")) {
+    return "risk";
+  } else if (goal.includes("boss") || goal.includes("manager") || goal.includes("authority") || goal.includes("hierarchy") || goal.includes("senior") || goal.includes("direct report") || goal.includes("power")) {
+    return "authority";
+  } else if (goal.includes("listen") || goal.includes("understand") || goal.includes("empathy") || goal.includes("emotion") || goal.includes("perspective") || goal.includes("hear")) {
+    return "listening";
+  } else if (goal.includes("option") || goal.includes("solution") || goal.includes("choice") || goal.includes("tradeoff") || goal.includes("no") || goal.includes("propose")) {
+    return "solution";
+  } else if (goal.includes("apologi") || goal.includes("mistake") || goal.includes("wrong") || goal.includes("regret") || goal.includes("sorry")) {
+    return "accountability";
+  } else {
+    return "custom";
+  }
+}
+
 // Try AI first, validate, then fallback to goal-specific local generator
 async function getTailoredLearningPath(goalDescription) {
   const storageKey = "sandbox.customTailoredModules";
   
   // If API key present, try callOpenAI with STRICT goal-specific requirements
   if (state.settings && state.settings.apiKey) {
+    const goalClass = classifyCustomGoal(goalDescription);
+    
+    // Provide context-specific guidance based on goal classification
+    let contextGuidance = "";
+    if (goalClass === "feedback") {
+      contextGuidance = `CONTEXT: This goal is about GIVING FEEDBACK or ADDRESSING BEHAVIOR/PERFORMANCE. The modules MUST focus on: recognizing defensiveness patterns, opening feedback conversations properly, handling when they react defensively, co-creating action plans together, following up on changes, and navigating difficult feedback moments. NOT generic communication skills.`;
+    } else if (goalClass === "pressure") {
+      contextGuidance = `CONTEXT: This goal is about HANDLING PRESSURE, STRESS, or CONFLICT. The modules MUST focus on: understanding your personal stress response, creating pause space before reacting, acknowledging constraints without blame, listening to others' pressure/perspectives, problem-solving under tight constraints, and de-escalating conflict spirals. NOT generic communication.`;
+    } else if (goalClass === "risk") {
+      contextGuidance = `CONTEXT: This goal is about SURFACING RISKS or DELIVERING BAD NEWS. The modules MUST focus on: diagnosing why surfacing risk is hard, framing bad news diplomatically, choosing right timing/audience, listening to concerns about the risk, co-creating action plans, and building psychological safety for early surfacing. NOT generic leadership.`;
+    } else if (goalClass === "authority") {
+      contextGuidance = `CONTEXT: This goal is about NAVIGATING POWER DYNAMICS or AUTHORITY RELATIONSHIPS. The modules MUST focus on: understanding hierarchy's influence, earning credibility, communicating upward (frame in their terms), downward (clarity), across (peers), and handling disagreement across power levels. NOT generic relationship skills.`;
+    } else if (goalClass === "listening") {
+      contextGuidance = `CONTEXT: This goal is about LISTENING, EMPATHY, or UNDERSTANDING others' perspectives. The modules MUST focus on: recognizing listening blockers, asking genuine questions, acknowledging emotion, paraphrasing to confirm understanding, extending empathy despite disagreement, and finding common ground. NOT generic active listening.`;
+    } else if (goalClass === "solution") {
+      contextGuidance = `CONTEXT: This goal is about OFFERING OPTIONS, SOLUTIONS, or TRADEOFFS. The modules MUST focus on: reframing "no" as "here's what we can do", offering explicit tradeoffs, co-creating solutions, expanding the solution space creatively, making decisions clear, and iterating based on learning. NOT generic negotiation.`;
+    } else if (goalClass === "accountability") {
+      contextGuidance = `CONTEXT: This goal is about TAKING ACCOUNTABILITY, APOLOGIZING, or ADMITTING MISTAKES. The modules MUST focus on: owning mistakes without excuses, understanding impact on them, showing remorse, offering meaningful repair, committing to change, and rebuilding trust through consistency. NOT generic apology templates.`;
+    } else {
+      contextGuidance = `CONTEXT: This is a CUSTOM/UNIQUE goal: "${goalDescription}". Modules must be HIGHLY SPECIFIC to this exact goal — not generic advice that could apply anywhere. Each module title, point, example, and tip must be relevant ONLY to "${goalDescription}". Assume the user has thought carefully about what they need.`;
+    }
+    
     const systemPrompt = {
       role: "system",
-      content: `You are an expert communication coach. Create COMPLETELY DIFFERENT, HIGHLY SPECIFIC learning modules for ONLY this goal: "${goalDescription}"
+      content: `You are an expert communication coach creating highly specific, tailored learning modules.
 
-CRITICAL: DO NOT create generic modules that could apply to any goal.
-DO NOT use a standard "foundation, introduce, listen, empathize, talk, solve" template for every goal.
+GOAL: Create 6 learning modules ONLY for: "${goalDescription}"
+${contextGuidance}
 
-REQUIREMENT: If the goal is "Give Peer Feedback", the modules look NOTHING like "Handle Pressure" modules.
-- "Give Peer Feedback" has unique progression: self-check, opening, handling defensiveness, co-creating action, follow-up, difficult moments
-- "Handle Pressure" has unique progression: stress response, pause/reset, acknowledge constraints, listen to their pressure, problem-solve, de-escalate
-- "Improve Listening" would have completely different progression again
+CRITICAL RULES:
+1. DO NOT create generic modules that could apply to multiple goals
+2. DO NOT use a standard "foundation, listen, empathize, talk, solve" template
+3. EVERY module MUST be completely unique to "${goalDescription}"
+4. EVERY module title must only make sense for THIS goal (include "— Focus: ${goalDescription}")
+5. EVERY point, example, and tip must be actionable SPECIFICALLY for "${goalDescription}"
+6. NO module should work for a different goal
 
-RETURN ONLY valid JSON array of exactly 6 modules. NO markdown, NO extra text.
-Each module MUST be completely specific to "${goalDescription}":
-{
-  "id": "module-N",
-  "title": "Module N: [SPECIFIC concept ONLY relevant to ${goalDescription}] — Focus: ${goalDescription}",
-  "summary": "One sentence benefit specific to ${goalDescription}",
-  "points": ["Concrete action 1 for ${goalDescription}", "Concrete action 2 for ${goalDescription}", "Concrete action 3 for ${goalDescription}"],
-  "example": "Realistic workplace example with actual dialogue specific to ${goalDescription}",
-  "tips": ["Specific tip for ${goalDescription}", "Specific tip for ${goalDescription}", "Specific tip for ${goalDescription}"],
-  "tailoredTo": "${goalDescription}"
-}
+RETURN ONLY valid JSON (no markdown):
+[
+  {
+    "id": "module-1",
+    "title": "Module 1: [Concept SPECIFIC to ${goalDescription}] — Focus: ${goalDescription}",
+    "summary": "Benefit specific to ${goalDescription}",
+    "points": ["Point 1 ONLY for ${goalDescription}", "Point 2 ONLY for ${goalDescription}", "Point 3 ONLY for ${goalDescription}"],
+    "example": "Real dialogue specific to ${goalDescription}",
+    "tips": ["Actionable tip for ${goalDescription}", "Specific technique for ${goalDescription}", "Concrete practice for ${goalDescription}"],
+    "tailoredTo": "${goalDescription}"
+  },
+  ...
+]
 
-CRITICAL VALIDATION:
-- REFUSE to generate generic content that applies to multiple goals
-- EVERY module title MUST be specific to "${goalDescription}" (reject generic like 'Self-Awareness')
-- EVERY point must ONLY apply to "${goalDescription}", not other goals
-- EVERY example must show actual DIALOGUE and be specific to "${goalDescription}"
-- EVERY tip must be immediately actionable SPECIFICALLY for "${goalDescription}"
-- NO module should make sense for a different goal
-- Modules must build a UNIQUE progression ONLY for "${goalDescription}"
+VALIDATION CHECKLIST:
+✓ Goal explicitly mentioned in every module title
+✓ Each point ONLY relevant to ${goalDescription}, not generic
+✓ Each example shows actual DIALOGUE specific to ${goalDescription}
+✓ Each tip is immediately actionable SPECIFICALLY for ${goalDescription}
+✓ NO module could work for a different goal
+✓ Progression is UNIQUE to ${goalDescription}
+✓ Content is RICH with real examples and specifics
 
-Example of WRONG approach (DON'T DO):
-- "Module 1: Self-Awareness" (generic, all goals need this)
-- "Recognize your patterns" (vague, applies to everything)
+REJECT (don't include):
+- Generic module titles: "Self-Awareness", "Active Listening", "Communication"
+- Vague advice: "Recognize patterns", "Be authentic", "Stay calm"
+- Cookie-cutter examples: "Talk to them", "Be respectful"
+- Standard 6-module template used for every goal
 
-Example of RIGHT approach (DO THIS):
-- For "Give Peer Feedback": "Module 1: Recognize Your Defensiveness Patterns Before Giving Feedback"
-- For "Handle Pressure": "Module 1: Recognize Your Stress Response (Fight/Flight/Freeze)"
-- These are COMPLETELY DIFFERENT modules
+DELIVER (do this):
+- Titles specific to goal: "Recognize Your Defensiveness Before Giving Feedback" (feedback-specific)
+- Points tied to goal: "Pause for 3 seconds after they react defensively" (only relevant to feedback)
+- Dialogue examples: "Instead of 'I think you're wrong', try 'Help me understand...'" (shows real words)
+- Actionable tips: "Record yourself saying feedback 3 times to build confidence" (do THIS, not generic advice)
 
-Make content RICH with real examples, dialogue, and actionable advice specific to "${goalDescription}".`
+Remember: Different goals = COMPLETELY DIFFERENT modules. A user saying "apologize to my friend" should get COMPLETELY DIFFERENT modules than "give feedback to a peer" — not the same template with goal name changed.`
     };
 
     const userPrompt = {
@@ -4980,26 +5034,40 @@ Return ONLY the JSON array.`
       }
       
       if (parsed && Array.isArray(parsed) && parsed.length === 6) {
-        // Validate modules are goal-specific, not generic
-        const allModulesText = parsed.map(m => `${m.title} ${m.summary} ${m.points?.join(" ")}`).join(" ").toLowerCase();
-        const goalKeywords = goalDescription.toLowerCase().split(";").map(g => g.trim());
+        // STRICT validation: modules must be goal-specific, not generic
+        const titleText = parsed.map(m => m.title).join(" ").toLowerCase();
+        const allModulesText = parsed.map(m => `${m.title} ${m.summary} ${m.points?.join(" ")} ${m.example} ${m.tips?.join(" ")}`).join(" ").toLowerCase();
         
-        // Count how many times goal is mentioned
+        // Extract main goal keyword (first part before semicolon)
+        const mainGoal = goalDescription.toLowerCase().split(";")[0].trim();
+        const goalKeywords = mainGoal.split(" ");
+        
+        // Count goal mentions - stricter requirement
         let goalMentionCount = 0;
         for (const keyword of goalKeywords) {
-          const matches = allModulesText.match(new RegExp(keyword, "g")) || [];
-          goalMentionCount += matches.length;
+          if (keyword.length > 2) { // Ignore very short words
+            const matches = allModulesText.match(new RegExp("\\b" + keyword + "\\b", "g")) || [];
+            goalMentionCount += matches.length;
+          }
         }
         
-        if (goalMentionCount >= 10) { // Goal must be frequently referenced
+        // Check for generic module titles (red flags)
+        const genericTitles = ["self-awareness", "active listening", "communication", "empathy", "foundation", "introduction", "basics"];
+        const hasGenericTitles = genericTitles.some(g => titleText.includes(g));
+        
+        // Check that modules mention goal in titles (not just in content)
+        const goalInTitles = parsed.filter(m => m.title.toLowerCase().includes(mainGoal.split(" ")[0])).length;
+        
+        // Stricter validation
+        if (goalMentionCount >= 12 && !hasGenericTitles && goalInTitles >= 4) {
           localStorage.setItem(storageKey, JSON.stringify(parsed));
-          console.log(`✓ AI generated GOAL-SPECIFIC, UNIQUE modules for: ${goalDescription}`);
+          console.log(`✓ AI generated GOAL-SPECIFIC modules for: ${goalDescription} (${goalMentionCount} goal mentions)`);
           return parsed;
         } else {
-          console.warn(`AI modules not specific enough (${goalMentionCount} mentions), using goal-specific fallback`);
+          console.warn(`⚠ AI modules rejected: goal mentions=${goalMentionCount}, generic titles=${hasGenericTitles}, goal in titles=${goalInTitles}/6`);
         }
       }
-      console.warn("AI returned invalid modules, using goal-specific fallback");
+      console.warn("AI returned invalid or generic modules, using goal-specific fallback");
     } catch (err) {
       console.warn("AI generation failed:", err.message);
     }
