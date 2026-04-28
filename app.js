@@ -1795,7 +1795,7 @@ function renderGoalsIdentity() {
   if (goalsNameStatus) {
     goalsNameStatus.textContent = learner
       ? "Name saved. This identity is used in AI practice and peer practice."
-      : "This name is used for AI practice and peer practice.";
+      : "";
   }
 }
 
