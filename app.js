@@ -899,6 +899,9 @@ const state = {
   page: "landing",
   moduleIndex: 0,
   moduleQuizPassed: false,
+  aiQuizQuestions: [],
+  aiQuizGenerated: false,
+  aiQuizLoading: false,
   userName: localStorage.getItem(USER_NAME_KEY) || "",
   userLearningGoals: JSON.parse(localStorage.getItem("sandbox.userLearningGoals") || "[]"),
   userCustomGoals: JSON.parse(localStorage.getItem("sandbox.userCustomGoals") || "[]"),
@@ -1132,6 +1135,7 @@ const modulePrevBtn = document.getElementById("modulePrevBtn");
 const moduleNextBtn = document.getElementById("moduleNextBtn");
 const moduleQuiz = document.getElementById("moduleQuiz");
 const submitQuizBtn = document.getElementById("submitQuizBtn");
+const aiQuizContainer = document.getElementById("aiQuizContainer");
 const quizResultText = document.getElementById("quizResultText");
 const finalIdentity = document.getElementById("finalIdentity");
 const finalTabOverview = document.getElementById("finalTabOverview");
@@ -2038,12 +2042,17 @@ window.__ssNavigate = (targetPage) => {
   if (targetPage === "learn") {
     state.moduleIndex = 0;
     state.moduleQuizPassed = false;
+    state.aiQuizQuestions = [];
+    state.aiQuizGenerated = false;
+    state.aiQuizLoading = false;
     if (quizResultText) {
-      quizResultText.textContent = "";
+      quizResultText.innerHTML = "";
+      quizResultText.classList.add("is-hidden");
     }
-    document.querySelectorAll("input[name='q1'], input[name='q2'], input[name='q3']").forEach((input) => {
-      input.checked = false;
-    });
+    if (submitQuizBtn) {
+      submitQuizBtn.disabled = true;
+      submitQuizBtn.textContent = "Submit Reflection";
+    }
     goToPage("learn");
     return;
   }
@@ -2256,9 +2265,96 @@ function renderModule() {
 
   modulePrevBtn.disabled = index === 0;
   moduleNextBtn.disabled = index === total - 1;
-  moduleQuiz.classList.toggle("is-hidden", index !== total - 1);
+
+  const isLastModule = index === total - 1;
+  moduleQuiz.classList.toggle("is-hidden", !isLastModule);
+  if (isLastModule && !state.aiQuizGenerated && !state.aiQuizLoading) {
+    generateAIQuiz();
+  }
+
   startPracticeBtn.disabled = false;
   startPracticeBtn.textContent = "Start Conversation Practice";
+}
+
+function getQuizGoalText() {
+  const presetId = state.userLearningGoals[0];
+  const custom = state.userCustomGoals[0];
+  if (presetId) {
+    return LEARNING_GOALS.find((g) => g.id === presetId)?.title || presetId;
+  }
+  return custom || "difficult conversations";
+}
+
+function renderAIQuiz() {
+  if (!aiQuizContainer) return;
+
+  if (state.aiQuizLoading) {
+    aiQuizContainer.innerHTML = `<p class="muted ai-quiz-loading">Generating your reflection questions...</p>`;
+    if (submitQuizBtn) submitQuizBtn.disabled = true;
+    return;
+  }
+
+  if (!state.aiQuizQuestions.length) {
+    aiQuizContainer.innerHTML = `<p class="muted">Could not generate questions. Write one thing you want to remember from what you just learned.</p>
+      <textarea class="ai-quiz-textarea" data-qi="0" rows="3" placeholder="Your reflection..."></textarea>`;
+    if (submitQuizBtn) submitQuizBtn.disabled = false;
+    return;
+  }
+
+  aiQuizContainer.innerHTML = state.aiQuizQuestions.map((q, i) => `
+    <div class="ai-quiz-question">
+      <p class="ai-quiz-q-label">${escapeHtml(q)}</p>
+      <textarea class="ai-quiz-textarea" data-qi="${i}" rows="3" placeholder="Write your honest answer here..."></textarea>
+    </div>
+  `).join("");
+  if (submitQuizBtn) submitQuizBtn.disabled = false;
+}
+
+async function generateAIQuiz() {
+  state.aiQuizLoading = true;
+  state.aiQuizGenerated = false;
+  renderAIQuiz();
+
+  const goal = getQuizGoalText();
+  const systemPrompt = {
+    role: "system",
+    content: `You generate deep, open-ended reflection questions for adult learners studying difficult conversations.
+The learner has just completed two learning tracks:
+1. Goal-specific modules tailored to: "${goal}"
+2. The ILETS Framework — a 5-stage structure for any difficult conversation: Introduce (set purpose), Listen (understand before arguing), Empathize (acknowledge emotion and pressure), Talk (speak with evidence, not attack), Solve (close with concrete commitments).
+
+Generate exactly 3 reflection questions that:
+- Are open-ended (no right/wrong answer)
+- Connect the learner's specific goal to the ILETS stages
+- Push beyond recall — ask them to analyze a real situation, challenge an assumption, or predict a difficulty
+- Are varied: one about themselves, one about the other person's perspective, one about applying the structure
+- Are specific, not generic ("How would you handle feedback?")
+
+Return ONLY a valid JSON array of 3 question strings. No markdown, no extra text.
+Example: ["Question 1?", "Question 2?", "Question 3?"]`
+  };
+
+  const userPrompt = {
+    role: "user",
+    content: `Generate 3 deep reflection questions for a learner whose focus is: "${goal}"`
+  };
+
+  try {
+    const response = await callProxyAPI({ model: state.settings.model || "gpt-4", messages: [systemPrompt, userPrompt] });
+    const cleaned = response.replace(/^```json\s*/i, "").replace(/\s*```$/, "").trim();
+    const parsed = JSON.parse(cleaned);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      state.aiQuizQuestions = parsed.slice(0, 3);
+    } else {
+      state.aiQuizQuestions = [];
+    }
+  } catch {
+    state.aiQuizQuestions = [];
+  }
+
+  state.aiQuizLoading = false;
+  state.aiQuizGenerated = true;
+  renderAIQuiz();
 }
 
 function getLearningModules() {
@@ -7375,10 +7471,17 @@ goToChoiceBtn.addEventListener("click", () => {
 chooseLearnBtn.addEventListener("click", () => {
   state.moduleIndex = 0;
   state.moduleQuizPassed = false;
-  quizResultText.textContent = "";
-  document.querySelectorAll("input[name='q1'], input[name='q2'], input[name='q3']").forEach((input) => {
-    input.checked = false;
-  });
+  state.aiQuizQuestions = [];
+  state.aiQuizGenerated = false;
+  state.aiQuizLoading = false;
+  if (quizResultText) {
+    quizResultText.innerHTML = "";
+    quizResultText.classList.add("is-hidden");
+  }
+  if (submitQuizBtn) {
+    submitQuizBtn.disabled = true;
+    submitQuizBtn.textContent = "Submit Reflection";
+  }
   goToPage("learn");
 });
 
@@ -7581,32 +7684,64 @@ moduleNextBtn.addEventListener("click", () => {
   }
 });
 
-submitQuizBtn.addEventListener("click", () => {
-  const q1 = document.querySelector("input[name='q1']:checked")?.value;
-  const q2 = document.querySelector("input[name='q2']:checked")?.value;
-  const q3 = document.querySelector("input[name='q3']:checked")?.value;
+submitQuizBtn.addEventListener("click", async () => {
+  const textareas = aiQuizContainer ? aiQuizContainer.querySelectorAll(".ai-quiz-textarea") : [];
+  const answers = Array.from(textareas).map(t => t.value.trim());
 
-  if (!q1 || !q2 || !q3) {
-    quizResultText.textContent = "Please answer all questions before submitting.";
+  if (answers.every(a => !a)) {
+    if (quizResultText) {
+      quizResultText.innerHTML = `<p style="color:var(--ink-muted);">Please write at least one answer before submitting.</p>`;
+      quizResultText.classList.remove("is-hidden");
+    }
     return;
   }
 
-  const score = Number(q1 === "b") + Number(q2 === "c") + Number(q3 === "b");
-  state.moduleQuizPassed = score >= 2;
-  const misses = [];
-  if (q1 !== "b") misses.push("start with shared purpose");
-  if (q2 !== "c") misses.push("listen before pushing your point");
-  if (q3 !== "b") misses.push("close with one action, one owner, and a follow-up");
+  submitQuizBtn.disabled = true;
+  submitQuizBtn.textContent = "Getting feedback...";
+  if (quizResultText) quizResultText.classList.add("is-hidden");
 
-  quizResultText.textContent = state.moduleQuizPassed
-    ? `Great. You scored ${score}/3. Your choices show the right sequence: purpose, curiosity, then commitment.`
-    : `You scored ${score}/3. Revisit ${misses.join(", ")} so your next response feels more grounded.`;
+  const goal = getQuizGoalText();
+  const qaText = state.aiQuizQuestions.map((q, i) =>
+    `Q${i + 1}: ${q}\nA${i + 1}: ${answers[i] || "(no answer)"}`
+  ).join("\n\n");
 
-  renderModule();
-  if (state.moduleQuizPassed) {
-    startPracticeBtn.focus();
-    startPracticeBtn.textContent = "Start Conversation Practice";
+  const systemPrompt = {
+    role: "system",
+    content: `You give warm, specific, constructive feedback on a learner's reflection answers about difficult conversations.
+The learner's focus area: "${goal}"
+Framework studied: ILETS (Introduce, Listen, Empathize, Talk, Solve).
+
+Give 2–3 sentences of feedback that:
+- Reference their actual words (quote briefly if helpful)
+- Acknowledge what shows genuine insight
+- Gently push on one thing they could think more deeply about
+- End with one concrete thing to notice in their upcoming practice
+
+Be direct and warm. No bullet points — just natural, thoughtful prose.`
+  };
+
+  const userPrompt = {
+    role: "user",
+    content: `Here are the learner's reflection answers:\n\n${qaText}`
+  };
+
+  try {
+    const feedback = await callProxyAPI({ model: state.settings.model || "gpt-4", messages: [systemPrompt, userPrompt] });
+    if (quizResultText) {
+      quizResultText.innerHTML = `<p style="font-weight:600;margin:0 0 0.4rem;">Feedback on your reflection</p><p style="margin:0;line-height:1.7;">${escapeHtml(feedback)}</p>`;
+      quizResultText.classList.remove("is-hidden");
+    }
+    state.moduleQuizPassed = true;
+  } catch {
+    if (quizResultText) {
+      quizResultText.innerHTML = `<p style="margin:0;">Thanks for reflecting. You're ready to practice — keep these thoughts in mind as you go.</p>`;
+      quizResultText.classList.remove("is-hidden");
+    }
+    state.moduleQuizPassed = true;
   }
+
+  submitQuizBtn.textContent = "Reflection submitted";
+  startPracticeBtn.focus();
 });
 
 backToChoiceBtn.addEventListener("click", () => {

@@ -2310,6 +2310,61 @@ textarea {
   font-weight: 600;
 }
 
+.ai-quiz-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  margin: 1rem 0;
+}
+
+.ai-quiz-loading {
+  font-style: italic;
+}
+
+.ai-quiz-question {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ai-quiz-q-label {
+  margin: 0;
+  font-weight: 600;
+  color: var(--ink-dark);
+  line-height: 1.5;
+}
+
+.ai-quiz-textarea {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border: 1.5px solid rgba(20, 97, 255, 0.2);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  resize: vertical;
+  background: #fafcff;
+  color: var(--ink-dark);
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.ai-quiz-textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: #fff;
+}
+
+.ai-quiz-feedback {
+  margin-top: 1rem;
+  padding: 1rem 1.1rem;
+  background: linear-gradient(135deg, rgba(29, 95, 229, 0.06), rgba(99, 60, 229, 0.04));
+  border: 1.5px solid rgba(29, 95, 229, 0.18);
+  border-radius: 12px;
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
 .mini-track {
   height: 8px;
   border-radius: 999px;

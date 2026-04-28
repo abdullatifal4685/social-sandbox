@@ -181,33 +181,14 @@
 
       <section id="moduleQuiz" class="module-quiz is-hidden">
         <h3>Checkpoint Reflection</h3>
-        <p class="muted">Choose the response you would actually use in a real conversation.</p>
-
-        <fieldset class="quiz-block">
-          <legend>1) You need to raise missed milestones with a senior manager. What is the strongest first line?</legend>
-          <label><input type="radio" name="q1" value="a" /> "You have let this slip too far, and we need to fix it now."</label>
-          <label><input type="radio" name="q1" value="b" /> "I want to protect the project early and work through the risk together."</label>
-          <label><input type="radio" name="q1" value="c" /> "There is no point explaining this if the timeline is already broken."</label>
-        </fieldset>
-
-        <fieldset class="quiz-block">
-          <legend>2) The other person says, "We had to move fast because the deadline was tight." What is the best next move?</legend>
-          <label><input type="radio" name="q2" value="a" /> Jump straight to the fix so the conversation does not take too long.</label>
-          <label><input type="radio" name="q2" value="b" /> Repeat your complaint with stronger wording so they understand the pressure.</label>
-          <label><input type="radio" name="q2" value="c" /> Acknowledge the pressure and ask one open question about what happened.</label>
-        </fieldset>
-
-        <fieldset class="quiz-block">
-          <legend>3) You have explained the issue and now need a close. What sounds most effective?</legend>
-          <label><input type="radio" name="q3" value="a" /> "Please just be more careful next time."</label>
-          <label><input type="radio" name="q3" value="b" /> "Can we agree on one action, one owner, and a follow-up time today?"</label>
-          <label><input type="radio" name="q3" value="c" /> "Let us leave it here for now and see what happens."</label>
-        </fieldset>
-
-        <div class="flow-actions">
-          <button id="submitQuizBtn" type="button">Check My Choices</button>
+        <p class="muted">Answer honestly — these questions are tailored to your goal and the ILETS framework. There are no wrong answers, only deeper thinking.</p>
+        <div id="aiQuizContainer" class="ai-quiz-container">
+          <p class="muted ai-quiz-loading">Generating your reflection questions...</p>
         </div>
-        <p id="quizResultText" class="muted quiz-summary">Reflect on what you learned before moving to practice.</p>
+        <div class="flow-actions">
+          <button id="submitQuizBtn" type="button" disabled>Submit Reflection</button>
+        </div>
+        <div id="quizResultText" class="ai-quiz-feedback is-hidden"></div>
       </section>
 
       <div class="flow-actions flow-actions-spread">
