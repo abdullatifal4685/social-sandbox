@@ -4155,20 +4155,17 @@ ${userMessages.map((m, i) => `Message ${i + 1}: ${m}`).join("\n\n")}`,
   }
 }
 
-// Build a deterministic, local tailored learning path as a fallback (6 modules)
+// Build a deterministic, local tailored learning path as a fallback (6 modules) - clean, no repetitive phrases
 function buildLocalTailoredLearningPath(goalDescription) {
   const goal = goalDescription || "your goal";
-  // Ensure we generate exactly 6 modules by extending MODULE_SECTIONS if needed
   const baseModules = MODULE_SECTIONS.slice(0, 6);
   const padCount = 6 - baseModules.length;
   
   const generated = baseModules.map((section, idx) => {
     const title = `${section.title} — Focus: ${goal}`;
-    const summary = `${section.summary} This module is tailored to: ${goal}.`;
-    const points = section.points.map((p) => {
-      return `${p} (applies to: ${goal})`;
-    });
-    const example = `${section.example} Example tied to goal: ${goal}.`;
+    const summary = section.summary; // Clean: no "tailored to" phrase
+    const points = section.points; // Clean: no "(applies to)" tags
+    const example = section.example; // Clean: no "Example tied to goal" phrase
     return {
       id: `module-${idx + 1}`,
       title,
@@ -4179,25 +4176,90 @@ function buildLocalTailoredLearningPath(goalDescription) {
     };
   });
 
-  // If MODULE_SECTIONS has fewer than 6 items, pad with generated modules
+  // Pad if needed
   if (padCount > 0) {
     for (let i = baseModules.length; i < 6; i++) {
       generated.push({
         id: `module-${i + 1}`,
-        title: `Module ${i + 1}: Advanced ${goal}`,
-        summary: `Deepen your ${goal} skills for complex situations`,
+        title: `Module ${i + 1}: Advanced — Focus: ${goal}`,
+        summary: `Deepen your skills for complex situations`,
         points: [
-          `Recognize when ${goal} becomes challenging`,
-          `Apply ${goal} in high-stakes scenarios`,
-          `Reflect and adjust your ${goal} approach`,
+          `Recognize when challenges arise`,
+          `Apply strategies in high-stakes scenarios`,
+          `Reflect and adjust your approach`,
         ],
-        example: `When facing difficult resistance, ${goal} becomes even more critical. Use these advanced strategies.`,
+        example: `When facing difficult resistance, maintain your focus and use these advanced strategies.`,
         tailoredTo: goal,
       });
     }
   }
 
   return generated;
+}
+
+// Try AI first, validate, then fallback to local generator
+async function getTailoredLearningPath(goalDescription) {
+  const storageKey = "sandbox.customTailoredModules";
+  
+  // If API key present, try callOpenAI with strict schema
+  if (state.settings && state.settings.apiKey) {
+    const systemPrompt = {
+      role: "system",
+      content: `You are an expert communication coach creating RICH, PRACTICAL learning modules.
+
+RETURN ONLY valid JSON array of exactly 6 modules. NO markdown, NO extra text.
+Each module:
+{
+  "id": "module-N",
+  "title": "Module N: [Concept] — Focus: ${goalDescription}",
+  "summary": "One sentence benefit specific to ${goalDescription}",
+  "points": ["Concrete action 1", "Concrete action 2", "Concrete action 3"],
+  "example": "Realistic workplace example (2-3 sentences) showing dialogue and how to apply this for ${goalDescription}",
+  "tips": ["Actionable tip 1", "Actionable tip 2", "Actionable tip 3"],
+  "tailoredTo": "${goalDescription}"
+}
+
+CRITICAL:
+- Every field must reference ${goalDescription} explicitly
+- Examples must show DIALOGUE (actual words people say)
+- Tips must be SPECIFIC and IMMEDIATELY ACTIONABLE
+- NO generic placeholders or vague guidance
+- NO repetitive phrases like "this module is tailored to" or "applies to"
+- Make content RICH: explain WHY each step matters, show examples with real dialogue, provide tips someone can use today
+- Make clear how each module helps with ${goalDescription}`
+    };
+
+    const userPrompt = {
+      role: "user",
+      content: `Create 6 practical learning modules for: ${goalDescription}\n\nMake each rich with explanations, real examples with dialogue, and actionable tips specific to ${goalDescription}. Return ONLY the JSON array, no other text.`
+    };
+
+    try {
+      const responseText = await callOpenAI([systemPrompt, userPrompt], state.settings.model || "gpt-4");
+      let parsed;
+      try {
+        const cleaned = responseText.replace(/^```json\s*/, "").replace(/\s*```$/, "").trim();
+        parsed = JSON.parse(cleaned);
+      } catch (e) {
+        parsed = null;
+      }
+      
+      if (parsed && Array.isArray(parsed) && parsed.length === 6) {
+        localStorage.setItem(storageKey, JSON.stringify(parsed));
+        console.log(`✓ AI generated rich tailored modules for: ${goalDescription}`);
+        return parsed;
+      }
+      console.warn("AI returned invalid modules, using fallback");
+    } catch (err) {
+      console.warn("AI generation failed:", err.message);
+    }
+  }
+
+  // Fallback to local generation
+  const local = buildLocalTailoredLearningPath(goalDescription);
+  localStorage.setItem(storageKey, JSON.stringify(local));
+  console.log(`✓ Using local fallback for: ${goalDescription}`);
+  return local;
 }
 
 function validateTailoredPath(modules, goalDescription) {
@@ -7074,8 +7136,8 @@ goalsNextBtn.addEventListener("click", async () => {
       const goalDescription = allGoalTitles.length > 0 ? allGoalTitles.join("; ") : "";
 
       if (goalDescription) {
-        // Build tailored modules based on all selected goals
-        const tailoredPath = buildLocalTailoredLearningPath(goalDescription);
+        // Try AI first, then fallback to local generation
+        const tailoredPath = await getTailoredLearningPath(goalDescription);
         state.customTailoredModules = tailoredPath;
         state.moduleIndex = 0;
         localStorage.setItem("sandbox.customTailoredModules", JSON.stringify(state.customTailoredModules));
