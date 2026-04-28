@@ -2518,7 +2518,10 @@ function getContextPreview(context) {
 
 function renderScenarioPicker() {
   state.nameEditorOpen = false;
-  void ensureGoalTailoredScenario();
+  // Only generate an AI scenario for custom typed goals — preset goals already have built-in scenarios
+  if (state.userCustomGoals.length > 0) {
+    void ensureGoalTailoredScenario();
+  }
   const orderedScenarios = getOrderedScenarios();
   const hasGoalFilter = state.userLearningGoals.length > 0;
 
@@ -3510,6 +3513,10 @@ async function refreshDynamicPracticeHints_UNUSED() {
 }
 
 async function ensureGoalTailoredScenario() {
+  // Preset checkbox goals already have built-in matching scenarios — no AI needed
+  if (state.userCustomGoals.length === 0) {
+    return;
+  }
   const goalLabels = getActiveGoalLabels();
   if (!goalLabels.length) {
     return;
