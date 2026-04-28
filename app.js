@@ -8261,105 +8261,18 @@ goalsBackBtn.addEventListener("click", () => {
   goToPage("landing");
 });
 
-goalsNextBtn.addEventListener("click", async () => {
-  // Read checked built-in goal from the goals grid (in case UI hasn't synced state)
-  try {
-    // READ ALL CHECKED GOALS (not just first one)
-    const checked = Array.from(document.querySelectorAll('#goalsGrid input[type="checkbox"]:checked')).map((el) => el.value);
-    if (checked && checked.length >= 0) {
-      state.userLearningGoals = checked; // Keep ALL selected goals
-      localStorage.setItem('sandbox.userLearningGoals', JSON.stringify(state.userLearningGoals));
-    }
-  } catch (err) {
-    // ignore if DOM not available
-  }
-
-  const totalGoals = state.userLearningGoals.length + state.userCustomGoals.length;
-  // Support multiple goals (not just single goal)
-  if (totalGoals >= 1) {
-    // Generate tailored learning path (6 modules) based on ALL selected goals.
-    try {
-      // Build goal description from ALL selected preset goals
-      const presetGoalTitles = state.userLearningGoals.map((goalId) => {
-        const goal = LEARNING_GOALS.find((g) => g.id === goalId);
-        return goal?.title || goalId;
-      });
-      
-      // Combine all goal titles (both preset and custom) with semicolon separator
-      const allGoalTitles = [...presetGoalTitles, ...state.userCustomGoals];
-      const goalDescription = allGoalTitles.length > 0 ? allGoalTitles.join("; ") : "";
-
-      if (goalDescription) {
-        // Try AI first, then fallback to local generation
-        const tailoredPath = await getTailoredLearningPath(goalDescription);
-        state.customTailoredModules = tailoredPath;
-        state.moduleIndex = 0;
-        localStorage.setItem("sandbox.customTailoredModules", JSON.stringify(state.customTailoredModules));
-
-        // Ensure goal-tailored scenario is also generated (for first goal if multiple)
-        try {
-          await ensureGoalTailoredScenario();
-        } catch (scenarioErr) {
-          console.warn("Scenario generation failed (continuing anyway):", scenarioErr);
-        }
-      }
-    } catch (e) {
-      // proceed anyway
-      console.warn('Goal-based content generation failed', e);
-    }
-    goToPage("choice");
-  }
-});
-
 choiceBackBtn.addEventListener("click", () => {
   goToPage("goals");
 });
 
-addCustomGoalBtn.addEventListener("click", async () => {
+addCustomGoalBtn.addEventListener("click", () => {
   const customGoalText = customGoalInput.value.trim();
   if (customGoalText && !state.userCustomGoals.includes(customGoalText)) {
-    const totalGoals = state.userLearningGoals.length + state.userCustomGoals.length;
-    if (totalGoals >= 0) {
-      // Show loading state
-      addCustomGoalBtn.disabled = true;
-      const originalText = addCustomGoalBtn.textContent;
-      addCustomGoalBtn.textContent = "Generating tailored learning path...";
-
-      // Single-goal mode: custom goal replaces any selected preset/custom goal.
-      state.userLearningGoals = [];
-      state.userCustomGoals = [customGoalText];
-      localStorage.setItem("sandbox.userLearningGoals", JSON.stringify(state.userLearningGoals));
-      localStorage.setItem("sandbox.userCustomGoals", JSON.stringify(state.userCustomGoals));
-      customGoalInput.value = "";
-      
-      // Generate AI-tailored full learning path (7 modules) and scenario
-      try {
-        const tailoredPath = await generateTailoredLearningPath(customGoalText);
-        const tailoredScenario = await generateTailoredPracticeScenario(customGoalText);
-        
-        // Store tailored modules (full path)
-        state.customTailoredModules = tailoredPath;
-        state.moduleIndex = 0;
-        localStorage.setItem("sandbox.customTailoredModules", JSON.stringify(state.customTailoredModules));
-        
-        // Add tailored scenario to scenarios list
-        state.scenarios.push(tailoredScenario);
-        state.customTailoredScenarios.push(tailoredScenario);
-        state.selectedScenarioId = tailoredScenario.id;
-        localStorage.setItem("sandbox.customTailoredScenarios", JSON.stringify(state.customTailoredScenarios));
-        persistCustomScenarios();
-      } catch (error) {
-        console.error("Error generating tailored content:", error);
-        alert("Could not generate personalized content. Check your API key in Settings.");
-      } finally {
-        addCustomGoalBtn.disabled = false;
-        addCustomGoalBtn.textContent = originalText;
-      }
-      
-      renderGoalsPage();
-      renderCustomGoalsList();
-      updateGoalsPageState();
-    }
+    state.userCustomGoals.push(customGoalText);
+    localStorage.setItem("sandbox.userCustomGoals", JSON.stringify(state.userCustomGoals));
+    customGoalInput.value = "";
+    renderCustomGoalsList();
+    updateGoalsPageState();
   }
 });
 
