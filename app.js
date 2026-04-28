@@ -7048,9 +7048,10 @@ goalsBackBtn.addEventListener("click", () => {
 goalsNextBtn.addEventListener("click", async () => {
   // Read checked built-in goal from the goals grid (in case UI hasn't synced state)
   try {
+    // READ ALL CHECKED GOALS (not just first one)
     const checked = Array.from(document.querySelectorAll('#goalsGrid input[type="checkbox"]:checked')).map((el) => el.value);
     if (checked && checked.length >= 0) {
-      state.userLearningGoals = checked.slice(0, 1);
+      state.userLearningGoals = checked; // Keep ALL selected goals
       localStorage.setItem('sandbox.userLearningGoals', JSON.stringify(state.userLearningGoals));
     }
   } catch (err) {
@@ -7058,36 +7059,33 @@ goalsNextBtn.addEventListener("click", async () => {
   }
 
   const totalGoals = state.userLearningGoals.length + state.userCustomGoals.length;
-  if (totalGoals === 1) {
-    // Generate full tailored learning path (7 modules) and scenario based on the single active goal.
+  // Support multiple goals (not just single goal)
+  if (totalGoals >= 1) {
+    // Generate tailored learning path (6 modules) based on ALL selected goals.
     try {
-      const builtInGoalId = state.userLearningGoals[0];
-      const builtInGoalTitle = builtInGoalId
-        ? (LEARNING_GOALS.find((g) => g.id === builtInGoalId)?.title || builtInGoalId)
-        : "";
-      const customGoalTitle = state.userCustomGoals[0] || "";
-      const goalDescription = customGoalTitle || builtInGoalTitle;
+      // Build goal description from ALL selected preset goals
+      const presetGoalTitles = state.userLearningGoals.map((goalId) => {
+        const goal = LEARNING_GOALS.find((g) => g.id === goalId);
+        return goal?.title || goalId;
+      });
+      
+      // Combine all goal titles (both preset and custom) with semicolon separator
+      const allGoalTitles = [...presetGoalTitles, ...state.userCustomGoals];
+      const goalDescription = allGoalTitles.length > 0 ? allGoalTitles.join("; ") : "";
 
       if (goalDescription) {
-        const currentGoal = state.customTailoredModules?.[0]?.customGoal || "";
-        const hasCompletePath = state.customTailoredModules.length >= 7;
-        if (!hasCompletePath || currentGoal !== goalDescription) {
-          const tailoredPath = await generateTailoredLearningPath(goalDescription);
-          state.customTailoredModules = tailoredPath;
-          state.moduleIndex = 0;
-          localStorage.setItem("sandbox.customTailoredModules", JSON.stringify(state.customTailoredModules));
-        }
-
-        // Ensure goal-tailored scenario is also generated
-        await ensureGoalTailoredScenario();
-      }
-
-      if (state.customTailoredModules.length < 7 && goalDescription) {
-        const fallbackPath = buildLocalTailoredLearningPath(goalDescription);
-        state.customTailoredModules = fallbackPath;
-        state.customTailoredModules = tailoredPath; // Replace with full path, not append
+        // Build tailored modules based on all selected goals
+        const tailoredPath = buildLocalTailoredLearningPath(goalDescription);
+        state.customTailoredModules = tailoredPath;
         state.moduleIndex = 0;
         localStorage.setItem("sandbox.customTailoredModules", JSON.stringify(state.customTailoredModules));
+
+        // Ensure goal-tailored scenario is also generated (for first goal if multiple)
+        try {
+          await ensureGoalTailoredScenario();
+        } catch (scenarioErr) {
+          console.warn("Scenario generation failed (continuing anyway):", scenarioErr);
+        }
       }
     } catch (e) {
       // proceed anyway
