@@ -7949,6 +7949,11 @@ promptInput.addEventListener("input", () => {
 });
 
 async function handleFinish() {
+  const userTurns = state.messages.filter(m => m.role === "user").length;
+  const msg = userTurns < 3
+    ? `You've only sent ${userTurns === 0 ? "no messages" : userTurns === 1 ? "1 message" : "2 messages"} — are you sure you want to finish? You'll get better coaching with a fuller conversation.`
+    : "Ready to finish and get your coaching? You can't return to this conversation after.";
+  if (!window.confirm(msg)) return;
   finishBtn.disabled = true;
   finishBtn.textContent = "Generating your feedback...";
   try {
