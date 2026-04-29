@@ -1658,6 +1658,7 @@ const voiceModeBtn = document.getElementById("voiceModeBtn");
 const voiceStatusText = document.getElementById("voiceStatusText");
 const sendBtn = document.getElementById("sendBtn");
 const finishBtn = document.getElementById("finishBtn");
+const finishBtnBottom = document.getElementById("finishBtnBottom");
 const goHomeBtn = document.getElementById("goHomeBtn");
 const goLearningPathBtn = document.getElementById("goLearningPathBtn");
 const backToBriefingBtn = document.getElementById("backToBriefingBtn");
@@ -7254,6 +7255,28 @@ async function generateFeedback() {
   }
 
   const overviewHtml = `
+    ${(analysisData?.strengths?.length || analysisData?.growthAreas?.length) ? `
+    <article class="analytics-card" style="margin-bottom:1rem; background:linear-gradient(135deg,rgba(14,163,122,0.05) 0%,rgba(217,117,30,0.05) 100%);">
+      <h4 style="margin-bottom:0.75rem;">Session at a Glance</h4>
+      <div style="display:grid; gap:0.6rem;">
+        ${analysisData?.strengths?.length ? `
+        <div style="display:flex; align-items:flex-start; gap:0.65rem;">
+          <span style="font-size:1.05rem; flex-shrink:0; line-height:1.4; color:#0fa37a; font-weight:700;">✓</span>
+          <div>
+            <span style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#0fa37a;">Did well</span>
+            <p style="margin:0.15rem 0 0; font-size:0.9rem; color:var(--ink-dark); line-height:1.4;">${escapeHtml(analysisData.strengths[0].behavior)}</p>
+          </div>
+        </div>` : ''}
+        ${analysisData?.growthAreas?.length ? `
+        <div style="display:flex; align-items:flex-start; gap:0.65rem;">
+          <span style="font-size:1.05rem; flex-shrink:0; line-height:1.4; color:#d9751e; font-weight:700;">↑</span>
+          <div>
+            <span style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#d9751e;">Focus next</span>
+            <p style="margin:0.15rem 0 0; font-size:0.9rem; color:var(--ink-dark); line-height:1.4;">${escapeHtml(analysisData.growthAreas[0].area)}</p>
+          </div>
+        </div>` : ''}
+      </div>
+    </article>` : ''}
     <article class="analytics-card" style="margin-bottom:1rem;">
       <h4 style="margin-bottom:0.6rem;">Your Coach Says</h4>
       <p style="line-height:1.75; margin:0; color:var(--ink-dark);">${escapeHtml(coachingFeedback || "Complete a practice session to get personalized coaching feedback.")}</p>
@@ -7917,19 +7940,22 @@ promptInput.addEventListener("input", () => {
   }
 });
 
-finishBtn.addEventListener("click", async () => {
-  finishBtn.disabled = true;
-  finishBtn.textContent = "Generating your feedback...";
+async function handleFinish() {
+  [finishBtn, finishBtnBottom].forEach(b => { b.disabled = true; b.textContent = "Generating your feedback..."; });
   try {
     await generateFeedback();
   } finally {
     finishBtn.disabled = false;
     finishBtn.textContent = "Finish & Get Coaching";
+    finishBtnBottom.disabled = false;
+    finishBtnBottom.textContent = "Finish & Get Coaching";
   }
   state.rightTab = "practice";
   renderRightPanel();
   goToPage("final");
-});
+}
+finishBtn.addEventListener("click", handleFinish);
+finishBtnBottom.addEventListener("click", handleFinish);
 
 rightTabs.addEventListener("click", (event) => {
   const button = event.target.closest(".right-tab");
