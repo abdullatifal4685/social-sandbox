@@ -7512,7 +7512,7 @@ chooseLearnBtn.addEventListener("click", () => {
 });
 
 choosePracticeBtn.addEventListener("click", () => {
-  goToPage("dashboard");
+  goToPage("scenarioBriefing");
 });
 
 
