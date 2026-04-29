@@ -520,12 +520,18 @@ const GOAL_ILETS_MODULES = {
 };
 
 // Returns the 6 ILETS framework modules for the learner's active goal,
-// or the generic set if no matching preset goal is found.
+// or AI-generated modules for a custom goal, or the generic set as final fallback.
 function getILETSModulesForGoal() {
+  // 1. Preset goal with built-in GOAL_ILETS_MODULES content
   const primaryGoal = state.userLearningGoals.find((id) => GOAL_ILETS_MODULES[id]);
   if (primaryGoal) {
     return GOAL_ILETS_MODULES[primaryGoal];
   }
+  // 2. Custom typed goal — use AI-generated ILETS modules if they've been built
+  if (state.userCustomGoals.length > 0 && Array.isArray(state.customILETSModules) && state.customILETSModules.length === 6) {
+    return state.customILETSModules;
+  }
+  // 3. Generic fallback
   return MODULE_SECTIONS;
 }
 
@@ -1309,6 +1315,7 @@ const state = {
   userLearningGoals: JSON.parse(localStorage.getItem("sandbox.userLearningGoals") || "[]"),
   userCustomGoals: JSON.parse(localStorage.getItem("sandbox.userCustomGoals") || "[]"),
   customTailoredModules: JSON.parse(localStorage.getItem("sandbox.customTailoredModules") || "[]"),
+  customILETSModules: JSON.parse(localStorage.getItem("sandbox.customILETSModules") || "[]"),
   customTailoredScenarios: JSON.parse(localStorage.getItem("sandbox.customTailoredScenarios") || "[]"),
   goalScenarioGenerationKey: null,
   goalScenarioLoading: false,
@@ -2510,7 +2517,10 @@ function renderModule() {
   const activeGoalId = state.userLearningGoals.find((id) => GOAL_ILETS_MODULES[id]) || null;
   const activeGoalName = activeGoalId
     ? (LEARNING_GOALS.find((g) => g.id === activeGoalId)?.title || null)
-    : null;
+    // Custom typed goal — show the goal name if we've generated ILETS modules for it
+    : (state.userCustomGoals.length > 0 && Array.isArray(state.customILETSModules) && state.customILETSModules.length === 6)
+      ? state.userCustomGoals[0]
+      : null;
   const iletsIsGoalSpecific = Boolean(activeGoalName);
 
   if (moduleSectionBanner) {
@@ -5682,6 +5692,152 @@ Return ONLY the JSON array.`
   return local;
 }
 
+// ─── Custom-goal ILETS module generation ──────────────────────────────────────
+// Generates 6 ILETS-structured modules tailored to a user-typed custom goal.
+// Falls back to a template-based local version if the AI call fails.
+
+async function generateCustomILETSModules(goalDescription) {
+  const storageKey = "sandbox.customILETSModules";
+
+  if (state.settings) {
+    const systemPrompt = {
+      role: "system",
+      content: `You are an expert communication coach. Generate exactly 6 learning modules that teach the ILETS conversation framework specifically for: "${goalDescription}"
+
+The ILETS framework has 5 steps: Introduce, Listen, Empathize, Talk, Solve.
+Your 6 modules must follow this fixed structure (you cannot change the structure):
+  Module 1: Foundation — Why "${goalDescription}" is difficult and what makes it hard to start
+  Module 2: Introduce — How to open the conversation about "${goalDescription}"
+  Module 3: Listen — What to listen for and how to hear what matters in "${goalDescription}"
+  Module 4: Empathize + Talk — How to acknowledge feelings and clearly state your perspective in "${goalDescription}"
+  Module 5: Solve — How to move toward a resolution or decision in "${goalDescription}"
+  Module 6: Reflect — How to build the habit of handling "${goalDescription}" well over time
+
+CRITICAL RULES:
+- Every title, summary, bullet point, and example MUST be specific to "${goalDescription}"
+- Examples must show actual dialogue words (not just "say something empathetic")
+- Points must be immediately actionable for "${goalDescription}" specifically
+- Do NOT produce generic advice that could apply to any conversation
+
+Return ONLY valid JSON — no markdown, no extra text:
+[
+  {
+    "id": "ilets-custom-1",
+    "title": "1. [Short, goal-specific title]",
+    "summary": "One sentence describing what this module gives the learner for ${goalDescription}",
+    "points": ["Actionable point 1 specific to ${goalDescription}", "Actionable point 2", "Actionable point 3"],
+    "example": "Example: '[Real dialogue words specific to ${goalDescription}]'"
+  },
+  ... (6 total)
+]`
+    };
+
+    const userPrompt = {
+      role: "user",
+      content: `Create 6 ILETS framework modules tailored exactly to: "${goalDescription}". Return ONLY the JSON array.`
+    };
+
+    try {
+      const responseText = await callProxyAPI({ model: "gpt-4o-mini", messages: [systemPrompt, userPrompt] });
+      let parsed;
+      try {
+        const cleaned = responseText.replace(/^```json\s*/, "").replace(/\s*```$/, "").trim();
+        parsed = JSON.parse(cleaned);
+      } catch (e) {
+        parsed = null;
+      }
+
+      if (parsed && Array.isArray(parsed) && parsed.length === 6 &&
+          parsed.every(m => m.title && m.summary && Array.isArray(m.points) && m.example)) {
+        localStorage.setItem(storageKey, JSON.stringify(parsed));
+        console.log(`✓ AI generated custom ILETS modules for: ${goalDescription}`);
+        return parsed;
+      }
+      console.warn("AI returned invalid custom ILETS modules, using local fallback");
+    } catch (err) {
+      console.warn("Custom ILETS AI generation failed:", err.message);
+    }
+  }
+
+  // Local fallback: template-based modules that at least name the goal throughout
+  const local = buildLocalCustomILETSModules(goalDescription);
+  localStorage.setItem(storageKey, JSON.stringify(local));
+  console.log(`✓ Using local ILETS fallback for custom goal: ${goalDescription}`);
+  return local;
+}
+
+function buildLocalCustomILETSModules(goal) {
+  const g = goal || "your goal";
+  return [
+    {
+      id: "ilets-custom-1",
+      title: `1. Why "${g}" Feels Hard to Raise`,
+      summary: `Understanding the internal barriers that make conversations about "${g}" difficult to start.`,
+      points: [
+        `Name your hesitation: fear of reaction, timing, or not knowing the right words for "${g}".`,
+        `Separate your intent (helpful) from the impact you fear (conflict or rejection).`,
+        `Remind yourself: raising "${g}" early keeps options open. Waiting usually makes it harder.`,
+      ],
+      example: `Example: Before the conversation, write one sentence: "I want to talk about ${g} because I believe it matters for both of us."`,
+    },
+    {
+      id: "ilets-custom-2",
+      title: `2. Introduce: Open the Conversation About "${g}"`,
+      summary: `How to start the conversation in a way that signals collaboration, not confrontation.`,
+      points: [
+        `Open with intent, not with impact: say what you're hoping to achieve together.`,
+        `Keep your opening sentence short — one sentence about "${g}" is enough to start.`,
+        `Signal that you want to work through "${g}" together, not to win an argument.`,
+      ],
+      example: `Example: "I'd like to talk about ${g}. My goal is to find something that works for both of us — not to put you on the spot."`,
+    },
+    {
+      id: "ilets-custom-3",
+      title: `3. Listen: Hear What Matters to Them About "${g}"`,
+      summary: `Before you present your view on "${g}", understand what the other person is protecting.`,
+      points: [
+        `Ask one open question about their perspective on "${g}" before sharing yours.`,
+        `Listen for what is underneath their position — their needs, fears, or constraints.`,
+        `Resist the urge to correct or counter immediately. Nod, pause, and confirm first.`,
+      ],
+      example: `Example: "Before I share my thoughts on ${g} — what's your take on where things stand right now?"`,
+    },
+    {
+      id: "ilets-custom-4",
+      title: `4. Empathize + Talk: Acknowledge and Then State Your View on "${g}"`,
+      summary: `Show you've heard them, then clearly explain what you need or see regarding "${g}".`,
+      points: [
+        `Start with acknowledgment: reflect back what you heard before offering your perspective on "${g}".`,
+        `Use "I" language: "I've noticed…", "From my side…", "What I'm experiencing with ${g} is…"`,
+        `State facts and impact — not blame: describe what happened and what it means for "${g}".`,
+      ],
+      example: `Example: "I hear that ${g} is also important to you. From my side, here's what I'm seeing: [specific observation]. That's why I wanted to have this conversation."`,
+    },
+    {
+      id: "ilets-custom-5",
+      title: `5. Solve: Move Toward a Decision on "${g}"`,
+      summary: `Turn the conversation about "${g}" into a concrete next step both people own.`,
+      points: [
+        `Come prepared with at least two options for how to address "${g}" — not just the problem.`,
+        `Ask: "What would a good outcome look like for you on ${g}?" to co-create the solution.`,
+        `Close with a clear agreement: who will do what, and by when.`,
+      ],
+      example: `Example: "Here are two ways we could approach ${g}: [option A] or [option B]. Which feels more workable to you?"`,
+    },
+    {
+      id: "ilets-custom-6",
+      title: `6. Reflect: Build the Habit of Addressing "${g}"`,
+      summary: `Each time you handle "${g}", you build confidence and skill for the next difficult conversation.`,
+      points: [
+        `After the conversation, note one thing that went well and one thing you'd adjust for "${g}" next time.`,
+        `Identify what triggered you during the conversation and how you managed it.`,
+        `Set a short follow-up: check back in within a week to see how things have changed.`,
+      ],
+      example: `Example: "I'll reflect on how the conversation about ${g} went and note the moment I felt most confident — then use that as my starting point next time."`,
+    },
+  ];
+}
+
 function validateTailoredPath(modules, goalDescription) {
   if (!Array.isArray(modules) || modules.length !== MODULE_SECTIONS.length) return false;
   const goal = (goalDescription || "").toLowerCase();
@@ -6694,19 +6850,27 @@ function saveReflectionEntry(entry) {
       try {
         btn.disabled = true;
         btn.textContent = "Building your custom modules…";
-        const modules = await getTailoredLearningPath(goalText);
+        // Generate warm-up modules AND goal-specific ILETS modules in parallel
+        const [modules, iletsModules] = await Promise.all([
+          getTailoredLearningPath(goalText),
+          generateCustomILETSModules(goalText),
+        ]);
         state.customTailoredModules = Array.isArray(modules) ? modules : [];
         localStorage.setItem("sandbox.customTailoredModules", JSON.stringify(state.customTailoredModules));
+        state.customILETSModules = Array.isArray(iletsModules) && iletsModules.length === 6 ? iletsModules : [];
+        localStorage.setItem("sandbox.customILETSModules", JSON.stringify(state.customILETSModules));
       } catch (err) {
         console.error("Failed to generate tailored learning path:", err);
         state.customTailoredModules = [];
         localStorage.setItem("sandbox.customTailoredModules", "[]");
+        state.customILETSModules = [];
+        localStorage.setItem("sandbox.customILETSModules", "[]");
       } finally {
         btn.disabled = false;
         btn.textContent = "Continue";
       }
     } else {
-      // Preset goal selected — use built-in tailored modules (no API call needed)
+      // Preset goal selected — use built-in tailored modules and clear any custom ILETS modules
       const presetKeywordMap = {
         "peer-feedback":      "peer feedback give difficult feedback",
         "navigate-authority": "authority hierarchy navigate power levels",
@@ -6718,6 +6882,9 @@ function saveReflectionEntry(entry) {
       const searchText = presetKeywordMap[selectedPresetId] || (LEARNING_GOALS.find((g) => g.id === selectedPresetId)?.title || "");
       state.customTailoredModules = buildLocalTailoredLearningPath(searchText);
       localStorage.setItem("sandbox.customTailoredModules", JSON.stringify(state.customTailoredModules));
+      // Clear any previously generated custom ILETS modules — preset goals use GOAL_ILETS_MODULES
+      state.customILETSModules = [];
+      localStorage.setItem("sandbox.customILETSModules", "[]");
     }
 
     goToPage("choice");
