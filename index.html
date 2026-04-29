@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./styles.css?v=20260428-380000" />
+  <link rel="stylesheet" href="./styles.css?v=20260428-430000" />
 </head>
 <body>
   <div class="page-glow page-glow-a"></div>
@@ -247,7 +247,7 @@
       </section>
 
       <div class="flow-actions">
-        <button id="backToChoiceBtn" class="ghost" type="button">New Learning Path</button>
+        <button id="backToChoiceBtn" class="ghost" type="button">Back to Path</button>
         <button id="restartPracticeBtn" type="button">Practice Again</button>
       </div>
     </div>
@@ -258,8 +258,8 @@
       <div class="peer-page-head">
         <div>
           <h2>Peer Practice</h2>
-          <p class="muted">Practice a real difficult conversation with a study partner, then reflect together and exchange structured feedback.</p>
-          <p class="dashboard-help muted">Use the Reflection tab after a session to log what you practiced and give each other one strength and one growth suggestion.</p>
+          <p class="muted">Simulate a peer conversation using demo profiles, then use the Reflection tab to log what you practiced and give each other structured feedback.</p>
+          <p class="dashboard-help muted">Select a partner from the Community tab, start a conversation, then use the Reflection tab to review ILETS stages, write shared notes, and exchange one piece of feedback.</p>
         </div>
       </div>
 
@@ -273,12 +273,13 @@
       <div id="peerCommunityView" class="peer-community-view">
         <div class="peer-room-head">
           <h3>Find a Practice Partner</h3>
+          <p class="muted" style="font-size:0.85rem;margin-top:0.25rem;">Demo profiles — click any partner to start a simulated peer session for practice and structured reflection.</p>
         </div>
         <div id="peerUserDirectory" class="peer-user-directory"></div>
 
         <section class="peer-panel">
           <h3>Practice Requests</h3>
-          <p class="muted">Request a session from someone above. Once accepted, switch to the Live Session tab to start practicing.</p>
+          <p class="muted">Select a practice partner above, then click Start Conversation to begin.</p>
           <ul id="peerRequestList" class="peer-participant-list"></ul>
         </section>
       </div>
@@ -766,7 +767,7 @@ Agree on next step" required></textarea>
     </form>
   </dialog>
 
-  <script src="./app.js?v=20260428-380000" defer></script>
+  <script src="./app.js?v=20260428-430000" defer></script>
 </body>
 </html>
 

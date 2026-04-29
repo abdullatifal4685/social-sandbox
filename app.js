@@ -2738,9 +2738,9 @@ function renderPeerRequests() {
       const user = PEER_DIRECTORY.find((item) => item.id === request.peerId);
       const peerName = user?.name || "Peer";
       const status = request.status || "pending";
-      const action = status === "accepted"
+      const action = status === "accepted" || status === "pending"
         ? `<button class=\"ghost\" type=\"button\" data-peer-start=\"${request.id}\">Start Conversation</button>`
-        : `<button class=\"ghost\" type=\"button\" data-peer-accept=\"${request.id}\">Mark Accepted</button>`;
+        : "";
 
       return `<li>
         <strong>${escapeHtml(peerName)}</strong> • ${escapeHtml(status)}
@@ -3142,7 +3142,9 @@ function renderPeerPracticum() {
 
 function enterPracticeCompactMode() {
   state.leftVisible = true;
-  state.rightVisible = false;
+  // Level 1 (Fully Guided) shows the right panel by default so hints are immediately visible.
+  // Level 2 and 3 start with it collapsed to encourage independent effort first.
+  state.rightVisible = state.scaffold.level === 1;
   state.scenarioBriefExpanded = true;  // expanded by default; auto-collapses after first exchange
   state.scenariosExpanded = true;
   state.iletsExpanded = true;
@@ -3914,8 +3916,7 @@ function updateGoalsPageState() {
   // Multiple-goal mode: at least one goal (preset or custom) is required.
   const totalGoals = state.userLearningGoals.length + state.userCustomGoals.length;
   goalsNextBtn.disabled = totalGoals === 0;
-  
-  goalsNextBtn.textContent = totalGoals > 0 ? "Continue" : "Select a goal";
+  goalsNextBtn.textContent = "Continue";
 }
 
 function getScenarioGoalMatch(scenarioId) {
@@ -7511,7 +7512,7 @@ chooseLearnBtn.addEventListener("click", () => {
 });
 
 choosePracticeBtn.addEventListener("click", () => {
-  goToPage("scenarioBriefing");
+  goToPage("dashboard");
 });
 
 
