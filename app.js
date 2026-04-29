@@ -1657,8 +1657,7 @@ const promptInput = document.getElementById("promptInput");
 const voiceModeBtn = document.getElementById("voiceModeBtn");
 const voiceStatusText = document.getElementById("voiceStatusText");
 const sendBtn = document.getElementById("sendBtn");
-const finishBtn = document.getElementById("finishBtn");
-const finishBtnBottom = document.getElementById("finishBtnBottom");
+const finishBtn = document.getElementById("finishBtnBottom");
 const goHomeBtn = document.getElementById("goHomeBtn");
 const goLearningPathBtn = document.getElementById("goLearningPathBtn");
 const backToBriefingBtn = document.getElementById("backToBriefingBtn");
@@ -7941,21 +7940,19 @@ promptInput.addEventListener("input", () => {
 });
 
 async function handleFinish() {
-  [finishBtn, finishBtnBottom].forEach(b => { b.disabled = true; b.textContent = "Generating your feedback..."; });
+  finishBtn.disabled = true;
+  finishBtn.textContent = "Generating your feedback...";
   try {
     await generateFeedback();
   } finally {
     finishBtn.disabled = false;
     finishBtn.textContent = "Finish & Get Coaching";
-    finishBtnBottom.disabled = false;
-    finishBtnBottom.textContent = "Finish & Get Coaching";
   }
   state.rightTab = "practice";
   renderRightPanel();
   goToPage("final");
 }
 finishBtn.addEventListener("click", handleFinish);
-finishBtnBottom.addEventListener("click", handleFinish);
 
 rightTabs.addEventListener("click", (event) => {
   const button = event.target.closest(".right-tab");
