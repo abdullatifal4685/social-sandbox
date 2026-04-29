@@ -3427,49 +3427,6 @@ function buildConversationGuidedHints(stage, scenario, messages) {
   }
 }
 
-async function generateDynamicHintsFromConversation(scenario, stage, messages) {
-  const userGoals = getActiveGoalLabels();
-  const transcript = messages
-    .map((message, index) => `${index + 1}. ${message.role.toUpperCase()}: ${message.content}`)
-    .join("\n");
-
-  const prompt = {
-    role: "system",
-    content: `You are a conversation coach. Generate 3 short sentence starters for the ${stage} stage.
-
-Use the recent conversation to make them feel IMMEDIATELY useful and specific to what was just said.
-Scenario: ${scenario?.title || "Unknown"} — ${scenario?.context || ""}
-User goals: ${userGoals.length > 0 ? userGoals.join(", ") : "general communication"}
-
-Recent conversation:
-${transcript || "No conversation yet."}
-
-Return ONLY valid JSON — no markdown, no text outside the JSON:
-{
-  "starters": [
-    {"text": "Short suggestion phrase (what to do)", "style": "direct",     "example": "e.g., a realistic sentence the learner could actually say"},
-    {"text": "Short suggestion phrase (what to do)", "style": "balanced",   "example": "e.g., a realistic sentence the learner could actually say"},
-    {"text": "Short suggestion phrase (what to do)", "style": "empathetic", "example": "e.g., a realistic sentence the learner could actually say"}
-  ]
-}
-
-Rules:
-- "text" is a short coaching instruction (10-15 words max)
-- "example" starts with 'e.g., ' and shows a realistic thing the learner could say (in quotes)
-- Reference specific words or ideas from the recent conversation`,
-  };
-
-  try {
-    // Use gpt-4o-mini for hints — much cheaper, fast enough for suggestions
-    const response = await callProxyAPI({ model: "gpt-4o-mini", messages: [prompt] });
-    const parsed = JSON.parse(response);
-    return Array.isArray(parsed?.starters) ? parsed.starters.filter((item) => item && item.text) : [];
-  } catch (error) {
-    console.warn("Failed to generate live hints:", error);
-    return buildConversationGuidedHints(stage, scenario, messages);
-  }
-}
-
 async function refreshDynamicPracticeHints() {
   const scenario = getScenario();
   if (!scenario) {
@@ -3485,30 +3442,6 @@ async function refreshDynamicPracticeHints() {
   }
 }
 
-async function refreshDynamicPracticeHints_UNUSED() {
-  const scenario = getScenario();
-  if (!scenario) {
-    return;
-  }
-
-  const stage = ILETS[state.stageIndex];
-  const signature = `${scenario.id}:${stage}:${state.messages.slice(-6).map((message) => `${message.role}:${message.content}`).join("|")}`;
-  if (state.dynamicHintGenerationKey === signature) {
-    return;
-  }
-
-  state.dynamicHintGenerationKey = signature;
-  try {
-    const hints = await generateDynamicHintsFromConversation(scenario, stage, state.messages.slice(-6));
-    scenario.contextualHints = scenario.contextualHints || {};
-    scenario.contextualHints[stage] = hints;
-  } finally {
-    state.dynamicHintGenerationKey = null;
-    if (state.page === "practice") {
-      renderPracticeStrip();
-    }
-  }
-}
 
 async function ensureGoalTailoredScenario() {
   // Preset checkbox goals already have built-in matching scenarios — no AI needed
