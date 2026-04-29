@@ -3283,6 +3283,16 @@ body.hide-left.hide-right .layout {
   color: #3553ad;
 }
 
+.brief-collapsed-hint {
+  margin: 0.35rem 0.75rem 0.5rem;
+  font-size: 0.84rem;
+  color: var(--ink-soft);
+  line-height: 1.45;
+  font-style: italic;
+  border-left: 2px solid var(--accent);
+  padding-left: 0.6rem;
+}
+
 .brief-content {
   margin-top: 0.75rem;
   background: linear-gradient(180deg, #ffffff, #f7f9fe);

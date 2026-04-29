@@ -586,7 +586,8 @@ const DEFAULT_SCENARIOS = [
       "Navigate power dynamics respectfully"
     ],
     context:
-      "You are a junior analyst on a 6-month IT modernization project. When the project kicked off three months ago, your senior manager was confident. But behind the scenes, technical debt is worse than expected. Two key milestones have slipped: your integration work is delayed, and the testing phase is now compressed into half the planned time. Your manager still believes the project can deliver on time and has not flagged issues to leadership yet. You have noticed stress rising in the team, and if risks are not surfaced now, delivery quality and team capacity are both at risk. You have a 10-minute sync to raise this carefully.",
+      "You are a junior analyst on a project that started six months ago. Three months in, things looked fine. But now there are real problems. Two important steps have fallen behind schedule. The testing phase has been cut to half the time it needs. Your manager still thinks everything is on track. They have not told company leadership about any of this. The team is stressed. If nothing changes soon, the project will miss its deadline or deliver bad quality. You have a 10-minute meeting with your manager. You need to raise the problem carefully — without sounding like you are blaming anyone.",
+    shortContext: "Your project is behind schedule, but your manager doesn't know yet. You need to raise the problem before it gets worse.",
     imageUrl: "./assets/scenarios/failing-project.svg",
     aiRole: "Senior Manager",
     opening:
@@ -698,7 +699,8 @@ const DEFAULT_SCENARIOS = [
       "Collaborate on solutions under stress"
     ],
     context:
-      "Your engineering team is racing to hit a quarterly release deadline. A teammate just committed code that bypasses a critical data validation step, the step that catches errors before they reach production. When you ask why, they say, 'We're already late. I'll add it back after launch.' You know this is risky. If bad data slips through, it will create downstream data corruption that's expensive to fix. The team is already stressed, and you don't want to trigger a blame conversation. But you also can't let this pass. You need to address it without making your teammate defensive.",
+      "Your team is working fast to meet a deadline. A teammate removed an important safety check from the code. When you asked why, they said they will add it back after the launch. But you know this is dangerous. If the safety check is missing, bad data can reach users — and fixing that later will take a long time and cost a lot. Your team is already under pressure. You do not want to make your teammate feel blamed. But you cannot just let this go. You need to raise the issue in a way that keeps the conversation safe and finds a real solution.",
+    shortContext: "A teammate skipped a safety check to save time. You need to raise the risk without making them feel attacked.",
     imageUrl: "./assets/scenarios/unsafe-shortcut.svg",
     aiRole: "Teammate",
     opening:
@@ -764,7 +766,8 @@ const DEFAULT_SCENARIOS = [
       "Preserve relationships while raising concerns",
       "Invite shared ownership of change"
     ],
-    context: `You work with a senior peer from another department who regularly dominates meetings. They interrupt people, jump to conclusions quickly, and shut down ideas from junior team members. In the last three meetings, you've watched your team's junior analysts stop offering input. You're not their manager, so you can't direct them. But you can talk to your senior peer. The challenge: they might get defensive, or worse, they might not even realize they're doing it. You want to name the behavior, show respect for their role, and invite them to co-own a solution without making it awkward.`,
+    context: `A senior colleague from another team often takes over your meetings. They speak over other people, move quickly past ideas, and junior team members have stopped sharing their thoughts. In the last three meetings, you watched this happen — and people went quiet. You are not their manager, so you cannot give them orders. But you can talk to them directly. The challenge is that they may not know they are doing this, or they may feel criticized when you raise it. You want to describe what you have seen, show respect for who they are, and find a solution together.`,
+    shortContext: "A senior colleague dominates meetings and junior people have stopped speaking up. You need to raise this without causing conflict.",
     imageUrl: "./assets/scenarios/meeting-dominance.svg",
     aiRole: "Senior Peer",
     opening:
@@ -876,7 +879,8 @@ const DEFAULT_SCENARIOS = [
       "Offer options instead of just saying no",
       "Align priorities across stakeholders"
     ],
-    context: `You're a project lead working across two business units. Your primary sponsor told you a month ago that delivery date was fixed. But six weeks in, a more senior leader (not your direct manager) has been requesting increasing scope: new features, reports, and data integrations. The problem: each addition adds 1-2 weeks to the timeline, and your team is already stretched. Your original sponsor is now asking why feature X isn't done yet, unaware that the scope has expanded. You need to have a conversation with the senior leader about timeline vs. scope trade-offs. But they outrank you, and you don't want to seem uncooperative or like you're refusing work. How do you raise this without appearing to say no?`,
+    context: `You lead a project that works across two teams. One month ago, the deadline was set and the work was clear. But over the last six weeks, a senior leader from another team has been asking for more and more features — things that were not in the original plan. Each new request adds one to two weeks to the project. Your team is already at full capacity. Meanwhile, the person who first hired you for this project is now asking why certain things are not finished — but they do not know about all the extra work that was added. You need to talk to the senior leader and explain that you cannot do everything on time. But they are more senior than you, and you do not want to seem like you are refusing to help.`,
+    shortContext: "Extra work keeps getting added to your project, but the deadline hasn't changed. You need to push back without seeming uncooperative.",
     imageUrl: "./assets/scenarios/resource-priority.svg",
     aiRole: "Senior Leader (Different Unit)",
     opening: "I've been thinking about next steps. We should add the user dashboard to this release. I know it's late in the cycle, but the stakeholder asked for it. Can you make it work?",
@@ -987,7 +991,8 @@ const DEFAULT_SCENARIOS = [
       "Find middle-ground solutions",
       "Balance business pressure with standards"
     ],
-    context: `You're a QA lead on a product launch. Your test plan includes three rounds of testing: unit, integration, and user acceptance. Today, your product manager informed you that to hit the market window, testing needs to be compressed to one week (originally two weeks) and only cover "critical path" functionality. They're feeling pressure from executives to get to market fast. But you know that skipping integration testing has historically led to 10-15% of bugs reaching production. That's not acceptable for this product category. You need to push back, but respectfully, because your manager agrees with the compressed timeline, and you don't want to be seen as slowing the company down. How do you advocate for quality without sounding obstructionist?`,
+    context: `You are in charge of testing a product before it launches. The original plan was two weeks of testing across three stages. Today, your product manager told you the testing must be done in one week instead, and you should only test the most important parts. They are under pressure from company leadership to launch quickly. But you know from experience that cutting testing this way causes serious problems — about 10 to 15 percent of bugs end up reaching real users. That is not acceptable for this product. You need to push back, but carefully. Your own manager already agreed to the shorter timeline, and you do not want to look like you are slowing everything down.`,
+    shortContext: "Your manager wants to cut testing time in half to launch faster. You know this will cause bugs — and you need to say so respectfully.",
     imageUrl: "./assets/scenarios/quality-vs-speed.svg",
     aiRole: "Product Manager",
     opening: "I know the test plan is ambitious, but we've got to cut it. The market window is closing. Can you get to MVP quality in one week instead of two?",
@@ -4069,6 +4074,19 @@ function renderBrief() {
 function renderScenarioBriefVisibility() {
   if (scenarioBriefBody) {
     scenarioBriefBody.classList.toggle("is-collapsed", !state.scenarioBriefExpanded);
+  }
+  // Show a short summary line when the brief is collapsed so users never lose track of the scenario
+  const collapsedHint = document.getElementById("briefCollapsedHint");
+  if (collapsedHint) {
+    collapsedHint.classList.toggle("is-hidden", state.scenarioBriefExpanded);
+    if (!state.scenarioBriefExpanded) {
+      const scenario = getScenario();
+      // Prefer the dedicated shortContext; fall back to first 1-2 sentences of context
+      const hint =
+        scenario.shortContext ||
+        scenario.context.split(/(?<=[.!?])\s+/).slice(0, 2).join(" ");
+      collapsedHint.textContent = hint;
+    }
   }
   if (toggleScenarioBriefBtn) {
     toggleScenarioBriefBtn.textContent = state.scenarioBriefExpanded ? "Hide Details" : "Show Details";
