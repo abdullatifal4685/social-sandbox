@@ -3747,7 +3747,7 @@ function renderTips() {
   };
 
   const currentHint = state.latestHint || stageDefaults[ILETS[state.stageIndex]];
-  tipsLead.textContent = `Current tip (${ILETS[state.stageIndex]}): ${currentHint}`;
+  if (tipsLead) tipsLead.textContent = `Current tip (${ILETS[state.stageIndex]}): ${currentHint}`;
 
   const tips = state.hintHistory?.length ? state.hintHistory : Object.values(stageDefaults);
   tipsList.innerHTML = tips.map((tip) => `<li>${escapeHtml(tip)}</li>`).join("");
