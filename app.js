@@ -4026,9 +4026,9 @@ function renderHeader() {
   const scenario = getScenario();
   const scaffold = getScaffoldLevelConfig();
   scenarioTitle.textContent = scenario.title;
-  scenarioContext.textContent = "Review the brief below, then start your first response.";
+  scenarioContext.textContent = `Hi ${getLearnerName()}, review the brief below, then start your first response.`;
   roleBadge.textContent = `AI Role: ${scenario.aiRole}`;
-  practiceIdentity.textContent = `Practicing as: ${getLearnerName()}`;
+  practiceIdentity.textContent = "";
   if (practiceScaffoldMenuBtn) {
     practiceScaffoldMenuBtn.innerHTML = `
       <span class="scaffold-menu-current">${escapeHtml(scaffold.label)}</span>
