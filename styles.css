@@ -566,6 +566,8 @@ button {
   color: #f5fcff;
   background: linear-gradient(130deg, var(--accent), #0f4ed0);
   transition: all 220ms ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 button:hover:not(:disabled) {
