@@ -2356,12 +2356,11 @@ Example: ["Question 1?", "Question 2?", "Question 3?"]`
 }
 
 function getLearningModules() {
-  // Use custom modules exclusively when we have a full set (AI and local fallback both return 6)
-  if (state.customTailoredModules.length >= 6) {
-    return state.customTailoredModules;
-  }
-  // Partial or no custom modules — prepend any partials to defaults
-  return [...state.customTailoredModules, ...MODULE_SECTIONS];
+  // Always include the ILETS framework (MODULE_SECTIONS).
+  // Goal-specific tailored modules come first as a warm-up (capped at 3 so the
+  // total stays manageable), then the 6 ILETS framework modules follow.
+  const tailored = state.customTailoredModules.slice(0, 3);
+  return [...tailored, ...MODULE_SECTIONS];
 }
 
 async function generateContextualHintsForScenario(scenario) {
