@@ -561,13 +561,15 @@ button {
   padding: 0.85rem 1.2rem;
   font: inherit;
   font-weight: 700;
-  font-size: 0.98rem;
+  font-size: 1rem;
+  letter-spacing: 0.01em;
   cursor: pointer;
-  color: #f5fcff;
+  color: #fff;
   background: linear-gradient(130deg, var(--accent), #0f4ed0);
   transition: all 220ms ease;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 button:hover:not(:disabled) {
