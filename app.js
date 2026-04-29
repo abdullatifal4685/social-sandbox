@@ -143,7 +143,7 @@ const GOAL_ILETS_MODULES = {
   "surface-risks": [
     {
       title: "1. Notice Why Surfacing Risks Feels Hard",
-      summary: "Bad news is hard to deliver because you fear the messenger effect — being blamed for the problem you're reporting.",
+      summary: "Bad news is hard to deliver because you fear the messenger effect: that you will be blamed for the problem you are reporting.",
       points: [
         "Distinguish your role from the problem: you're reporting a risk, not causing it.",
         "Prepare one clear sentence about the risk before the conversation starts.",
@@ -153,40 +153,40 @@ const GOAL_ILETS_MODULES = {
     },
     {
       title: "2. Introduce: Open Without Sounding Alarmist",
-      summary: "How you open decides whether the other person hears your news as a problem to solve together — or a threat to defend against.",
+      summary: "How you open decides whether the other person hears your news as a problem to solve together, or as a threat to defend against.",
       points: [
         "Lead with intent, not with impact: 'I want to flag this early so we can stay ahead of it.'",
-        "Avoid hedging language that buries the concern — don't open with five minutes of context-setting.",
+        "Avoid hedging language that buries the concern. Do not open with five minutes of context-setting.",
         "Signal shared ownership: 'I think we can address this together if we decide now.'",
       ],
-      example: "Example: 'I asked for this time because I've spotted a risk in the project timeline. My goal is to protect delivery — not to add pressure.'",
+      example: "Example: 'I asked for this time because I've spotted a risk in the project timeline. My goal is to protect delivery, not to add pressure.'",
     },
     {
       title: "3. Listen: Understand Their Stakes Before You Present Data",
-      summary: "Before sharing your evidence, understand what the other person is protecting — their credibility, their leadership relationship, their budget.",
+      summary: "Before sharing your evidence, understand what the other person is protecting: their credibility, their leadership relationship, their budget.",
       points: [
         "Ask one focused question about what they're prioritising right now: timeline, quality, or stakeholder confidence.",
-        "Listen for what they've already told leadership — this shapes how you frame the risk.",
+        "Listen for what they've already told leadership, because that shapes how you frame the risk.",
         "Don't use listening as a delay tactic. Two or three focused questions is enough.",
       ],
-      example: "Example: 'Before I share what I'm seeing — what's your biggest constraint right now: the launch date, the stakeholder relationship, or team capacity?'",
+      example: "Example: 'Can I ask one question before I share what I'm seeing? What is your biggest constraint right now: the launch date, the stakeholder relationship, or team capacity?'",
     },
     {
       title: "4. Empathize + Talk: Acknowledge Pressure, Then State the Facts",
-      summary: "Empathy makes your data land better. You're not dismissing the pressure — you're naming it and offering a way through.",
+      summary: "Empathy makes your data land better. You are not dismissing the pressure. You are naming it and offering a way through.",
       points: [
         "Name the pressure they're under before you describe the risk: 'I know you've committed this date to leadership.'",
         "State impact in numbers, not feelings: 'Two milestones slipped, which compresses testing by four weeks.'",
-        "Separate what happened from what it means — don't conflate data with conclusions.",
+        "Separate what happened from what it means. Do not conflate data with conclusions.",
       ],
-      example: "Example: 'I know you're under real schedule pressure. Here's what the data shows: at our current pace, we'll miss quality threshold or date — and we still have time to choose one trade-off.'",
+      example: "Example: 'I know you're under real schedule pressure. Here's what the data shows: at our current pace, we'll miss the quality threshold or the date. We still have time to choose one trade-off if we decide now.'",
     },
     {
       title: "5. Solve: Turn Bad News Into a Decision Conversation",
       summary: "Bad news should end with a decision, not just an acknowledgment. You leave with a clear owner and a clear next step.",
       points: [
-        "Come prepared with two or three options — don't put the solution burden entirely on them.",
-        "Ask for a decision on scope, timeline, or resources — not just feedback on the risk.",
+        "Come prepared with two or three options. Do not put the solution burden entirely on them.",
+        "Ask for a decision on scope, timeline, or resources, not just feedback on the risk.",
         "Confirm who owns the next step and by when: 'Can we decide by Thursday so we still have time to act?'",
       ],
       example: "Example: 'We have three options: trim scope by 15%, extend the timeline two weeks, or bring in additional testing support. Which one should we take to leadership?'",
@@ -196,21 +196,21 @@ const GOAL_ILETS_MODULES = {
       summary: "Surfacing risks early is a leadership behaviour, not just a communication technique. Practise it until it becomes your default.",
       points: [
         "Identify one risk you've been holding back and decide when to surface it.",
-        "Capture the opening sentence you'll use — write it down before the conversation.",
+        "Capture the opening sentence you'll use and write it down before the conversation.",
         "After each difficult-news conversation, note what landed and what you'd say differently.",
       ],
-      example: "Example: 'Going forward, I'll flag risks when I first spot them — not when they've become emergencies — using this format: what happened, what the impact is, and what I recommend.'",
+      example: "Example: 'Going forward, I'll flag risks when I first spot them rather than waiting until they become emergencies. I will use this format: what happened, what the impact is, and what I recommend.'",
     },
   ],
 
   "peer-feedback": [
     {
       title: "1. Notice What Makes Feedback Feel Dangerous",
-      summary: "Feedback feels risky because you're commenting on someone's behaviour — something they may not see the way you do.",
+      summary: "Feedback feels risky because you're commenting on someone's behaviour, and they may not see it the way you do.",
       points: [
         "Separate the behaviour from the person: you're addressing what happened, not who they are.",
         "Identify what you're most afraid of: their reaction, the relationship, or being wrong.",
-        "Prepare one specific, observable example — vague feedback creates defensiveness.",
+        "Prepare one specific, observable example. Vague feedback creates defensiveness.",
       ],
       example: "Example: Instead of 'You dominate meetings', try 'In the Tuesday standup, you spoke for 12 of the 20 minutes and three people didn't get to share their blockers.'",
     },
@@ -219,20 +219,20 @@ const GOAL_ILETS_MODULES = {
       summary: "Your opening sentence decides whether this becomes a conversation or a confrontation.",
       points: [
         "Signal intent immediately: 'I want to share something I noticed because I think it's fixable and I want us to work well together.'",
-        "Avoid the feedback sandwich — it creates suspense and undercuts the message.",
+        "Avoid the feedback sandwich, as it creates suspense and undercuts the message.",
         "Request their engagement: 'I'd like to share something and hear your perspective on it.'",
       ],
-      example: "Example: 'I want to raise something I noticed in our last few meetings. It's not about you personally — it's about a pattern that's affecting the team, and I think we can fix it.'",
+      example: "Example: 'I want to raise something I noticed in our last few meetings. This is not about you personally. It's about a pattern that's affecting the team, and I think we can fix it together.'",
     },
     {
-      title: "3. Listen: Ask Before Telling — Understand Their Story First",
+      title: "3. Listen: Ask Before Telling So You Understand Their Story First",
       summary: "Before you deliver your observation, ask a question that invites their perspective. What they say will change how you frame the feedback.",
       points: [
-        "Ask how they think the recent interaction went — their self-assessment often reveals what they already know.",
+        "Ask how they think the recent interaction went. Their self-assessment often reveals what they already know.",
         "Listen for pressures they're under that might explain the behaviour.",
         "Don't use listening as a setup. Genuinely incorporate what they say into your response.",
       ],
-      example: "Example: 'Before I get into it — how do you think the last three team meetings went from your side? What was on your mind during them?'",
+      example: "Example: 'How do you think the last three team meetings went from your side? I want to understand your perspective before I share mine.'",
     },
     {
       title: "4. Empathize + Talk: Separate Observation From Judgment",
@@ -240,12 +240,12 @@ const GOAL_ILETS_MODULES = {
       points: [
         "Acknowledge what they're trying to do: 'I can see you're trying to keep things moving.'",
         "Then name the observable behaviour: 'When you jump in before others finish, it signals their input doesn't matter.'",
-        "Stick to what you observed — not what it means about their character.",
+        "Stick to what you observed, not to conclusions about their character.",
       ],
       example: "Example: 'I can see you're trying to keep things efficient. And when you cut across people mid-sentence, a few team members told me they've stopped sharing ideas. That's the impact I want to flag.'",
     },
     {
-      title: "5. Solve: Co-Create the Change — Don't Just Prescribe It",
+      title: "5. Solve: Co-Create the Change Rather Than Prescribing It",
       summary: "Telling someone to 'just stop' rarely works. Collaborating on the solution creates buy-in and a realistic change.",
       points: [
         "Ask what would make the change realistic for them: 'What would help you catch yourself before jumping in?'",
@@ -258,32 +258,32 @@ const GOAL_ILETS_MODULES = {
       title: "6. Reflect: Build a Feedback Practice That Actually Changes Things",
       summary: "One feedback conversation rarely creates lasting change. Regular, early, specific feedback does.",
       points: [
-        "Identify one person you've been avoiding giving feedback to — and plan when to do it.",
+        "Identify one person you've been avoiding giving feedback to, and plan when to do it.",
         "After the conversation, note what they heard clearly and what created friction.",
         "Make feedback a regular habit: monthly check-ins, not just crisis conversations.",
       ],
-      example: "Example: 'Going forward, I'll share observations within a week of noticing them — while the example is fresh — rather than storing them up for a big conversation.'",
+      example: "Example: 'Going forward, I'll share observations within a week of noticing them, while the example is still fresh, rather than storing them up for one big conversation.'",
     },
   ],
 
   "navigate-authority": [
     {
       title: "1. Notice How Power Shapes What You Say (and Don't)",
-      summary: "Authority gradients — the gap between your seniority and theirs — shape every word choice, whether you know it or not.",
+      summary: "The gap between your seniority and theirs shapes every word choice, whether you notice it or not.",
       points: [
         "Identify the authority gap: are you speaking up to a senior leader, across to a peer, or down to a report?",
         "Notice what you're self-censoring and ask whether that silence is protecting you or protecting the problem.",
-        "Prepare your core point in one sentence — authority conversations need to be clear, not elaborate.",
+        "Prepare your core point in one sentence. Authority conversations need to be clear, not elaborate.",
       ],
-      example: "Example: Instead of circling for three minutes, try 'I want to push back on one part of this decision — specifically the timeline — and explain why I think the risk is higher than it looks.'",
+      example: "Example: Instead of circling for three minutes, try: 'I want to push back on one part of this decision, specifically the timeline, and explain why I think the risk is higher than it looks.'",
     },
     {
       title: "2. Introduce: Frame Your Point for Who's Listening",
       summary: "A senior leader and a peer need different openings. One needs the strategic risk; the other needs shared ownership.",
       points: [
-        "Speaking up to authority: lead with business impact, not personal discomfort — 'This decision carries a risk I want to flag.'",
-        "Pushing back across peers: lead with alignment first — 'I'm on the same page with the goal, and I see a different path to it.'",
-        "Avoid hedging openers like 'This is probably wrong but...' — they undermine the point before you've made it.",
+        "Speaking up to authority: lead with business impact, not personal discomfort. For example: 'This decision carries a risk I want to flag.'",
+        "Pushing back across peers: lead with alignment first. For example: 'I'm on the same page with the goal, and I see a different path to it.'",
+        "Avoid hedging openers like 'This is probably wrong but...' as they undermine the point before you've made it.",
       ],
       example: "Example (speaking up to senior): 'I know the decision is made. I want to flag one implementation risk that could affect our Q3 commitments. Is there a moment to walk through it?'",
     },
@@ -291,11 +291,11 @@ const GOAL_ILETS_MODULES = {
       title: "3. Listen: Ask Strategic Questions to Understand Their World",
       summary: "Before you push back, understand what the person above or beside you is optimising for. Their constraint is often invisible to you.",
       points: [
-        "Ask what outcome they're protecting: 'What's most important to you in this decision — speed, cost, or stakeholder relationship?'",
+        "Ask what outcome they're protecting: 'What's most important to you in this decision? Is it speed, cost, or the stakeholder relationship?'",
         "Understand what they've already committed to: 'Has this already been shared with leadership?'",
         "Use their answer to anchor your pushback in their priorities, not just yours.",
       ],
-      example: "Example: 'Before I share my concern — what's driving the urgency on the timeline? I want to make sure I understand the full picture before I suggest anything.'",
+      example: "Example: 'What's driving the urgency on the timeline? I want to make sure I understand the full picture before I suggest anything.'",
     },
     {
       title: "4. Empathize + Talk: Acknowledge Constraints, Then Make Your Case",
@@ -303,9 +303,9 @@ const GOAL_ILETS_MODULES = {
       points: [
         "Name the constraint they're managing: 'I know you've committed this to the board already.'",
         "Then introduce your evidence without hedging: 'Here's the specific risk I think changes the calculus.'",
-        "Avoid apologising for your view — qualify your certainty, not your right to raise it.",
+        "Avoid apologising for your view. It is fine to qualify your certainty, but do not apologise for raising the concern.",
       ],
-      example: "Example: 'I understand the pressure to move fast. Here's what changes the picture: if we launch on schedule, we face a data privacy exposure that would require pulling back within weeks — which costs more than a two-week delay now.'",
+      example: "Example: 'I understand the pressure to move fast. Here's what changes the picture: if we launch on schedule, we face a data privacy exposure that would require pulling back within weeks. That costs more than a two-week delay now.'",
     },
     {
       title: "5. Solve: Propose in Their Language, Confirm the Decision",
@@ -313,7 +313,7 @@ const GOAL_ILETS_MODULES = {
       points: [
         "Frame your proposal around their stated priority: 'This approach still hits the Q3 date and reduces the risk you'd have to explain to the board.'",
         "Ask for a decision, not just consideration: 'Can we align on this change in approach today?'",
-        "Confirm agreements in writing — even a brief email summary protects both of you.",
+        "Confirm agreements in writing. Even a brief email summary protects both of you.",
       ],
       example: "Example: 'Here's what I'm proposing: delay by two weeks, adjust scope to keep the core feature intact, and use that time to fix the privacy gap. That protects the Q3 number. Does that work?'",
     },
@@ -321,18 +321,18 @@ const GOAL_ILETS_MODULES = {
       title: "6. Reflect: Build the Habit of Speaking Up Before the Cost Gets High",
       summary: "Speaking up is a skill that degrades when you don't practise it. Every conversation where you stay silent is a missed rep.",
       points: [
-        "Identify one decision in the next week where you have a different view — and practise sharing it.",
+        "Identify one decision in the next week where you have a different view, and practise sharing it.",
         "After each authority conversation, review: did you state your position clearly, or soften it past the point of usefulness?",
-        "Track when your pushback changed an outcome — use those moments to reinforce the behaviour.",
+        "Track when your pushback changed an outcome and use those moments to reinforce the behaviour.",
       ],
-      example: "Example: 'This week I'll raise one concern I've been holding back — using this frame: what I'm seeing, why it matters for their goals, and what I recommend we do differently.'",
+      example: "Example: 'This week I'll raise one concern I've been holding back. I'll use this frame: what I'm seeing, why it matters for their goals, and what I recommend we do differently.'",
     },
   ],
 
   "handle-pressure": [
     {
       title: "1. Notice When Pressure Is Shaping Your Response",
-      summary: "Under pressure, you move faster, listen less, and assume more — often without realising it.",
+      summary: "Under pressure, you move faster, listen less, and assume more, often without realising it.",
       points: [
         "Identify your personal signal that you're under pressure: rushing, cutting people off, going quiet, or getting blunt.",
         "Name the source of pressure before the conversation: deadline, relationship, or fear of outcome.",
@@ -344,21 +344,21 @@ const GOAL_ILETS_MODULES = {
       title: "2. Introduce: Open Calmly When the Situation Isn't",
       summary: "How you open signals whether this will be a problem-solving conversation or an escalation.",
       points: [
-        "Slow your speaking pace deliberately — faster speech under pressure reads as aggression.",
+        "Slow your speaking pace deliberately. Faster speech under pressure reads as aggression.",
         "Lead with the goal, not the problem: 'I want us to solve this together before it gets worse.'",
-        "Acknowledge the pressure out loud if it's obvious: 'I know we're both under the clock here — let's use this time well.'",
+        "Acknowledge the pressure out loud if it's obvious: 'I know we're both under the clock here, so let's use this time well.'",
       ],
       example: "Example: 'I want to raise something quickly because I think it affects what we're both trying to get done. My goal is to find a path forward, not to create more friction.'",
     },
     {
       title: "3. Listen: Slow Down to Actually Hear Them",
-      summary: "Under pressure, listening becomes selective — you hear what confirms your view and miss what changes it.",
+      summary: "Under pressure, listening becomes selective. You hear what confirms your view and miss what might change it.",
       points: [
         "Ask one question before reacting, even if you think you already know the answer.",
         "Paraphrase what they said before adding your own view: 'So what you're saying is... is that right?'",
-        "Treat their answer as information that might change your plan — not as something to get through.",
+        "Treat their answer as information that might change your plan, not as an obstacle to get through.",
       ],
-      example: "Example: 'Before I respond — I want to make sure I understand what you're actually asking for. Are you saying you need more time, more resources, or a different scope?'",
+      example: "Example: 'Before I respond, I want to make sure I understand what you're actually asking for. Are you saying you need more time, more resources, or a different scope?'",
     },
     {
       title: "4. Empathize + Talk: Acknowledge the Tension, Then Name the Facts",
@@ -366,7 +366,7 @@ const GOAL_ILETS_MODULES = {
       points: [
         "Name the shared pressure before diving into the issue: 'We're both under the same deadline here.'",
         "State the problem as a shared one: 'Here's what I'm seeing that I think affects both of us.'",
-        "Avoid blame framing — 'you caused this' closes options. 'Here's where we are' keeps them open.",
+        "Avoid blame framing. Saying 'you caused this' closes options. Saying 'here's where we are' keeps them open.",
       ],
       example: "Example: 'I know we're both stretched thin. Here's the situation: we're three days from launch and two blockers aren't resolved. I think we need to make a call now on which one we drop.'",
     },
@@ -374,7 +374,7 @@ const GOAL_ILETS_MODULES = {
       title: "5. Solve: Agree on One Step That Reduces Pressure for Both of You",
       summary: "Under pressure, perfect solutions don't exist. One clear, owned next step is worth more than a comprehensive plan.",
       points: [
-        "Aim for one agreed decision, not a full plan — pressure narrows options, and that's okay.",
+        "Aim for one agreed decision, not a full plan. Pressure narrows options, and that is acceptable in the moment.",
         "Assign a single owner for the next action: ambiguity under pressure creates more pressure.",
         "Agree on when you'll check in: even 'let's talk in two hours' reduces the feeling of free-fall.",
       ],
@@ -385,10 +385,10 @@ const GOAL_ILETS_MODULES = {
       summary: "Staying composed under pressure is practised, not innate. The reps happen before the crisis.",
       points: [
         "After each high-pressure conversation, note one moment where you reacted vs. responded.",
-        "Identify one phrase that helps you slow down — make it your default opening under pressure.",
+        "Identify one phrase that helps you slow down and make it your default opening under pressure.",
         "Seek out mildly stressful conversations on purpose to build composure in lower-stakes situations.",
       ],
-      example: "Example: 'My go-to phrase under pressure is now: I want to make sure I understand before I respond. It buys five seconds — and changes the whole tone of the conversation.'",
+      example: "Example: 'My go-to phrase under pressure is now: I want to make sure I understand before I respond. It buys five seconds and changes the whole tone of the conversation.'",
     },
   ],
 
@@ -401,17 +401,17 @@ const GOAL_ILETS_MODULES = {
         "Notice when you finish people's sentences or assume what they mean before they've finished.",
         "Try one conversation this week where you ask a second question before saying anything about yourself.",
       ],
-      example: "Example: In your next meeting, try not finishing anyone's sentence — even when you're sure you know what they're going to say.",
+      example: "Example: In your next meeting, try not finishing anyone's sentence, even when you are sure you know what they are going to say.",
     },
     {
       title: "2. Introduce: Open With Curiosity, Not Your Agenda",
       summary: "Your opening signals whether this will be a conversation or a presentation. Curiosity invites honesty.",
       points: [
         "Start with a question, not a statement: 'I'd love to understand your perspective on what happened.'",
-        "Resist sharing your view first — invite theirs, then build on what you hear.",
+        "Resist sharing your view first. Invite theirs, then build on what you hear.",
         "Signal that you're genuinely open: 'I want to understand this before I respond, so take your time.'",
       ],
-      example: "Example: Instead of 'Here's what I think we should do', try 'Before I share my view — what's your read on how this went and what needs to change?'",
+      example: "Example: Instead of 'Here's what I think we should do', try asking: 'Before I share my view, what's your read on how this went and what needs to change?'",
     },
     {
       title: "3. Listen: Ask Questions That Open Doors, Not Close Them",
@@ -425,7 +425,7 @@ const GOAL_ILETS_MODULES = {
     },
     {
       title: "4. Empathize + Talk: Show You Understood Before You Respond",
-      summary: "Empathy isn't agreement — it's demonstrating that you actually heard what they said before you reply.",
+      summary: "Empathy is not the same as agreement. It is demonstrating that you actually heard what they said before you reply.",
       points: [
         "Paraphrase what you heard before adding your view: 'So if I understand right, you felt X because of Y...'",
         "Name the emotion if it's visible: 'It sounds like this has been really frustrating to navigate.'",
@@ -437,18 +437,18 @@ const GOAL_ILETS_MODULES = {
       title: "5. Solve: Build a Solution They Helped Create",
       summary: "Solutions built on full understanding of the other person's reality are more likely to stick.",
       points: [
-        "Use what you heard to anchor your proposal: 'Based on what you said, the main issue is X — so how about we address that first?'",
+        "Use what you heard to anchor your proposal: 'Based on what you said, the main issue is X, so how about we address that first?'",
         "Ask them to improve your suggestion: 'Does that address the core problem, or is there something I'm missing?'",
         "Check understanding one more time before closing: 'So we're aligned that you'll do X and I'll do Y. Does that feel right?'",
       ],
-      example: "Example: 'You said the biggest issue is not knowing when things change. What if we set up a brief Friday check-in — just 10 minutes — to flag anything that shifted that week?'",
+      example: "Example: 'You said the biggest issue is not knowing when things change. What if we set up a brief Friday check-in, just 10 minutes, to flag anything that shifted that week?'",
     },
     {
       title: "6. Reflect: Make Deep Listening a Consistent Habit",
       summary: "Listening is a practice, not an event. The improvement happens in the small, everyday conversations.",
       points: [
         "After each conversation this week, ask: did I understand their position before I shared mine?",
-        "Identify one person you regularly half-listen to — and give them your full attention next time.",
+        "Identify one person you regularly half-listen to and give them your full attention next time.",
         "Choose one question to ask more often: 'Help me understand what this is like from your side.'",
       ],
       example: "Example: 'I'll add one habit: before I share my view in any disagreement, I'll paraphrase what I heard and ask if I got it right. That forces me to actually listen.'",
@@ -464,15 +464,15 @@ const GOAL_ILETS_MODULES = {
         "Separate the constraint (what you can't do) from the intent (what you're trying to achieve together).",
         "Come prepared with at least one alternative before the conversation starts.",
       ],
-      example: "Example: Instead of 'I can't do that by Friday', try 'I can't deliver the full scope by Friday — but I can deliver the core feature Friday and the rest by Tuesday. Would that work?'",
+      example: "Example: Instead of 'I can't do that by Friday', try 'I can't deliver the full scope by Friday. I can deliver the core feature Friday and the rest by Tuesday. Would that work?'",
     },
     {
       title: "2. Introduce: Open by Showing You're on Their Side",
-      summary: "Before you say no, signal that your goal is to help them succeed — just within real constraints.",
+      summary: "Before you say no, signal that your goal is to help them succeed, within the constraints you are working with.",
       points: [
-        "Lead with shared intent: 'I want to help you hit this goal — let me explain the constraints and what I can offer.'",
-        "Don't open with the constraint — it sounds like a refusal before you've offered anything.",
-        "Acknowledge what they're asking for: 'I understand why you need this by Friday — the client deadline is real.'",
+        "Lead with shared intent: 'I want to help you hit this goal. Let me explain the constraints and what I can offer.'",
+        "Do not open with the constraint. It sounds like a refusal before you have offered anything.",
+        "Acknowledge what they're asking for: 'I understand why you need this by Friday. The client deadline is real.'",
       ],
       example: "Example: 'I want to make sure you have what you need for the client meeting. Let me walk you through what I can do and what the trade-offs are, and we can pick the best path together.'",
     },
@@ -480,9 +480,9 @@ const GOAL_ILETS_MODULES = {
       title: "3. Listen: Understand What They Actually Need, Not Just What They Asked For",
       summary: "What someone asks for is often a proxy for what they really need. Understanding the underlying need gives you more options.",
       points: [
-        "Ask why they need it: 'Help me understand — what's driving the Friday deadline specifically?'",
+        "Ask why they need it: 'Help me understand what's driving the Friday deadline specifically.'",
         "Find out what's negotiable: 'Is the date fixed, or is there flexibility if the core functionality is there?'",
-        "Use what you learn to tailor your options — a solution they didn't know they could ask for is often the best one.",
+        "Use what you learn to tailor your options. A solution they didn't know they could ask for is often the best one.",
       ],
       example: "Example: 'What does the client specifically need by Friday? If it's the dashboard and not the full report, I might be able to hit that while finishing the rest early next week.'",
     },
@@ -491,18 +491,18 @@ const GOAL_ILETS_MODULES = {
       summary: "Empathy earns the right to say no. Explaining the constraint makes it real, not an excuse.",
       points: [
         "Acknowledge the impact of your constraint on them: 'I know this creates pressure on your end, and I'm sorry it limits your options.'",
-        "State the constraint clearly and briefly — one sentence, no over-explaining.",
+        "State the constraint clearly and briefly. One sentence is enough; no over-explaining needed.",
         "Immediately follow the constraint with what you can do: 'Here's what I can offer instead...'",
       ],
       example: "Example: 'I know this affects your client prep. Here's what's real: I have 8 hours available this week, not 20. With that, I can deliver X. If you need Y too, we'd be looking at Wednesday.'",
     },
     {
       title: "5. Solve: Expand the Solution Space Together",
-      summary: "The best responses to a no come from co-creation — not from a list of alternatives you present like a menu.",
+      summary: "The best responses to a no come from co-creation, not from a list of alternatives you present like a menu.",
       points: [
-        "Offer two or three options and ask which fits best — giving one option removes their sense of choice.",
+        "Offer two or three options and ask which fits best. Giving only one option removes their sense of choice.",
         "Invite them to improve your options: 'Is there a variation of this that would work better for you?'",
-        "Confirm the chosen option explicitly: 'So we're going with Option B — I'll have X to you by Tuesday. Confirmed?'",
+        "Confirm the chosen option explicitly: 'So we're going with Option B. I'll have X to you by Tuesday. Confirmed?'",
       ],
       example: "Example: 'Here are three paths: Option A gets you the full deliverable Wednesday. Option B gets you the core piece Friday and the rest Monday. Option C is a Friday draft with Tuesday final. Which works best?'",
     },
@@ -592,7 +592,7 @@ const DEFAULT_SCENARIOS = [
       "Navigate power dynamics respectfully"
     ],
     context:
-      "You are a junior analyst on a project that started six months ago. Three months in, things looked fine. But now there are real problems. Two important steps have fallen behind schedule. The testing phase has been cut to half the time it needs. Your manager still thinks everything is on track. They have not told company leadership about any of this. The team is stressed. If nothing changes soon, the project will miss its deadline or deliver bad quality. You have a 10-minute meeting with your manager. You need to raise the problem carefully — without sounding like you are blaming anyone.",
+      "You are a junior analyst on a project that started six months ago. Three months in, things looked fine. But now there are real problems. Two important steps have fallen behind schedule. The testing phase has been cut to half the time it needs. Your manager still thinks everything is on track. They have not told company leadership about any of this. The team is stressed. If nothing changes soon, the project will miss its deadline or deliver bad quality. You have a 10-minute meeting with your manager. You need to raise the problem carefully, without sounding like you are blaming anyone.",
     shortContext: "Your project is behind schedule, but your manager doesn't know yet. You need to raise the problem before it gets worse.",
     imageUrl: "./assets/scenarios/failing-project.svg",
     aiRole: "Senior Manager",
@@ -705,7 +705,7 @@ const DEFAULT_SCENARIOS = [
       "Collaborate on solutions under stress"
     ],
     context:
-      "Your team is working fast to meet a deadline. A teammate removed an important safety check from the code. When you asked why, they said they will add it back after the launch. But you know this is dangerous. If the safety check is missing, bad data can reach users — and fixing that later will take a long time and cost a lot. Your team is already under pressure. You do not want to make your teammate feel blamed. But you cannot just let this go. You need to raise the issue in a way that keeps the conversation safe and finds a real solution.",
+      "Your team is working fast to meet a deadline. A teammate removed an important safety check from the code. When you asked why, they said they will add it back after the launch. But you know this is dangerous. If the safety check is missing, bad data can reach users. Fixing that later will take a long time and cost a lot. Your team is already under pressure. You do not want to make your teammate feel blamed. But you cannot just let this go. You need to raise the issue in a way that keeps the conversation safe and finds a real solution.",
     shortContext: "A teammate skipped a safety check to save time. You need to raise the risk without making them feel attacked.",
     imageUrl: "./assets/scenarios/unsafe-shortcut.svg",
     aiRole: "Teammate",
@@ -772,7 +772,7 @@ const DEFAULT_SCENARIOS = [
       "Preserve relationships while raising concerns",
       "Invite shared ownership of change"
     ],
-    context: `A senior colleague from another team often takes over your meetings. They speak over other people, move quickly past ideas, and junior team members have stopped sharing their thoughts. In the last three meetings, you watched this happen — and people went quiet. You are not their manager, so you cannot give them orders. But you can talk to them directly. The challenge is that they may not know they are doing this, or they may feel criticized when you raise it. You want to describe what you have seen, show respect for who they are, and find a solution together.`,
+    context: `A senior colleague from another team often takes over your meetings. They speak over other people, move quickly past ideas, and junior team members have stopped sharing their thoughts. In the last three meetings, you watched this happen and people went quiet. You are not their manager, so you cannot give them orders. But you can talk to them directly. The challenge is that they may not know they are doing this, or they may feel criticized when you raise it. You want to describe what you have seen, show respect for who they are, and find a solution together.`,
     shortContext: "A senior colleague dominates meetings and junior people have stopped speaking up. You need to raise this without causing conflict.",
     imageUrl: "./assets/scenarios/meeting-dominance.svg",
     aiRole: "Senior Peer",
@@ -997,8 +997,8 @@ const DEFAULT_SCENARIOS = [
       "Find middle-ground solutions",
       "Balance business pressure with standards"
     ],
-    context: `You are in charge of testing a product before it launches. The original plan was two weeks of testing across three stages. Today, your product manager told you the testing must be done in one week instead, and you should only test the most important parts. They are under pressure from company leadership to launch quickly. But you know from experience that cutting testing this way causes serious problems — about 10 to 15 percent of bugs end up reaching real users. That is not acceptable for this product. You need to push back, but carefully. Your own manager already agreed to the shorter timeline, and you do not want to look like you are slowing everything down.`,
-    shortContext: "Your manager wants to cut testing time in half to launch faster. You know this will cause bugs — and you need to say so respectfully.",
+    context: `You are in charge of testing a product before it launches. The original plan was two weeks of testing across three stages. Today, your product manager told you the testing must be done in one week instead, and you should only test the most important parts. They are under pressure from company leadership to launch quickly. But you know from experience that cutting testing this way causes serious problems. About 10 to 15 percent of bugs end up reaching real users. That is not acceptable for this product. You need to push back, but carefully. Your own manager already agreed to the shorter timeline, and you do not want to look like you are slowing everything down.`,
+    shortContext: "Your manager wants to cut testing time in half to launch faster. You know this will cause bugs, and you need to say so respectfully.",
     imageUrl: "./assets/scenarios/quality-vs-speed.svg",
     aiRole: "Product Manager",
     opening: "I know the test plan is ambitious, but we've got to cut it. The market window is closing. Can you get to MVP quality in one week instead of two?",
@@ -2547,7 +2547,7 @@ function renderModule() {
   if (moduleTransitionCard) {
     if (hasILETSSection && index === tailoredCount) {
       const transitionBody = iletsIsGoalSpecific
-        ? `Your warm-up modules built skills specific to <strong>${escapeHtml(activeGoalName)}</strong>. Now the <strong>ILETS Framework</strong> gives you the step-by-step conversation structure — and every example, tip, and prompt in these six modules is anchored to that same goal. Same method, same context. Think of it as the engine, tuned for your specific challenge.`
+        ? `Your warm-up modules built skills specific to <strong>${escapeHtml(activeGoalName)}</strong>. Now the <strong>ILETS Framework</strong> gives you the step-by-step conversation structure, and every example, tip, and prompt in these six modules is anchored to that same goal. Same method, same context. Think of it as the engine, tuned for your specific challenge.`
         : `Your previous modules focused on skills specific to your goal. The <strong>ILETS Framework</strong> is the step-by-step conversation structure you'll use during practice. Think of it as the engine; your goal modules were the fuel.`;
       moduleTransitionCard.innerHTML = `
         <p style="margin:0 0 0.4rem; font-weight:700; color:var(--ink-dark);">Now for the framework that ties it all together.</p>
@@ -5786,10 +5786,10 @@ function buildLocalCustomILETSModules(goal) {
       summary: `How to start the conversation in a way that signals collaboration, not confrontation.`,
       points: [
         `Open with intent, not with impact: say what you're hoping to achieve together.`,
-        `Keep your opening sentence short — one sentence about "${g}" is enough to start.`,
+        `Keep your opening sentence short. One sentence about "${g}" is enough to start.`,
         `Signal that you want to work through "${g}" together, not to win an argument.`,
       ],
-      example: `Example: "I'd like to talk about ${g}. My goal is to find something that works for both of us — not to put you on the spot."`,
+      example: `Example: "I'd like to talk about ${g}. My goal is to find something that works for both of us, not to put you on the spot."`,
     },
     {
       id: "ilets-custom-3",
@@ -5797,10 +5797,10 @@ function buildLocalCustomILETSModules(goal) {
       summary: `Before you present your view on "${g}", understand what the other person is protecting.`,
       points: [
         `Ask one open question about their perspective on "${g}" before sharing yours.`,
-        `Listen for what is underneath their position — their needs, fears, or constraints.`,
+        `Listen for what is underneath their position: their needs, fears, or constraints.`,
         `Resist the urge to correct or counter immediately. Nod, pause, and confirm first.`,
       ],
-      example: `Example: "Before I share my thoughts on ${g} — what's your take on where things stand right now?"`,
+      example: `Example: "Before I share my thoughts on ${g}, what's your take on where things stand right now?"`,
     },
     {
       id: "ilets-custom-4",
@@ -5809,7 +5809,7 @@ function buildLocalCustomILETSModules(goal) {
       points: [
         `Start with acknowledgment: reflect back what you heard before offering your perspective on "${g}".`,
         `Use "I" language: "I've noticed…", "From my side…", "What I'm experiencing with ${g} is…"`,
-        `State facts and impact — not blame: describe what happened and what it means for "${g}".`,
+        `State facts and impact, not blame: describe what happened and what it means for "${g}".`,
       ],
       example: `Example: "I hear that ${g} is also important to you. From my side, here's what I'm seeing: [specific observation]. That's why I wanted to have this conversation."`,
     },
@@ -5818,7 +5818,7 @@ function buildLocalCustomILETSModules(goal) {
       title: `5. Solve: Move Toward a Decision on "${g}"`,
       summary: `Turn the conversation about "${g}" into a concrete next step both people own.`,
       points: [
-        `Come prepared with at least two options for how to address "${g}" — not just the problem.`,
+        `Come prepared with at least two options for how to address "${g}", not just the problem.`,
         `Ask: "What would a good outcome look like for you on ${g}?" to co-create the solution.`,
         `Close with a clear agreement: who will do what, and by when.`,
       ],
@@ -5833,7 +5833,7 @@ function buildLocalCustomILETSModules(goal) {
         `Identify what triggered you during the conversation and how you managed it.`,
         `Set a short follow-up: check back in within a week to see how things have changed.`,
       ],
-      example: `Example: "I'll reflect on how the conversation about ${g} went and note the moment I felt most confident — then use that as my starting point next time."`,
+      example: `Example: "I'll reflect on how the conversation about ${g} went and note the moment I felt most confident, then use that as my starting point next time."`,
     },
   ];
 }
