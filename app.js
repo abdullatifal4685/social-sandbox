@@ -6442,9 +6442,9 @@ ${analysis.userQuotes.map((q) => `- "${q.quote}" (during ${q.stage}): ${q.analys
 
 Return ONLY a JSON object with exactly these three keys (no markdown, no extra text):
 {
-  "strength": "One sentence acknowledging a specific strength, referencing their actual words.",
-  "workOn": "One sentence identifying the most important thing to improve.",
-  "nextStep": "One concrete, actionable next step they can try in their very next conversation."
+  "strength": "2-3 sentences. Name the specific strength, explain why it matters in difficult conversations, and reference their actual words from the session as evidence.",
+  "workOn": "2-3 sentences. Name the most important growth area, explain what goes wrong when this skill is missing, and describe what it would look like if done well.",
+  "nextStep": "2-3 sentences. Give one concrete, specific action they can try in their very next conversation. Explain how to do it and what result to expect."
 }`,
     };
 
@@ -7259,28 +7259,6 @@ async function generateFeedback() {
   }
 
   const overviewHtml = `
-    ${(analysisData?.strengths?.length || analysisData?.growthAreas?.length) ? `
-    <article class="analytics-card" style="margin-bottom:1rem; background:linear-gradient(135deg,rgba(14,163,122,0.05) 0%,rgba(217,117,30,0.05) 100%);">
-      <h4 style="margin-bottom:0.75rem;">Session at a Glance</h4>
-      <div style="display:grid; gap:0.6rem;">
-        ${analysisData?.strengths?.length ? `
-        <div style="display:flex; align-items:flex-start; gap:0.65rem;">
-          <span style="font-size:1.05rem; flex-shrink:0; line-height:1.4; color:#0fa37a; font-weight:700;">✓</span>
-          <div>
-            <span style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#0fa37a;">Did well</span>
-            <p style="margin:0.15rem 0 0; font-size:0.9rem; color:var(--ink-dark); line-height:1.4;">${escapeHtml(analysisData.strengths[0].behavior)}</p>
-          </div>
-        </div>` : ''}
-        ${analysisData?.growthAreas?.length ? `
-        <div style="display:flex; align-items:flex-start; gap:0.65rem;">
-          <span style="font-size:1.05rem; flex-shrink:0; line-height:1.4; color:#d9751e; font-weight:700;">↑</span>
-          <div>
-            <span style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#d9751e;">Focus next</span>
-            <p style="margin:0.15rem 0 0; font-size:0.9rem; color:var(--ink-dark); line-height:1.4;">${escapeHtml(analysisData.growthAreas[0].area)}</p>
-          </div>
-        </div>` : ''}
-      </div>
-    </article>` : ''}
     ${(coachingFeedback?.strength || coachingFeedback?.workOn || coachingFeedback?.nextStep) ? `
     <article class="analytics-card" style="margin-bottom:1rem;">
       <h4 style="margin-bottom:0.75rem;">Your Coach Says</h4>
