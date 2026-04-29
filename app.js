@@ -6164,24 +6164,24 @@ function getStageScoresFromMessages(messages) {
 function buildAdaptivePrompts(stageScores) {
   const promptBank = {
     Introduce: {
-      inMoment: "What intention do you want the other person to hear in your next sentence?",
-      end: "How clear was your opening intent, and what would you rewrite to reduce defensiveness?",
+      inMoment: "What do you want the other person to understand about your intention in your next message?",
+      end: "How did you open the conversation? If you could redo your first message, what would you say differently to sound less confrontational?",
     },
     Listen: {
-      inMoment: "What assumption are you making right now, and what question could test it before you react?",
-      end: "Where did assumptions replace listening, and how will you ask better follow-up questions next time?",
+      inMoment: "Did you ask a question to understand their side, or did you react based on what you assumed they meant?",
+      end: "Did you ask enough questions, or did you assume you already knew what the other person meant? What question could you have asked to better understand them?",
     },
     Empathize: {
-      inMoment: "What emotion from the other side have you acknowledged so far, and what is still missing?",
-      end: "How well did you name emotion and pressure without losing your main point?",
+      inMoment: "What is the other person feeling right now that you haven't acknowledged yet?",
+      end: "Did you show the other person that you understood how they feel? What could you have said to make them feel more heard?",
     },
     Talk: {
-      inMoment: "What one concrete fact can you include next so your concern sounds specific, not personal?",
-      end: "Which part of your explanation lacked evidence, and what proof would make it stronger?",
+      inMoment: "Can you add one specific example or fact to make your point clearer and less personal?",
+      end: "When you made your point, did you back it up with a specific example? What concrete detail could you add to make it stronger?",
     },
     Solve: {
-      inMoment: "What commitment can you propose now with owner and timeline?",
-      end: "How specific was your close in terms of action, owner, and follow-up timing?",
+      inMoment: "What is one concrete next step you can suggest right now — who will do it, and by when?",
+      end: "Did you agree on a clear next step — who will do what, and by when? What would make that commitment more concrete?",
     },
   };
 
@@ -6192,17 +6192,17 @@ function buildAdaptivePrompts(stageScores) {
     {
       id: "emotion-awareness",
       stage: weakest,
-      question: `Emotion check (${weakest}): ${promptBank[weakest].end}`,
+      question: `Reflecting on ${weakest}: ${promptBank[weakest].end}`,
     },
     {
       id: "strategy-adjustment",
       stage: secondWeakest,
-      question: `Strategy check (${secondWeakest}): ${promptBank[secondWeakest].end}`,
+      question: `Reflecting on ${secondWeakest}: ${promptBank[secondWeakest].end}`,
     },
     {
       id: "transfer-plan",
       stage: "Solve",
-      question: "Transfer plan: What exact sentence will you use in a real conversation this week, and when will you use it?",
+      question: "Taking it to real life: What is one thing you will say or do differently in a real conversation this week?",
     },
   ];
 }
