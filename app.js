@@ -6425,7 +6425,7 @@ Be specific and reference actual quotes from their messages.`,
 
 async function generateAdaptiveCoachFeedback(analysis, scenarioTitle) {
   if (!analysis.userQuotes || analysis.userQuotes.length === 0) {
-    return "Great practice session! Continue building on your foundation.";
+    return { strength: "You engaged with the practice session.", workOn: "Try to use more specific language.", nextStep: "Pick one ILETS stage and focus on it in your next session." };
   }
 
   try {
@@ -6440,19 +6440,24 @@ Growth areas: ${analysis.growthAreas.map((a) => a.area).join("; ")}
 User quotes from the conversation:
 ${analysis.userQuotes.map((q) => `- "${q.quote}" (during ${q.stage}): ${q.analysis}`).join("\n")}
 
-Generate 3-4 sentences of coaching feedback that:
-1. Specifically references their actual quotes
-2. Acknowledges one strength
-3. Offers ONE concrete next-step improvement
-4. Is encouraging and actionable
-
-Keep it warm, specific, and focused on their learning goals.`,
+Return ONLY a JSON object with exactly these three keys (no markdown, no extra text):
+{
+  "strength": "One sentence acknowledging a specific strength, referencing their actual words.",
+  "workOn": "One sentence identifying the most important thing to improve.",
+  "nextStep": "One concrete, actionable next step they can try in their very next conversation."
+}`,
     };
 
-    return await callProxyAPI({ model: "gpt-4o-mini", messages: [feedback] });
+    const raw = await callProxyAPI({ model: "gpt-4o-mini", messages: [feedback] });
+    try {
+      const cleaned = raw.replace(/```json|```/g, "").trim();
+      return JSON.parse(cleaned);
+    } catch {
+      return { strength: raw, workOn: "", nextStep: "" };
+    }
   } catch (error) {
     console.error("Failed to generate adaptive feedback:", error);
-    return "Good effort in your practice! Keep building these skills with each scenario.";
+    return { strength: "Good effort in your practice!", workOn: "Keep refining your approach.", nextStep: "Try this scenario again with a different opening." };
   }
 }
 
@@ -7276,10 +7281,36 @@ async function generateFeedback() {
         </div>` : ''}
       </div>
     </article>` : ''}
+    ${(coachingFeedback?.strength || coachingFeedback?.workOn || coachingFeedback?.nextStep) ? `
     <article class="analytics-card" style="margin-bottom:1rem;">
-      <h4 style="margin-bottom:0.6rem;">Your Coach Says</h4>
-      <p style="line-height:1.75; margin:0; color:var(--ink-dark);">${escapeHtml(coachingFeedback || "Complete a practice session to get personalized coaching feedback.")}</p>
-    </article>
+      <h4 style="margin-bottom:0.75rem;">Your Coach Says</h4>
+      <div style="display:grid; gap:0.65rem;">
+        ${coachingFeedback?.strength ? `
+        <div style="display:flex; align-items:flex-start; gap:0.65rem;">
+          <span style="font-size:1.05rem; flex-shrink:0; line-height:1.4; color:#0fa37a; font-weight:700;">✓</span>
+          <div>
+            <span style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#0fa37a;">Strength</span>
+            <p style="margin:0.15rem 0 0; font-size:0.9rem; color:var(--ink-dark); line-height:1.5;">${escapeHtml(coachingFeedback.strength)}</p>
+          </div>
+        </div>` : ''}
+        ${coachingFeedback?.workOn ? `
+        <div style="display:flex; align-items:flex-start; gap:0.65rem;">
+          <span style="font-size:1.05rem; flex-shrink:0; line-height:1.4; color:#d9751e; font-weight:700;">↑</span>
+          <div>
+            <span style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#d9751e;">Work on</span>
+            <p style="margin:0.15rem 0 0; font-size:0.9rem; color:var(--ink-dark); line-height:1.5;">${escapeHtml(coachingFeedback.workOn)}</p>
+          </div>
+        </div>` : ''}
+        ${coachingFeedback?.nextStep ? `
+        <div style="display:flex; align-items:flex-start; gap:0.65rem;">
+          <span style="font-size:1.05rem; flex-shrink:0; line-height:1.4; color:#1d5fe5; font-weight:700;">→</span>
+          <div>
+            <span style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#1d5fe5;">Next step</span>
+            <p style="margin:0.15rem 0 0; font-size:0.9rem; color:var(--ink-dark); line-height:1.5;">${escapeHtml(coachingFeedback.nextStep)}</p>
+          </div>
+        </div>` : ''}
+      </div>
+    </article>` : ''}
     ${analysisData?.strengths?.length ? `
     <article class="analytics-card" style="margin-bottom:1rem;">
       <h4 style="margin-bottom:0.6rem;">What You Did Well</h4>
