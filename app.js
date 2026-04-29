@@ -1117,7 +1117,6 @@ const goalsNameInput = document.getElementById("goalsNameInput");
 const goalsSaveNameBtn = document.getElementById("goalsSaveNameBtn");
 const goalsNameStatus = document.getElementById("goalsNameStatus");
 const goalsTitle = document.getElementById("goalsTitle");
-const openDashboardBtn = document.getElementById("openDashboardBtn");
 const dashboardIdentity = document.getElementById("dashboardIdentity");
 const dashboardStageLabel = document.getElementById("dashboardStageLabel");
 const dashboardWeakStage = document.getElementById("dashboardWeakStage");
@@ -2357,11 +2356,11 @@ Example: ["Question 1?", "Question 2?", "Question 3?"]`
 }
 
 function getLearningModules() {
-  // If we have a full tailored learning path (7+ modules), use only that
-  if (state.customTailoredModules.length >= 7) {
+  // Use custom modules exclusively when we have a full set (AI and local fallback both return 6)
+  if (state.customTailoredModules.length >= 6) {
     return state.customTailoredModules;
   }
-  // Otherwise mix any partial tailored modules with defaults
+  // Partial or no custom modules — prepend any partials to defaults
   return [...state.customTailoredModules, ...MODULE_SECTIONS];
 }
 
@@ -3991,6 +3990,7 @@ function openSessionIntro() {
   ];
   state.stageIndex = 0;
   state.latestHint = "";
+  state.coachNote = "";
   state.hintHistory = [];
   state.inMomentPrompt = null;
   state.inMomentPromptAtTurn = 0;
@@ -7969,10 +7969,11 @@ if (peerUserDirectory) {
     if (alreadyRequested) {
       return;
     }
+    // Auto-accept immediately — these are demo profiles, no real peer to wait on
     state.peer.requests.push({
       id: `req-${Date.now()}`,
       peerId: requestId,
-      status: "pending",
+      status: "accepted",
       createdAt: Date.now(),
     });
     persistPeerRequests();
