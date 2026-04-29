@@ -5331,94 +5331,6 @@ function validateTailoredPath(modules, goalDescription) {
   return true;
 }
 
-// Try AI first, validate, then fallback to local generator and persist
-async function getTailoredLearningPath(goalDescription) {
-  const storageKey = "sandbox.customTailoredModules";
-  // Try AI via proxy with strict schema
-  if (state.settings) {
-    const systemPrompt = {
-      role: "system",
-      content: `You are an expert instructional designer creating STRICTLY TAILORED learning modules.
-
-CRITICAL REQUIREMENTS:
-1. Return ONLY a valid JSON array of exactly 6 objects. No markdown, no prose before or after.
-2. Each object MUST have this exact structure:
-   {
-     "id": "module-N",
-     "title": "Module N: [Specific to the goal, not generic]",
-     "summary": "One-sentence benefit specific to '${goalDescription}'",
-     "points": ["Point 1 referencing the goal", "Point 2 referencing the goal", "Point 3 referencing the goal"],
-     "example": "Realistic example showing how '${goalDescription}' is applied",
-     "tailoredTo": "${goalDescription}"
-   }
-3. EVERY field must explicitly mention or reference the learner's goal. Zero generic content.
-4. The goal is: "${goalDescription}"
-
-REJECTION RULES - DO NOT DO:
-- Do NOT write generic module titles like "1. Notice What Makes Conversation Hard" - instead write "1. Notice What Makes [the goal] Hard"
-- Do NOT include points that could apply to ANY goal - must be specific to ${goalDescription}
-- Do NOT include examples about OTHER goals or scenarios
-- Do NOT return more or fewer than 6 modules
-- Do NOT return incomplete JSON or JSON with extra text
-
-EXAMPLE FORMAT (for goal "Improve Listening & Empathy"):
-[
-  {
-    "id": "module-1",
-    "title": "Module 1: Prepare for Listening & Empathy - Self-Awareness & Planning",
-    "summary": "Understand how your default patterns affect your ability to listen and show empathy",
-    "points": [
-      "Recognize how you typically listen (or don't listen) when you need to show empathy",
-      "Identify what emotions make empathy harder for you in difficult conversations",
-      "Plan how you'll slow down to truly listen before reacting"
-    ],
-    "example": "You're in a meeting and someone shares a struggle. Instead of jumping to advice, pause and listen to understand what they really need. That's listening & empathy in action.",
-    "tailoredTo": "Improve Listening & Empathy"
-  },
-  ... 5 more modules following same pattern ...
-]`
-    };
-    
-    const userPrompt = {
-      role: "user",
-      content: `Create 6 STRICTLY TAILORED learning modules for this goal: "${goalDescription}"
-
-Each module must:
-- Reference "${goalDescription}" in title, summary, points, and example
-- Be specific to this goal, not generic
-- Be actionable and practical
-- Build on each other sequentially
-
-Return ONLY the JSON array, no other text.`
-    };
-
-    try {
-      const responseText = await callProxyAPI({ model: "gpt-4o-mini", messages: [systemPrompt, userPrompt] });
-      let parsed;
-      try {
-        // Clean response in case AI added markdown code fence
-        const cleaned = responseText.replace(/^```json\s*/, "").replace(/\s*```$/, "").trim();
-        parsed = JSON.parse(cleaned);
-      } catch (e) {
-        parsed = null;
-      }
-      if (parsed && validateTailoredPath(parsed, goalDescription)) {
-        localStorage.setItem(storageKey, JSON.stringify(parsed));
-        console.log(`✓ AI generated tailored modules for: ${goalDescription}`);
-        return parsed;
-      }
-      console.warn("AI returned invalid tailored path, using local fallback.");
-    } catch (err) {
-      console.warn("AI generation failed:", err);
-    }
-  }
-
-  // No API key or AI failed/invalid -> local fallback
-  const local = buildLocalTailoredLearningPath(goalDescription);
-  localStorage.setItem(storageKey, JSON.stringify(local));
-  console.log(`✓ Using local fallback for: ${goalDescription}`);
-  return local;
-}
 
 async function generateTailoredLearningModule(customGoal) {
   try {
@@ -6710,7 +6622,25 @@ function upsertImprovementTrack({ stage, mode, status }) {
 }
 
 function buildImprovementTrackerHtml() {
-  return "";
+  const range = state.improvementTrackRange || "all";
+  const cutoff = range === "week" ? Date.now() - 7 * 24 * 60 * 60 * 1000 : 0;
+  const tracks = (state.improvementTrack || []).filter((t) => (t.lastUpdated || 0) >= cutoff);
+
+  if (!tracks.length) {
+    return `<p class="muted" style="margin:0;">No improvement activity ${range === "week" ? "in the last 7 days" : "yet"}. Mark stages done or run AI drills above to track progress.</p>`;
+  }
+
+  const modeLabel = { self: "Self review", drill: "AI drill", ai: "AI coach", peer: "Peer" };
+  const rows = tracks.map((t) => {
+    const done = t.completions > 0;
+    return `<li style="display:flex;align-items:center;gap:0.5rem;padding:0.3rem 0;border-bottom:1px solid var(--border,#e2e8f0);">
+      <span style="font-size:1rem;">${done ? "✅" : "🔄"}</span>
+      <span style="flex:1;"><strong>${escapeHtml(t.stage)}</strong> <span class="muted">· ${escapeHtml(modeLabel[t.mode] || t.mode)}</span></span>
+      <span class="muted" style="font-size:0.8rem;">${t.attempts} attempt${t.attempts !== 1 ? "s" : ""}</span>
+    </li>`;
+  }).join("");
+
+  return `<ul style="list-style:none;padding:0;margin:0;">${rows}</ul>`;
 }
 
 function maybeQueueInMomentReflection() {
@@ -7713,11 +7643,14 @@ beginPracticeBtn.addEventListener("click", () => {
       : state.userName || userNameInput.value
   ).trim();
   if (!enteredName) {
-    window.alert("Please set your name before starting practice.");
     if (editUserNameBtn) {
       state.nameEditorOpen = true;
       renderBriefingPage();
-      briefUserNameInput.focus();
+      if (briefUserNameInput) {
+        briefUserNameInput.focus();
+        briefUserNameInput.classList.add("input-error");
+        setTimeout(() => briefUserNameInput.classList.remove("input-error"), 2000);
+      }
     }
     return;
   }
