@@ -3837,6 +3837,44 @@ body.hide-left.hide-right .layout {
   }
 }
 
+/* ── Mobile practice-space panel order & chat fixes ─────────────────── */
+@media (max-width: 600px) {
+  /* Reorder 3-column layout: chat first, hints second, scenarios last */
+  .panel-chat     { order: -1; }
+  .panel-feedback { order:  0; }
+  .panel-scenarios{ order:  1; }
+
+  /* Give chat a usable min-height so messages aren't collapsed */
+  .panel-chat {
+    min-height: 70vh;
+  }
+
+  /* Session-review tabs: shrink so "Progress" isn't clipped */
+  .dashboard-tabs {
+    overflow: hidden;
+  }
+  .dashboard-tab {
+    font-size: 0.82rem;
+    padding: 0.55rem 0.25rem;
+    white-space: nowrap;
+  }
+
+  /* Briefing bottom buttons: wrap on narrow screens */
+  .flow-actions-spread {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .flow-actions-spread > div {
+    display: flex;
+    gap: 0.5rem;
+    flex: 1;
+    justify-content: flex-end;
+  }
+  .flow-actions-spread button {
+    flex: 1;
+  }
+}
+
 /* Briefing image */
 .briefing-image {
   width: 100%;
