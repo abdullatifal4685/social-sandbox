@@ -456,6 +456,11 @@ h2 {
   justify-content: space-between;
 }
 
+/* Single-action rows that have no Back button stay right-aligned */
+.flow-actions-end {
+  justify-content: flex-end;
+}
+
 .flow-hero .flow-actions {
   justify-content: center;
   margin-top: 1.25rem;
