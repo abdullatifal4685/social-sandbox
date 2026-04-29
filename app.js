@@ -1355,7 +1355,7 @@ const state = {
     mode: localStorage.getItem("sandbox.mode") || "proxy",
     proxyUrl: localStorage.getItem("sandbox.proxyUrl") || "https://social-sandbox-api-proxy.onrender.com/api/chat",
     apiKey: localStorage.getItem("sandbox.apiKey") || "",
-    model: localStorage.getItem("sandbox.model") || "gpt-4",
+    model: localStorage.getItem("sandbox.model") || "gpt-4o-mini",
   },
   scaffold: {
     level: loadScaffoldLevel(),
@@ -4638,7 +4638,7 @@ async function callOpenAI(messages, model = null) {
     throw new Error("OpenAI API key is empty. Add it in Settings.");
   }
 
-  const modelToUse = model || state.settings.model || "gpt-4";
+  const modelToUse = model || state.settings.model || "gpt-4o-mini";
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
