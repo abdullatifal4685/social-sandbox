@@ -6704,6 +6704,10 @@ async function generateFeedback() {
         </div>
         <p class="reflection-question">${escapeHtml(metacognitivePrompts[0].question)}</p>
         <textarea id="reflectionAnswer1" rows="4" placeholder="Be specific. Reference something that actually happened in your conversation..."></textarea>
+        <div style="display:flex;gap:0.5rem;margin-top:0.5rem;flex-wrap:wrap;">
+          <button class="ghost" type="button" data-improve-action="mark-done" data-stage="${escapeHtml(metacognitivePrompts[0].stage)}" style="font-size:0.8rem;">✅ Mark Practiced</button>
+          <button class="ghost" type="button" data-improve-action="ai-now" data-stage="${escapeHtml(metacognitivePrompts[0].stage)}" style="font-size:0.8rem;">🤖 Practice with AI</button>
+        </div>
       </section>
 
       <section class="reflection-item">
@@ -6713,6 +6717,10 @@ async function generateFeedback() {
         </div>
         <p class="reflection-question">${escapeHtml(metacognitivePrompts[1].question)}</p>
         <textarea id="reflectionAnswer2" rows="4" placeholder="Think about what you'd do differently, or what worked well..."></textarea>
+        <div style="display:flex;gap:0.5rem;margin-top:0.5rem;flex-wrap:wrap;">
+          <button class="ghost" type="button" data-improve-action="mark-done" data-stage="${escapeHtml(metacognitivePrompts[1].stage)}" style="font-size:0.8rem;">✅ Mark Practiced</button>
+          <button class="ghost" type="button" data-improve-action="ai-now" data-stage="${escapeHtml(metacognitivePrompts[1].stage)}" style="font-size:0.8rem;">🤖 Practice with AI</button>
+        </div>
       </section>
 
       <section class="reflection-item">
@@ -6722,6 +6730,10 @@ async function generateFeedback() {
         </div>
         <p class="reflection-question">${escapeHtml(metacognitivePrompts[2].question)}</p>
         <textarea id="reflectionAnswer3" rows="4" placeholder="Name a real situation where you'll apply one thing from this session..."></textarea>
+        <div style="display:flex;gap:0.5rem;margin-top:0.5rem;flex-wrap:wrap;">
+          <button class="ghost" type="button" data-improve-action="mark-done" data-stage="Solve" style="font-size:0.8rem;">✅ Mark Practiced</button>
+          <button class="ghost" type="button" data-improve-action="peer-now" data-stage="Solve" style="font-size:0.8rem;">👥 Practice with Peer</button>
+        </div>
       </section>
 
       <div class="flow-actions flow-actions-wrap">
@@ -6828,6 +6840,17 @@ async function generateFeedback() {
     </article>
     ${stagePerformanceBarsHtml}
     ${comparisonHtml}
+    <article class="analytics-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+        <h4 style="margin:0;">Improvement Tracker</h4>
+        <div style="display:flex;gap:0.4rem;">
+          <button class="ghost" type="button" data-improve-filter="week" style="font-size:0.8rem;padding:0.2rem 0.6rem;">This Week</button>
+          <button class="ghost" type="button" data-improve-filter="all" style="font-size:0.8rem;padding:0.2rem 0.6rem;">All Time</button>
+        </div>
+      </div>
+      <p class="muted" style="font-size:0.85rem;margin-bottom:0.6rem;">Tracks stages you've marked practiced or drilled. Use the Reflect tab to log activity.</p>
+      <div id="improvementTrackerAnalytics">${buildImprovementTrackerHtml()}</div>
+    </article>
   `;
 
   feedbackPanel.innerHTML = overviewHtml;
@@ -7182,6 +7205,12 @@ if (finalReflectionContent) {
   const answer3 = finalReflectionContent.querySelector("#reflectionAnswer3")?.value?.trim() || "";
 
   if (!answer1 || !answer2 || !answer3) {
+    const statusNode = finalReflectionContent.querySelector("#reflectionDraftStatus");
+    if (statusNode) statusNode.textContent = "Please answer all three questions before submitting.";
+    // Focus the first empty answer
+    if (!answer1) finalReflectionContent.querySelector("#reflectionAnswer1")?.focus();
+    else if (!answer2) finalReflectionContent.querySelector("#reflectionAnswer2")?.focus();
+    else finalReflectionContent.querySelector("#reflectionAnswer3")?.focus();
     return;
   }
 
@@ -7229,8 +7258,8 @@ if (finalReflectionContent) {
   }
 
   state.finalReflectionSubmitting = false;
-  submitButton.disabled = false;
-  submitButton.textContent = "Get Adaptive Coach Feedback";
+  submitButton.disabled = true;
+  submitButton.textContent = "Feedback Submitted ✓";
   });
 
   finalReflectionContent.addEventListener("input", (event) => {
