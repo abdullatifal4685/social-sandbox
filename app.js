@@ -8231,24 +8231,10 @@ startPracticeBtn.addEventListener("click", () => {
 });
 
 beginPracticeBtn.addEventListener("click", () => {
-  const enteredName = (
-    state.nameEditorOpen && briefUserNameInput
-      ? briefUserNameInput.value
-      : state.userName || userNameInput.value
-  ).trim();
-  if (!enteredName) {
-    if (editUserNameBtn) {
-      state.nameEditorOpen = true;
-      renderBriefingPage();
-      if (briefUserNameInput) {
-        briefUserNameInput.focus();
-        briefUserNameInput.classList.add("input-error");
-        setTimeout(() => briefUserNameInput.classList.remove("input-error"), 2000);
-      }
-    }
-    return;
+  const typedName = (state.userName || userNameInput?.value || "").trim();
+  if (typedName) {
+    saveUserName(typedName);
   }
-  saveUserName(enteredName);
   enterPracticeCompactMode();
   openSessionIntro();
   goToPage("practice");
