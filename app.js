@@ -7383,7 +7383,7 @@ async function generateFeedback() {
       <div class="flow-actions flow-actions-wrap">
         <button id="saveReflectionDraftBtn" class="ghost" type="button">Save Draft</button>
         <button id="editReflectionDraftBtn" class="ghost" type="button" disabled>Edit Draft</button>
-        <button id="submitReflectionBtn" type="button">Get Written Feedback</button>
+        <button id="submitReflectionBtn" type="button">Get Feedback</button>
       </div>
       <p id="reflectionDraftStatus" class="muted">Draft not saved yet.</p>
       <div id="reflectionAiFeedback" class="reflection-feedback muted"></div>
