@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./styles.css?v=20260429-540000" />
+  <link rel="stylesheet" href="./styles.css?v=20260429-600000" />
 </head>
 <body>
   <div class="page-glow page-glow-a"></div>
@@ -67,7 +67,7 @@
         <label class="flow-label" for="customGoalInput">Or write your own learning goal</label>
         <p class="muted" style="font-size: 0.85rem; margin-bottom: 0.5rem;">Describe a specific aspect of difficult conversations you want to improve (e.g., "how to apologize without making excuses")</p>
         <div class="custom-goal-input-wrap">
-          <input id="customGoalInput" type="text" placeholder="e.g., How to deliver bad news without hurting relationships" maxlength="100" />
+          <textarea id="customGoalInput" rows="3" placeholder="e.g., How to deliver bad news without hurting relationships, without sounding cold or making the other person feel blamed" maxlength="300"></textarea>
           <button id="addCustomGoalBtn" class="ghost" type="button">Add</button>
         </div>
         <div id="customGoalsList" class="custom-goals-list"></div>
@@ -161,9 +161,11 @@
       </section>
 
       <div class="flow-actions flow-actions-wrap">
-        <button id="dashboardPracticeAiBtn" type="button">Start Recommended AI Practice</button>
-        <button id="dashboardPracticePeerBtn" class="ghost" type="button">Practice with Peer</button>
         <button id="dashboardBackBtn" class="ghost" type="button">Back to Path</button>
+        <div style="display:flex;gap:0.75rem;">
+          <button id="dashboardPracticeAiBtn" type="button">Start Recommended AI Practice</button>
+          <button id="dashboardPracticePeerBtn" class="ghost" type="button">Practice with Peer</button>
+        </div>
       </div>
     </div>
   </section>
@@ -273,7 +275,7 @@
       <div id="peerCommunityView" class="peer-community-view">
         <div class="peer-room-head">
           <h3>Find a Practice Partner</h3>
-          <p class="muted" style="font-size:0.85rem;margin-top:0.25rem;">Demo profiles — click any partner to start a simulated peer session for practice and structured reflection.</p>
+          <p class="muted" style="font-size:0.85rem;margin-top:0.25rem;">Demo profiles: click any partner to start a simulated peer session for practice and structured reflection.</p>
         </div>
         <div id="peerUserDirectory" class="peer-user-directory"></div>
 
@@ -768,7 +770,7 @@ Agree on next step" required></textarea>
     </form>
   </dialog>
 
-  <script src="./app.js?v=20260429-540000" defer></script>
+  <script src="./app.js?v=20260429-600000" defer></script>
 </body>
 </html>
 

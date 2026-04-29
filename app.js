@@ -885,7 +885,7 @@ const DEFAULT_SCENARIOS = [
       "Offer options instead of just saying no",
       "Align priorities with everyone involved in the project"
     ],
-    context: `You lead a project that works across two teams. One month ago, the deadline was set and the work was clear. But over the last six weeks, a senior leader from another team has been asking for more and more features — things that were not in the original plan. Each new request adds one to two weeks to the project. Your team is already at full capacity. Meanwhile, the person who first hired you for this project is now asking why certain things are not finished — but they do not know about all the extra work that was added. You need to talk to the senior leader and explain that you cannot do everything on time. But they are more senior than you, and you do not want to seem like you are refusing to help.`,
+    context: `You lead a project that works across two teams. One month ago, the deadline was set and the work was clear. But over the last six weeks, a senior leader from another team has been asking for more and more features, things that were not in the original plan. Each new request adds one to two weeks to the project. Your team is already at full capacity. Meanwhile, the person who first hired you for this project is now asking why certain things are not finished — but they do not know about all the extra work that was added. You need to talk to the senior leader and explain that you cannot do everything on time. But they are more senior than you, and you do not want to seem like you are refusing to help.`,
     shortContext: "Extra work keeps getting added to your project, but the deadline hasn't changed. You need to push back without seeming uncooperative.",
     imageUrl: "./assets/scenarios/resource-priority.svg",
     aiRole: "Senior Leader (Different Unit)",
@@ -8767,8 +8767,9 @@ addCustomGoalBtn.addEventListener("click", () => {
   }
 });
 
-customGoalInput.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") {
+customGoalInput.addEventListener("keydown", (e) => {
+  // Enter submits; Shift+Enter allows a newline for longer descriptions
+  if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
     addCustomGoalBtn.click();
   }
