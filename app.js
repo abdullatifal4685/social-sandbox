@@ -7283,7 +7283,7 @@ async function generateFeedback() {
       <div style="display:grid; gap:0.65rem;">
         ${coachingFeedback?.strength ? `
         <div style="display:flex; align-items:flex-start; gap:0.65rem;">
-          <span style="font-size:1.05rem; flex-shrink:0; line-height:1.4; color:#0fa37a; font-weight:700;">✓</span>
+          <span style="font-size:1.05rem; flex-shrink:0; line-height:1.4; color:#0fa37a; font-weight:700; width:1.2rem; text-align:center;">✓</span>
           <div>
             <span style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#0fa37a;">Strength</span>
             <p style="margin:0.15rem 0 0; font-size:0.9rem; color:var(--ink-dark); line-height:1.5;">${escapeHtml(coachingFeedback.strength)}</p>
@@ -7291,7 +7291,7 @@ async function generateFeedback() {
         </div>` : ''}
         ${coachingFeedback?.workOn ? `
         <div style="display:flex; align-items:flex-start; gap:0.65rem;">
-          <span style="font-size:1.05rem; flex-shrink:0; line-height:1.4; color:#d9751e; font-weight:700;">↑</span>
+          <span style="font-size:1.05rem; flex-shrink:0; line-height:1.4; color:#d9751e; font-weight:700; width:1.2rem; text-align:center;">↑</span>
           <div>
             <span style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#d9751e;">Work on</span>
             <p style="margin:0.15rem 0 0; font-size:0.9rem; color:var(--ink-dark); line-height:1.5;">${escapeHtml(coachingFeedback.workOn)}</p>
@@ -7299,7 +7299,7 @@ async function generateFeedback() {
         </div>` : ''}
         ${coachingFeedback?.nextStep ? `
         <div style="display:flex; align-items:flex-start; gap:0.65rem;">
-          <span style="font-size:1.05rem; flex-shrink:0; line-height:1.4; color:#1d5fe5; font-weight:700;">→</span>
+          <span style="font-size:1.05rem; flex-shrink:0; line-height:1.4; color:#1d5fe5; font-weight:700; width:1.2rem; text-align:center;">→</span>
           <div>
             <span style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#1d5fe5;">Next step</span>
             <p style="margin:0.15rem 0 0; font-size:0.9rem; color:var(--ink-dark); line-height:1.5;">${escapeHtml(coachingFeedback.nextStep)}</p>
