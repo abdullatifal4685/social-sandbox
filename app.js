@@ -2098,9 +2098,9 @@ function renderModule() {
   moduleProgressBar.style.width = `${progress}%`;
 
   // Section banner: tailored vs ILETS framework
-  const tailoredCount = state.customTailoredModules.length >= 7
-    ? total
-    : state.customTailoredModules.length;
+  // Use actual count of tailored modules in the returned list (capped at 3),
+  // not the raw customTailoredModules length (which may be 6).
+  const tailoredCount = Math.min(state.customTailoredModules.length, 3);
   const hasILETSSection = tailoredCount < total;
   const isInILETSSection = index >= tailoredCount;
   const isInTailoredSection = tailoredCount > 0 && index < tailoredCount;
