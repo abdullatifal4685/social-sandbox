@@ -361,23 +361,24 @@ h2 {
 }
 
 .landing-copy h2 {
-  margin: 0.38rem auto 0.25rem;
-  max-width: 15ch;
-  font-size: clamp(1.95rem, 3.55vw, 3rem);
-  line-height: 1.16;
-  letter-spacing: -0.02em;
-  font-weight: 700;
+  margin: 0.38rem auto 0.3rem;
+  max-width: 14ch;
+  font-size: clamp(2.1rem, 4vw, 3.2rem);
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  font-weight: 800;
   color: #11244a;
   text-wrap: balance;
 }
 
 .landing-tagline {
-  margin: 0 auto 0.7rem;
-  font-size: clamp(0.85rem, 1.5vw, 1rem);
-  font-weight: 500;
-  color: #4a5568;
-  letter-spacing: 0.01em;
-  max-width: 30ch;
+  margin: 0 auto 0.8rem;
+  font-size: clamp(0.78rem, 1.4vw, 0.92rem);
+  font-weight: 400;
+  font-style: italic;
+  color: #7a8499;
+  letter-spacing: 0.02em;
+  max-width: 32ch;
   text-wrap: balance;
 }
 
