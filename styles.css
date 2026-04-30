@@ -404,7 +404,8 @@ h2 {
 .landing-note {
   margin: 0.75rem auto 0;
   padding-top: 0.9rem;
-  border-top: 1.5px solid rgba(29, 95, 229, 0.25);
+  border-top: 1.5px solid transparent;
+  border-image: linear-gradient(135deg, #11244a 30%, #1d5fe5 100%) 1;
   font-size: 0.95rem;
   line-height: 1.6;
   color: #63758f;
