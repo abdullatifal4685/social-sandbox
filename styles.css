@@ -405,7 +405,7 @@ h2 {
   margin: 0.75rem auto 0;
   padding-top: 0.9rem;
   border-top: 1.5px solid transparent;
-  border-image: linear-gradient(135deg, #11244a 30%, #1d5fe5 100%) 1;
+  border-image: linear-gradient(90deg, rgba(29,95,229,0.5), rgba(29,95,229,0.12)) 1;
   font-size: 0.95rem;
   line-height: 1.6;
   color: #63758f;
