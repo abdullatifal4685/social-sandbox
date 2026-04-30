@@ -361,24 +361,28 @@ h2 {
 }
 
 .landing-copy h2 {
-  margin: 0.38rem auto 0.3rem;
+  margin: 0.38rem auto 0.5rem;
   max-width: 14ch;
   font-size: clamp(2.1rem, 4vw, 3.2rem);
   line-height: 1.12;
   letter-spacing: -0.03em;
   font-weight: 800;
-  color: #11244a;
+  background: linear-gradient(135deg, #11244a 30%, #1d5fe5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   text-wrap: balance;
 }
 
 .landing-tagline {
   margin: 0 auto 0.8rem;
-  font-size: clamp(0.78rem, 1.4vw, 0.92rem);
-  font-weight: 400;
-  font-style: italic;
-  color: #7a8499;
-  letter-spacing: 0.02em;
-  max-width: 32ch;
+  font-size: clamp(0.7rem, 1.3vw, 0.82rem);
+  font-weight: 600;
+  font-style: normal;
+  font-variant: small-caps;
+  color: #8892a4;
+  letter-spacing: 0.13em;
+  max-width: 34ch;
   text-wrap: balance;
 }
 
