@@ -375,15 +375,16 @@ h2 {
 }
 
 .landing-tagline {
-  margin: 0 auto 0.8rem;
-  font-size: clamp(0.7rem, 1.3vw, 0.82rem);
-  font-weight: 600;
-  font-style: normal;
-  font-variant: small-caps;
-  color: #8892a4;
-  letter-spacing: 0.13em;
-  max-width: 34ch;
-  text-wrap: balance;
+  display: inline-block;
+  margin: 0.1rem auto 0.85rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #4a5568;
+  letter-spacing: 0.05em;
+  border: 1px solid rgba(17,36,74,0.18);
+  border-radius: 100px;
+  padding: 0.28rem 0.9rem;
+  background: rgba(255,255,255,0.55);
 }
 
 .landing-subtitle,
